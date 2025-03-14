@@ -163,60 +163,59 @@ def main(tmp_dir):
 
     # param_names = ["alpha_transp", "alpha_q", "km_denit", "km_nit", "kmin", "kfix", "kngl", "dmax_denit", "dmax_nit", "phi_soil_temp", "clay", "soil_fertility", "z_soil"]
 
-    # colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
-    # lys_experiments = ["lys8", "lys3", "lys2"]
-    # years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
-    # params = ["km_denit", "km_nit", "dmax_denit", "dmax_nit"]
-    # ll_df = []
-    # for lys_experiment in lys_experiments:
-    #     df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
-    #     df_params_metrics = df_params_metrics.sort_values(by=["MAE_NO3_perc_mass_bs"], ascending=False)
-    #     df_params_metrics_30= df_params_metrics.iloc[:30, :]
-    #     df_params = df_params_metrics_30.loc[:, params]
-    #     df_params["lys"] = lys_experiment
-    #     ll_df.append(df_params)
-    # df = pd.concat(ll_df)
-    # df_long = pd.melt(df, value_vars=params, id_vars=["lys"])
+    colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
+    lys_experiments = ["lys8", "lys3", "lys2"]
+    params = ["km_denit", "km_nit", "dmax_denit", "dmax_nit"]
+    ll_df = []
+    for lys_experiment in lys_experiments:
+        df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
+        df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_bs_2011-2015"], ascending=False)
+        df_params_metrics_30= df_params_metrics.iloc[:30, :]
+        df_params = df_params_metrics_30.loc[:, params]
+        df_params["lys"] = lys_experiment
+        ll_df.append(df_params)
+    df = pd.concat(ll_df)
+    df_long = pd.melt(df, value_vars=params, id_vars=["lys"])
 
-    # fig, ax = plt.subplots(1, 4, figsize=(6, 2))
-    # for i, var in enumerate(params):
-    #     data = df_long.loc[df_long["variable"] == var, :]
-    #     sns.boxplot(data=data, x="variable", y="value", hue="lys", ax=ax[i], palette=colors, showfliers=False)
-    #     ax[i].set_xlabel("")
-    #     ax[i].set_xticklabels([])
-    #     ax[i].set_ylabel(f"{labs._LABS[var]}")
-    #     ax[i].legend_.remove()
-    # fig.subplots_adjust(wspace=0.8)
-    # ax[-1].legend(frameon=False, loc="upper right", bbox_to_anchor=(1.0, 1.0), labels=[fert_lys2_lys3_lys8[lys] for lys in lys_experiments])
-    # file = base_path_figs / f"boxplot_params_lys2_lys3_lys8_nit_denit.png"
-    # fig.savefig(file, dpi=300)
+    fig, ax = plt.subplots(1, 4, figsize=(6, 2))
+    for i, var in enumerate(params):
+        data = df_long.loc[df_long["variable"] == var, :]
+        sns.boxplot(data=data, x="variable", y="value", hue="lys", ax=ax[i], palette=colors, showfliers=False)
+        ax[i].set_xlabel("")
+        ax[i].set_xticklabels([])
+        ax[i].set_ylabel(f"{labs._LABS[var]}")
+        ax[i].legend_.remove()
+    fig.subplots_adjust(wspace=0.8)
+    ax[-1].legend(frameon=False, loc="upper right", bbox_to_anchor=(1.0, 1.0), labels=[fert_lys2_lys3_lys8[lys] for lys in lys_experiments])
+    file = base_path_figs / f"boxplot_params_lys2_lys3_lys8_nit_denit.png"
+    fig.savefig(file, dpi=300)
 
-    # colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
-    # lys_experiments = ["lys8", "lys3", "lys2"]
-    # params = ["alpha_transp", "alpha_q", "k_transp", "k_q"]
-    # ll_df = []
-    # for lys_experiment in lys_experiments:
-    #     df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
-    #     df_params_metrics = df_params_metrics.sort_values(by=["MAE_NO3_perc_mass_bs"], ascending=False)
-    #     df_params_metrics_30= df_params_metrics.iloc[:30, :]
-    #     df_params = df_params_metrics_30.loc[:, params]
-    #     df_params["lys"] = lys_experiment
-    #     ll_df.append(df_params)
-    # df = pd.concat(ll_df)
-    # df_long = pd.melt(df, value_vars=params, id_vars=["lys"])
+    colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
+    lys_experiments = ["lys8", "lys3", "lys2"]
+    params = ["alpha_transp", "alpha_q", "k_transp", "k_q"]
+    ll_df = []
+    for lys_experiment in lys_experiments:
+        df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
+        df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_bs_2011-2015"], ascending=False)
+        df_params_metrics_30= df_params_metrics.iloc[:30, :]
+        df_params = df_params_metrics_30.loc[:, params]
+        df_params["lys"] = lys_experiment
+        ll_df.append(df_params)
+    df = pd.concat(ll_df)
+    df_long = pd.melt(df, value_vars=params, id_vars=["lys"])
 
-    # fig, ax = plt.subplots(1, 4, figsize=(6, 2))
-    # for i, var in enumerate(params):
-    #     data = df_long.loc[df_long["variable"] == var, :]
-    #     sns.boxplot(data=data, x="variable", y="value", hue="lys", ax=ax[i], palette=colors, showfliers=False)
-    #     ax[i].set_xlabel("")
-    #     ax[i].set_xticklabels([])
-    #     ax[i].set_ylabel(f"{labs._LABS[var]}")
-    #     ax[i].legend_.remove()
-    # fig.subplots_adjust(wspace=0.8)
-    # ax[-1].legend(frameon=False, loc="upper right", bbox_to_anchor=(1.0, 1.0), labels=[fert_lys2_lys3_lys8[lys] for lys in lys_experiments])
-    # file = base_path_figs / f"boxplot_params_lys2_lys3_lys8_sas.png"
-    # fig.savefig(file, dpi=300)
+    fig, ax = plt.subplots(1, 4, figsize=(6, 2))
+    for i, var in enumerate(params):
+        data = df_long.loc[df_long["variable"] == var, :]
+        sns.boxplot(data=data, x="variable", y="value", hue="lys", ax=ax[i], palette=colors, showfliers=False)
+        ax[i].set_xlabel("")
+        ax[i].set_xticklabels([])
+        ax[i].set_ylabel(f"{labs._LABS[var]}")
+        ax[i].legend_.remove()
+    fig.subplots_adjust(wspace=0.8)
+    ax[-1].legend(frameon=False, loc="upper right", bbox_to_anchor=(1.0, 1.0), labels=[fert_lys2_lys3_lys8[lys] for lys in lys_experiments])
+    file = base_path_figs / f"boxplot_params_lys2_lys3_lys8_sas.png"
+    fig.savefig(file, dpi=300)
 
 
     # fig, ax = plt.subplots(7, 4, figsize=(6, 6), sharey='col')
@@ -282,94 +281,94 @@ def main(tmp_dir):
     # fig.savefig(file, dpi=300)
 
 
-    colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
-    lys_experiments = ["lys8", "lys3", "lys2"]
-    years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
-    ll_df = []
-    for lys_experiment in lys_experiments:
-        df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
-        df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_mass_bs"], ascending=False)
-        df_params_metrics_30 = df_params_metrics.iloc[:30, :]
-        metrics = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
-        df_metrics = df_params_metrics_30.loc[:, metrics]
-        df_metrics.columns = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
-        df_metrics["lys"] = lys_experiment
-        df_metrics["year"] = ""
-        ll_df.append(df_metrics)
-        for year in years:
-            metrics = [f"KGE_NO3_perc_mass_bs_{year}", f"KGE_NO3_perc_bs_{year}"]
-            df_metrics = df_params_metrics_30.loc[:, metrics]
-            df_metrics.columns = ["KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
-            df_metrics["lys"] = lys_experiment
-            df_metrics["year"] = f"{year}"
-            ll_df.append(df_metrics)
-    df = pd.concat(ll_df)
-    df_long = pd.melt(df, value_vars=["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"], id_vars=["lys", "year"])
+    # colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
+    # lys_experiments = ["lys8", "lys3", "lys2"]
+    # years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
+    # ll_df = []
+    # for lys_experiment in lys_experiments:
+    #     df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
+    #     df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_mass_bs"], ascending=False)
+    #     df_params_metrics_30 = df_params_metrics.iloc[:30, :]
+    #     metrics = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
+    #     df_metrics = df_params_metrics_30.loc[:, metrics]
+    #     df_metrics.columns = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
+    #     df_metrics["lys"] = lys_experiment
+    #     df_metrics["year"] = ""
+    #     ll_df.append(df_metrics)
+    #     for year in years:
+    #         metrics = [f"KGE_NO3_perc_mass_bs_{year}", f"KGE_NO3_perc_bs_{year}"]
+    #         df_metrics = df_params_metrics_30.loc[:, metrics]
+    #         df_metrics.columns = ["KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
+    #         df_metrics["lys"] = lys_experiment
+    #         df_metrics["year"] = f"{year}"
+    #         ll_df.append(df_metrics)
+    # df = pd.concat(ll_df)
+    # df_long = pd.melt(df, value_vars=["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"], id_vars=["lys", "year"])
 
-    metrics = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
-    fig, ax = plt.subplots(3, 1, figsize=(3, 5), sharex=True)
-    for i, var in enumerate(metrics):
-        data = df_long.loc[df_long["variable"] == var, :]
-        g = sns.boxplot(data=data, x="year", y="value", hue="lys", ax=ax[i], palette=colors, showfliers=False)
-        ax[i].set_xlabel("")
-    ax[0].set_ylabel("$KGE_{PERC}$\n[-]")
-    ax[1].set_ylabel("$KGE_{NO_3-PERC}$ (load)\n[-]")
-    ax[2].set_ylabel("$KGE_{NO_3-PERC}$ (conc.)\n[-]")
-    ax[0].legend_.remove()
-    ax[1].legend_.remove()
-    handels,labels = g.get_legend_handles_labels()
-    labels = [fert_lys2_lys3_lys8[lys] for lys in lys_experiments]
-    g.legend(handels, labels, frameon=False, title="")     
-    fig.tight_layout()
-    file = base_path_figs / "boxplot_metrics_lys2_lys3_lys8_2011-2017.png"
-    fig.savefig(file, dpi=300)
+    # metrics = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
+    # fig, ax = plt.subplots(3, 1, figsize=(3, 5), sharex=True)
+    # for i, var in enumerate(metrics):
+    #     data = df_long.loc[df_long["variable"] == var, :]
+    #     g = sns.boxplot(data=data, x="year", y="value", hue="lys", ax=ax[i], palette=colors, showfliers=False)
+    #     ax[i].set_xlabel("")
+    # ax[0].set_ylabel("$KGE_{PERC}$\n[-]")
+    # ax[1].set_ylabel("$KGE_{NO_3-PERC}$ (load)\n[-]")
+    # ax[2].set_ylabel("$KGE_{NO_3-PERC}$ (conc.)\n[-]")
+    # ax[0].legend_.remove()
+    # ax[1].legend_.remove()
+    # handels,labels = g.get_legend_handles_labels()
+    # labels = [fert_lys2_lys3_lys8[lys] for lys in lys_experiments]
+    # g.legend(handels, labels, frameon=False, title="")     
+    # fig.tight_layout()
+    # file = base_path_figs / "boxplot_metrics_lys2_lys3_lys8_2011-2017.png"
+    # fig.savefig(file, dpi=300)
 
-    colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
-    lys_experiments = ["lys8", "lys3", "lys2"]
-    years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
-    ll_df = []
-    for lys_experiment in lys_experiments:
-        df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
-        df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_mass_bs"], ascending=False)
-        df_params_metrics_30= df_params_metrics.iloc[:30, :]
-        metrics = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
-        df_metrics = df_params_metrics_30.loc[:, metrics]
-        metrics = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
-        df_metrics["lys"] = lys_experiment
-        df_metrics["year"] = ""
-        ll_df.append(df_metrics)
-        for year in years:
-            metrics = [f"KGE_perc_bs_sim_{year}", f"KGE_NO3_perc_mass_bs_{year}", f"KGE_NO3_perc_bs_{year}"]
-            df_params_metrics = df_params_metrics.sort_values(by=[f"KGE_NO3_perc_mass_bs_{year}"], ascending=False)
-            df_params_metrics_30= df_params_metrics.iloc[:30, :]
-            df_metrics = df_params_metrics_30.loc[:, metrics]
-            df_metrics.columns = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
-            df_metrics["lys"] = lys_experiment
-            df_metrics["year"] = f"{year}"
-            ll_df.append(df_metrics)
-    df = pd.concat(ll_df)
-    df_long = pd.melt(df, value_vars=["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"], id_vars=["lys", "year"])
+    # colors = ["#fbb4b9", "#f768a1", "#c51b8a"]
+    # lys_experiments = ["lys8", "lys3", "lys2"]
+    # years = [2011, 2012, 2013, 2014, 2015, 2016, 2017]
+    # ll_df = []
+    # for lys_experiment in lys_experiments:
+    #     df_params_metrics = pd.read_csv(base_path_output / f"params_metrics_{lys_experiment}_advection-dispersion-power.txt", sep="\t")
+    #     df_params_metrics = df_params_metrics.sort_values(by=["KGE_NO3_perc_mass_bs"], ascending=False)
+    #     df_params_metrics_30= df_params_metrics.iloc[:30, :]
+    #     metrics = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
+    #     df_metrics = df_params_metrics_30.loc[:, metrics]
+    #     metrics = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
+    #     df_metrics["lys"] = lys_experiment
+    #     df_metrics["year"] = ""
+    #     ll_df.append(df_metrics)
+    #     for year in years:
+    #         metrics = [f"KGE_perc_bs_sim_{year}", f"KGE_NO3_perc_mass_bs_{year}", f"KGE_NO3_perc_bs_{year}"]
+    #         df_params_metrics = df_params_metrics.sort_values(by=[f"KGE_NO3_perc_mass_bs_{year}"], ascending=False)
+    #         df_params_metrics_30= df_params_metrics.iloc[:30, :]
+    #         df_metrics = df_params_metrics_30.loc[:, metrics]
+    #         df_metrics.columns = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
+    #         df_metrics["lys"] = lys_experiment
+    #         df_metrics["year"] = f"{year}"
+    #         ll_df.append(df_metrics)
+    # df = pd.concat(ll_df)
+    # df_long = pd.melt(df, value_vars=["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"], id_vars=["lys", "year"])
 
-    metrics = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
-    fig, ax = plt.subplots(3, 1, figsize=(3, 5), sharex=True)
-    for i, var in enumerate(metrics):
-        data = df_long.loc[df_long["variable"] == var, :]
-        g = sns.boxplot(data=data, x="year", y="value", hue="lys", ax=ax[i], palette=colors, showfliers=False)
-        ax[i].set_xlabel("")
-    ax[0].set_ylabel("$KGE_{PERC}$\n[-]")
-    ax[1].set_ylabel("$KGE_{NO_3-PERC}$ (load)\n[-]")
-    ax[2].set_ylabel("$KGE_{NO_3-PERC}$ (conc.)\n[-]")
-    ax[0].set_ylim(0, 1.0)
-    ax[1].set_ylim(0, 1.0)
-    ax[2].set_ylim(0, 1.0)
-    ax[0].legend_.remove()
-    ax[1].legend_.remove()
-    handels,labels = g.get_legend_handles_labels()
-    labels = [fert_lys2_lys3_lys8[lys] for lys in lys_experiments]
-    g.legend(handels, labels, frameon=False, title="")     
-    fig.tight_layout()
-    file = base_path_figs / "boxplot_metrics_lys2_lys3_lys8_2011-2017_sorted_by_years.png"
-    fig.savefig(file, dpi=300)
+    # metrics = ["KGE_perc_bs_sim", "KGE_NO3_perc_mass_bs", "KGE_NO3_perc_bs"]
+    # fig, ax = plt.subplots(3, 1, figsize=(3, 5), sharex=True)
+    # for i, var in enumerate(metrics):
+    #     data = df_long.loc[df_long["variable"] == var, :]
+    #     g = sns.boxplot(data=data, x="year", y="value", hue="lys", ax=ax[i], palette=colors, showfliers=False)
+    #     ax[i].set_xlabel("")
+    # ax[0].set_ylabel("$KGE_{PERC}$\n[-]")
+    # ax[1].set_ylabel("$KGE_{NO_3-PERC}$ (load)\n[-]")
+    # ax[2].set_ylabel("$KGE_{NO_3-PERC}$ (conc.)\n[-]")
+    # ax[0].set_ylim(0, 1.0)
+    # ax[1].set_ylim(0, 1.0)
+    # ax[2].set_ylim(0, 1.0)
+    # ax[0].legend_.remove()
+    # ax[1].legend_.remove()
+    # handels,labels = g.get_legend_handles_labels()
+    # labels = [fert_lys2_lys3_lys8[lys] for lys in lys_experiments]
+    # g.legend(handels, labels, frameon=False, title="")     
+    # fig.tight_layout()
+    # file = base_path_figs / "boxplot_metrics_lys2_lys3_lys8_2011-2017_sorted_by_years.png"
+    # fig.savefig(file, dpi=300)
     return
 
 

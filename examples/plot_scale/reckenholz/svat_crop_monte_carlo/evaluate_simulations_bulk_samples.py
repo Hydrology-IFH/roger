@@ -19,6 +19,7 @@ def main(tmp_dir):
         base_path = Path(tmp_dir)
     else:
         base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
+        # base_path = Path(__file__).parent.parent
 
     # directory of results
     base_path_output = base_path / "output"
@@ -67,6 +68,7 @@ def main(tmp_dir):
         df_idx_bs.loc[:, 'sol'] = ds_obs['NO3_PERC'].isel(x=0, y=0).values
         idx_bs = df_idx_bs['sol'].dropna().index
         perc_bs_sim = onp.zeros((nx, 1, len(idx)))
+        transp_bs_sim = onp.zeros((nx, 1, len(idx)))
         perc_bs_obs = onp.zeros((nx, 1, len(idx)))
 
         for nrow in range(nx):
@@ -75,19 +77,24 @@ def main(tmp_dir):
             sample_no['sample_no'] = range(len(sample_no.index))
             df_perc_bs = pd.DataFrame(index=idx, columns=['perc', 'NO3_mass'])
             df_perc_bs['perc_sim'] = ds_sim['q_ss'].isel(x=nrow, y=0).values
+            df_perc_bs['transp_sim'] = ds_sim['transp'].isel(x=nrow, y=0).values
             df_perc_bs.loc[df_perc_bs.index[1]:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
             df_perc_bs = df_perc_bs.join(sample_no)
             df_perc_bs.loc[:, 'sample_no'] = df_perc_bs.loc[:, 'sample_no'].bfill(limit=14)
             perc_sim_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'perc_sim']
+            transp_sim_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'transp_sim']
             perc_obs_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'perc_obs']
             sample_no['perc_sim_sum'] = perc_sim_sum.values
+            sample_no['transp_sim_sum'] = transp_sim_sum.values
             sample_no['perc_obs_sum'] = perc_obs_sum.values
             df_perc_bs = df_perc_bs.join(sample_no['perc_sim_sum'])
+            df_perc_bs = df_perc_bs.join(sample_no['transp_sim_sum'])
             df_perc_bs = df_perc_bs.join(sample_no['perc_obs_sum'])
             # volume of observed bulk samples
             perc_bs_obs[nrow, 0, :] = df_perc_bs.loc[:, 'perc_obs_sum'].values.astype(float)
             # volume of simulated bulk samples
             perc_bs_sim[nrow, 0, :] = df_perc_bs.loc[:, 'perc_sim_sum'].values.astype(float)
+            transp_bs_sim[nrow, 0, :] = df_perc_bs.loc[:, 'transp_sim_sum'].values.astype(float)
 
             sim_vals = perc_bs_sim[nrow, 0, :]
             sim_vals = onp.where(sim_vals == 0, onp.nan, sim_vals)
@@ -151,23 +158,23 @@ def main(tmp_dir):
             key_rbs = "RBS_" + var_sim + "_2016-2017"
             df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
 
-            for year in range(2011, 2018):
-                obs_vals_year = df_eval.loc[f'{year}', "obs"].values.astype(float)
-                sim_vals_year = df_eval.loc[f'{year}', "sim"].values.astype(float)
-                key_kge = f'KGE_{var_sim}_{year}'
-                df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
-                key_kge_alpha = "KGE_alpha_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
-                key_kge_beta = "KGE_beta_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
-                key_r = "r_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
-                key_mae = "MAE_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
-                key_mae = "50AE_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
-                key_rbs = "RBS_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
+            # for year in range(2011, 2018):
+            #     obs_vals_year = df_eval.loc[f'{year}', "obs"].values.astype(float)
+            #     sim_vals_year = df_eval.loc[f'{year}', "sim"].values.astype(float)
+            #     key_kge = f'KGE_{var_sim}_{year}'
+            #     df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
+            #     key_kge_alpha = "KGE_alpha_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
+            #     key_kge_beta = "KGE_beta_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
+            #     key_r = "r_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
+            #     key_mae = "MAE_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
+            #     key_mae = "50AE_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
+            #     key_rbs = "RBS_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
 
         # write to .txt
         file = base_path / "output" / "svat_crop_monte_carlo" / f"params_eff_{lys_experiment}_bulk_samples.txt"
@@ -187,6 +194,13 @@ def main(tmp_dir):
             except ValueError:
                 var_obj = f.variables.get("q_ss_bs")
                 var_obj[:, :, :] = perc_bs_sim
+            try:
+                v = f.create_variable("transp_bs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
+                v[:, :, :] = transp_bs_sim
+                v.attrs.update(long_name="Volume of simulated bulk samples", units="mm")
+            except ValueError:
+                var_obj = f.variables.get("transp_bs")
+                var_obj[:, :, :] = transp_bs_sim
             try:
                 v = f.create_variable("q_ss_bs_obs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
                 v[:, :, :] = perc_bs_obs

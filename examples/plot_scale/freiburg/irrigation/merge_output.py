@@ -6,6 +6,7 @@ import datetime
 import numpy as onp
 from cftime import num2date
 import pandas as pd
+import yaml
 import click
 import roger
 
@@ -15,44 +16,13 @@ def main():
     base_path = Path(__file__).parent.parent
     dir_name = os.path.basename(str(Path(__file__).parent))
 
+    # load the configuration file
+    with open(base_path.parent / "config.yml", "r") as file:
+        config = yaml.safe_load(file)
 
-    # identifiers of simulations
-    irrigation_scenarios = ["35-ufc",
-                            "45-ufc",
-                            "50-ufc",
-                            "80-ufc",
-                            "crop-specific",
-                            ]
-    irrigation_scenarios = ["35-ufc",
-                            "crop-specific",
-                            ]
-    crop_rotation_scenarios = ["winter-wheat_clover",
-                               "winter-wheat_silage-corn",
-                               "summer-wheat_winter-wheat",
-                               "summer-wheat_clover_winter-wheat",
-                               "winter-wheat_clover_silage-corn",
-                               "winter-wheat_sugar-beet_silage-corn",
-                               "summer-wheat_winter-wheat_silage-corn",
-                               "summer-wheat_winter-wheat_winter-rape",
-                               "winter-wheat_winter-rape",
-                               "winter-wheat_soybean_winter-rape",
-                               "sugar-beet_winter-wheat_winter-barley", 
-                               "grain-corn_winter-wheat_winter-rape", 
-                               "grain-corn_winter-wheat_winter-barley",
-                               "grain-corn_winter-wheat_clover",
-                               "winter-wheat_silage-corn_yellow-mustard",
-                               "summer-wheat_winter-wheat_yellow-mustard",
-                               "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
-                               "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
-                               "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                               "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
-                               "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                               "grain-corn_winter-wheat_winter-barley_yellow-mustard",
-                               "miscanthus",
-                               "bare-grass"]
-    crop_rotation_scenarios = ["grain-corn_winter-wheat_winter-rape", 
-                               "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                               ]
+    # identifiers of the simulations
+    irrigation_scenarios = config["irrigation_scenarios"]
+    crop_rotation_scenarios = config["crop_rotation_scenarios"]
     # merge model output into single file
     for irrigation_scenario in irrigation_scenarios:
         if os.path.exists(str(base_path / "output" / dir_name / irrigation_scenario)):

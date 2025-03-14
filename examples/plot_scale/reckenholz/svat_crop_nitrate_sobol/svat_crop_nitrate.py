@@ -391,7 +391,6 @@ def main(lys_experiment, tmp_dir):
                 "TA",
                 "ta_year",
                 "NMIN_IN",
-                "NORG_IN",
             ],
         )
         def set_forcing_setup(self, state):
@@ -427,7 +426,6 @@ def main(lys_experiment, tmp_dir):
 
             # convert kg N/ha to mg/square meter
             vs.NMIN_IN = update(vs.NMIN_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("Nmin", self._input_dir2, 'forcing_tracer.nc') * 100 * settings.dx * settings.dy)
-            vs.NORG_IN = update(vs.NORG_IN, at[2:-2, 2:-2, 1:], self._read_var_from_nc("Norg", self._input_dir2, 'forcing_tracer.nc') * 100 * settings.dx * settings.dy)
         
         @roger_routine
         def set_forcing(self, state):

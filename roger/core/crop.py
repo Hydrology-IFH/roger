@@ -113,6 +113,14 @@ def calc_gdd(state):
         npx.where(mask24[2:-2, 2:-2, :], vs.gdd[2:-2, 2:-2, :], 0),
     )
 
+    # modify GDD if soil water content is greater than field capacity
+    mask25 = (vs.theta_rz[:, :, vs.tau] > (vs.theta_ufc * 1.0) + vs.theta_pwp)
+    vs.gdd = update(
+        vs.gdd,
+        at[2:-2, 2:-2, :],
+        npx.where(mask25[2:-2, 2:-2, npx.newaxis], (1 - vs.S_lp_rz[2:-2, 2:-2, npx.newaxis]/vs.S_ac_rz[2:-2, 2:-2, npx.newaxis]) * vs.gdd[2:-2, 2:-2, :], vs.gdd[2:-2, 2:-2, :]),
+    )
+
     return KernelOutput(gdd=vs.gdd, gdd_sum=vs.gdd_sum)
 
 
@@ -357,19 +365,6 @@ def calc_t_grow(state):
         at[2:-2, 2:-2, vs.tau, :],
         vs.gdd[2:-2, 2:-2, :] * vs.k_stress_root_growth[2:-2, 2:-2, :] * mask13[2:-2, 2:-2, :],
     )
-
-    # # no crop growth if soil water content is greater than field capacity
-    # mask14 = (vs.theta_rz[:, :, vs.tau] > (vs.theta_ufc * 1.0) + vs.theta_pwp)
-    # vs.t_grow_cc = update(
-    #     vs.t_grow_cc,
-    #     at[2:-2, 2:-2, vs.tau, :],
-    #     npx.where(mask14[2:-2, 2:-2, npx.newaxis], vs.t_grow_cc[2:-2, 2:-2, vs.taum1, :], vs.t_grow_cc[2:-2, 2:-2, vs.tau, :]),
-    # )
-    # vs.t_grow_root = update(
-    #     vs.t_grow_root,
-    #     at[2:-2, 2:-2, vs.tau, :],
-    #     npx.where(mask14[2:-2, 2:-2, npx.newaxis], vs.t_grow_cc[2:-2, 2:-2, vs.taum1, :], vs.t_grow_root[2:-2, 2:-2, vs.tau, :]),
-    # )
 
     return KernelOutput(t_grow_cc=vs.t_grow_cc, t_grow_root=vs.t_grow_root)
 

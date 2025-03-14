@@ -154,23 +154,23 @@ def main(tmp_dir):
             key_rbs = "RBS_" + var_sim + f"_{year}"
             df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
 
-            for year in range(2011, 2018):
-                obs_vals_year = df_eval.loc[f'{year}', "obs"].values.astype(float)
-                sim_vals_year = df_eval.loc[f'{year}', "sim"].values.astype(float)
-                key_kge = f'KGE_{var_sim}_{year}'
-                df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
-                key_kge_alpha = "KGE_alpha_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
-                key_kge_beta = "KGE_beta_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
-                key_r = "r_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
-                key_mae = "MAE_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
-                key_mae = "50AE_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
-                key_rbs = "RBS_" + var_sim + f"_{year}"
-                df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
+            # for year in range(2011, 2018):
+            #     obs_vals_year = df_eval.loc[f'{year}', "obs"].values.astype(float)
+            #     sim_vals_year = df_eval.loc[f'{year}', "sim"].values.astype(float)
+            #     key_kge = f'KGE_{var_sim}_{year}'
+            #     df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
+            #     key_kge_alpha = "KGE_alpha_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
+            #     key_kge_beta = "KGE_beta_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
+            #     key_r = "r_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
+            #     key_mae = "MAE_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
+            #     key_mae = "50AE_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
+            #     key_rbs = "RBS_" + var_sim + f"_{year}"
+            #     df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
 
         # write to .txt
         file = base_path / "output" / "svat_crop_monte_carlo_crop-specific" / f"params_eff_{lys_experiment}_bulk_samples.txt"

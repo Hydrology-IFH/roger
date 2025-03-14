@@ -54,9 +54,9 @@ def main():
     csv_file = base_path / "soil_fertility.csv"
     df_soil_fertility = pd.read_csv(csv_file, sep=";", skiprows=1)
     c_soil_fertility = onp.zeros(NN)
-    cond1 = (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) >= 1) & (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) < 2)
-    cond2 = (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) >= 2) & (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) < 3)
-    cond3 = (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) >= 3) & (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) < 4)
+    cond1 = (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) > 1) & (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) <= 2)
+    cond2 = (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) > 2) & (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) <= 3)
+    cond3 = (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) > 3) & (df_soil_fertility.loc[:, "soil_fertility"].values.astype(float) <= 4)
     c_soil_fertility[cond1] = 1/3
     c_soil_fertility[cond2] = 2/3
     c_soil_fertility[cond3] = 1

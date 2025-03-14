@@ -439,7 +439,7 @@ def calc_ammonium_uptake(state):
     mr_pot = update(
         mr_pot,
         at[2:-2, 2:-2],
-        npx.where(vs.transp[2:-2, 2:-2] > 0, (vs.nup[2:-2, 2:-2] * 0.5) * (vs.z_root[2:-2, 2:-2, vs.tau]/(vs.z_soil[2:-2, 2:-2] * settings.zroot_to_zsoil_max)), 0)
+        npx.where(vs.transp[2:-2, 2:-2] > 0, vs.nup[2:-2, 2:-2] * (vs.z_root[2:-2, 2:-2, vs.tau]/(vs.z_soil[2:-2, 2:-2] * settings.zroot_to_zsoil_max)), 0)
         * vs.maskCatch[2:-2, 2:-2],
     )
 

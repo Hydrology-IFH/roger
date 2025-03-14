@@ -35,11 +35,14 @@ def main(nsamples):
 
     lys_experiments = ["lys2", "lys3", "lys8"]
     for lys_experiment in lys_experiments:
-        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / f"params_eff_{lys_experiment}_weekly.txt"
-        df_params_metrics = pd.read_csv(file, sep="\t")
+        file = base_path / "parameters.csv"
+        df_params_metrics = pd.read_csv(file, sep=";", skiprows=1)
+
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / "KGE_bulk_samples.csv"
+        df_metric = pd.read_csv(file, sep=";")
 
         # calculate multi-objective efficiency
-        df_params_metrics["E_multi"] = 0.7 * df_params_metrics["KGE_q_ss_perc_pet_2011-2017"] + 0.3 * (1 - ((1 - df_params_metrics["r_S_perc_pet_2011-2017"])**2 + (1 - df_params_metrics["KGE_alpha_S_perc_pet_2011-2017"])**2)**(0.5))
+        df_params_metrics["E_multi"] = df_metric["avg"]
 
         # select best 100 model runs
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)

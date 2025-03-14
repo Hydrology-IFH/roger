@@ -142,9 +142,9 @@ def main(tmp_dir):
     #             # skip first seven days for warmup
     #             df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
     #             # plot observed and simulated time series
-    #             sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
-    #             sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
-    #             sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+    #             sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+    #             sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+    #             sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
     #             axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color="red", alpha=0.5, zorder=0)
     #             axs[i].plot(df_eval.index, sim_vals_median, color="red", zorder=1)
     #             axs[i].plot(df_eval.index, df_eval["obs"], color="blue", ls="--", zorder=2)
@@ -178,9 +178,9 @@ def main(tmp_dir):
     #             # skip first seven days for warmup
     #             df_eval = df_eval.loc[f"{year}-01-01":f"{year}-12-31", :]
     #             # plot observed and simulated time series
-    #             sim_vals_min = onp.nanmin(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
-    #             sim_vals_max = onp.nanmax(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
-    #             sim_vals_median = onp.nanmedian(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
+    #             sim_vals_min = onp.nanmin(onp.nancumsum(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=0), axis=1)
+    #             sim_vals_max = onp.nanmax(onp.nancumsum(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=0), axis=1)
+    #             sim_vals_median = onp.nanmedian(onp.nancumsum(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=0), axis=1)
     #             axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color="red", alpha=0.5, zorder=0)
     #             axs[i].plot(df_eval.index, sim_vals_median, color="red", zorder=1)
     #             axs[i].plot(df_eval.index, df_eval["obs"].cumsum(), color="blue")
@@ -261,7 +261,8 @@ def main(tmp_dir):
         axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
         axs[i].set_ylabel('[mg/14 days]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('[Jahr-Monat]')
+    axs[-1].xaxis.set_major_formatter(mpl.dates.DateFormatter('%b-%y'))
+    axs[-1].set_xlabel('[Monat-Jahr]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_load_bulk_samples_trace.png"
     path_fig = base_path_figs / file_str
@@ -317,16 +318,17 @@ def main(tmp_dir):
         elif lys_experiment == "lys8":
             col = "#e7e1ef"
         # plot observed and simulated time series
-        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
-        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
-        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
         axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color=col, alpha=0.5, zorder=0)
         axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1, marker=".")
         axs[i].plot(df_eval.index, df_eval["obs"], color="blue", marker=".")
         axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
         axs[i].set_ylabel('[mg/14 days]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('[Jahr-Monat]')
+    axs[-1].xaxis.set_major_formatter(mpl.dates.DateFormatter('%b-%y'))
+    axs[-1].set_xlabel('[Monat-Jahr]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_load_bulk_samples.png"
     path_fig = base_path_figs / file_str
@@ -391,7 +393,8 @@ def main(tmp_dir):
         axs[i].set_ylim(0,)
         axs[i].set_ylabel('[mg]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('[Jahr-Monat]')
+    axs[-1].xaxis.set_major_formatter(mpl.dates.DateFormatter('%b-%y'))
+    axs[-1].set_xlabel('[Monat-Jahr]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_load_bulk_samples_cumulated_trace.png"
     path_fig = base_path_figs / file_str
@@ -456,7 +459,8 @@ def main(tmp_dir):
         axs[i].set_ylim(0,)
         axs[i].set_ylabel('[mg/l]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('[Jahr-Monat]')
+    axs[-1].xaxis.set_major_formatter(mpl.dates.DateFormatter('%b-%y'))
+    axs[-1].set_xlabel('[Monat-Jahr]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_conc_bulk_samples_trace.png"
     path_fig = base_path_figs / file_str
@@ -520,7 +524,8 @@ def main(tmp_dir):
         axs[i].set_ylim(0, 70)
         axs[i].set_ylabel('[mg/l]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('[Jahr-Monat]')
+    axs[-1].xaxis.set_major_formatter(mpl.dates.DateFormatter('%b-%y'))
+    axs[-1].set_xlabel('[Monat-Jahr]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_conc_bulk_samples_trace_.png"
     path_fig = base_path_figs / file_str
@@ -576,9 +581,9 @@ def main(tmp_dir):
         elif lys_experiment == "lys8":
             col = "#e7e1ef"
         # plot observed and simulated time series
-        sim_vals_min = onp.nanmin(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
-        sim_vals_max = onp.nanmax(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
-        sim_vals_median = onp.nanmedian(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
+        sim_vals_min = onp.nanmin(onp.nancumsum(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=0), axis=1)
+        sim_vals_max = onp.nanmax(onp.nancumsum(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=0), axis=1)
+        sim_vals_median = onp.nanmedian(onp.nancumsum(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=0), axis=1)
         axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color=col, alpha=0.5, zorder=0)
         axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1, marker=".", lw=2)
         axs[i].plot(df_eval.index, df_eval["obs"].cumsum(), color="blue", marker=".", lw=2)
@@ -633,8 +638,8 @@ def main(tmp_dir):
         sim_vals = ds_sim["C_q_ss_bs"].isel(y=0).values[idx_best100, :].T * 4.43
         # join observations on simulations
         df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
-        df_eval = df_eval.loc["2011-01-01":"2015-12-31", :]
-        df_eval = df_eval.dropna()
+        df_eval_ = df_eval.loc["2011-01-01":"2015-12-31", :].copy()
+        df_eval = df_eval.loc["2011-01-01":"2015-12-31", :].bfill(limit=14)
         if lys_experiment == "lys2":
             col = "#dd1c77"
         elif lys_experiment == "lys3":
@@ -642,13 +647,15 @@ def main(tmp_dir):
         elif lys_experiment == "lys8":
             col = "#e7e1ef"
         # plot observed and simulated time series
-        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
-        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
-        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_median_ = onp.nanmedian(df_eval_.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
         axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color=col, alpha=0.5, zorder=0)
-        axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1, marker=".", lw=2)
-        axs[i].plot(df_eval.index, df_eval["obs"], color="blue", marker=".", lw=2)
-        axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
+        axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1)
+        axs[i].plot(df_eval.index, df_eval["obs"], color="blue")
+        axs[i].scatter(df_eval_.index, sim_vals_median_, color=col, zorder=1, s=2)
+        axs[i].scatter(df_eval_.index, df_eval["obs"], color="blue", s=2)
         axs[i].set_ylim(0, 100)
         axs[i].set_ylabel('[mg/l]')
         axs[i].set_xlabel('')
@@ -699,8 +706,8 @@ def main(tmp_dir):
         sim_vals = ds_sim["C_q_ss_bs"].isel(y=0).values[idx_best100, :].T * 4.43
         # join observations on simulations
         df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
-        df_eval = df_eval.loc["2011-01-01":"2015-12-31", :]
-        df_eval = df_eval.dropna()
+        df_eval_ = df_eval.loc["2011-01-01":"2015-12-31", :].copy()
+        df_eval = df_eval.loc["2011-01-01":"2015-12-31", :].bfill(limit=14)
         if lys_experiment == "lys2":
             col = "#dd1c77"
         elif lys_experiment == "lys3":
@@ -708,17 +715,20 @@ def main(tmp_dir):
         elif lys_experiment == "lys8":
             col = "#e7e1ef"
         # plot observed and simulated time series
-        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
-        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
-        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_median_ = onp.nanmedian(df_eval_.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
         axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color=col, alpha=0.5, zorder=0)
-        axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1, marker=".", lw=2)
-        axs[i].plot(df_eval.index, df_eval["obs"], color="blue", marker=".", lw=2)
-        axs[i].set_xlim(df_eval.index[0], df_eval.index[-1])
+        axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1)
+        axs[i].plot(df_eval.index, df_eval["obs"], color="blue")
+        axs[i].scatter(df_eval_.index, sim_vals_median_, color=col, zorder=1, s=2)
+        axs[i].scatter(df_eval_.index, df_eval["obs"], color="blue", s=2)
         axs[i].set_ylim(0, 100)
         axs[i].set_ylabel('[mg/l]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('[Jahr-Monat]')
+    axs[-1].xaxis.set_major_formatter(mpl.dates.DateFormatter('%b-%y'))
+    axs[-1].set_xlabel('[Monat-Jahr]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_conc_bulk_samples.png"
     path_fig = base_path_figs / file_str
@@ -774,9 +784,9 @@ def main(tmp_dir):
         elif lys_experiment == "lys8":
             col = "#e7e1ef"
         # plot observed and simulated time series
-        sim_vals_min = onp.nanmin(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
-        sim_vals_max = onp.nanmax(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
-        sim_vals_median = onp.nanmedian(onp.nancumsum(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=0), axis=1)
+        sim_vals_min = onp.nanmin(onp.nancumsum(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=0), axis=1)
+        sim_vals_max = onp.nanmax(onp.nancumsum(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=0), axis=1)
+        sim_vals_median = onp.nanmedian(onp.nancumsum(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=0), axis=1)
         axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color=col, alpha=0.5, zorder=0)
         axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1, marker=".", lw=2)
         axs[i].plot(df_eval.index, df_eval["obs"].cumsum(), color="blue", marker=".", lw=2)
@@ -784,7 +794,8 @@ def main(tmp_dir):
         axs[i].set_ylim(0, 2500)
         axs[i].set_ylabel('[mg]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('[Jahr-Monat]')
+    axs[-1].xaxis.set_major_formatter(mpl.dates.DateFormatter('%b-%y'))
+    axs[-1].set_xlabel('[Monat-Jahr]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_load_bulk_samples_cumulated_2015.png"
     path_fig = base_path_figs / file_str
@@ -840,9 +851,9 @@ def main(tmp_dir):
         elif lys_experiment == "lys8":
             col = "#e7e1ef"
         # plot observed and simulated time series
-        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
-        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
-        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":].values.astype(onp.float64), axis=1)
+        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
         axs[i].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color=col, alpha=0.5, zorder=0)
         axs[i].plot(df_eval.index, sim_vals_median, color=col, zorder=1, marker=".", lw=2)
         axs[i].plot(df_eval.index, df_eval["obs"], color="blue", marker=".", lw=2)
@@ -850,7 +861,8 @@ def main(tmp_dir):
         axs[i].set_ylim(0, 100)
         axs[i].set_ylabel('[mg/l]')
         axs[i].set_xlabel('')
-    axs[-1].set_xlabel('[Jahr-Monat]')
+    axs[-1].xaxis.set_major_formatter(mpl.dates.DateFormatter('%b-%y'))
+    axs[-1].set_xlabel('[Monat-Jahr]')
     fig.tight_layout()
     file_str = "comparison_nitrate_leaching_conc_bulk_samples_2015.png"
     path_fig = base_path_figs / file_str
