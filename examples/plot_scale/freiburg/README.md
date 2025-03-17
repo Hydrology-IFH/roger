@@ -80,12 +80,13 @@ Nitrate leaching is simulated with irrigation and without irrigation.
 ## Workflow
 ! Windows user may change from `/` to `\` in the provided *.sh-files. Please check beforehand. !
 
-1. Install RoGeR and the required Python libraries using Anaconda
+1. Install RoGeR and the required Python libraries using Anaconda `conda env create -f conda-environment.yml`
 2. After successfull installation activate the conda environment `roger`
-3. Open the terminal and move to the directory
-4. Define the model parameters in `parameters.csv`
-5. Run `python write_parameters_to_netcdf.py` to write `parameters.csv` to NetCDF format
-6. Run `./run_roger.sh`
-7. Simulations will be saved to the `output/` directory
-8. Run `./run_roger_nitrate.sh`
-9. Simulations will be saved to the `output/` directory
+3. Open the terminal and move to the project directory.
+4. Set the model parameters in `parameters.csv` (Skip this step if you agree using the provided parameters)
+5. Set the considered irrigation demand rules and crop rotation scenarios in `config.yml`
+6. Run `python write_parameters_to_netcdf.py` to write `parameters.csv` to NetCDF format
+7. Run `./run_roger.sh`
+8. Simulations will be saved to the `output/` directory
+9. Run `./run_roger_nitrate.sh`
+10. Simulations will be saved to the `output/` directory
