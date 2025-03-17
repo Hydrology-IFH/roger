@@ -17,7 +17,7 @@ Available soil types:
 
 Available irrigation demand rules:
 - no_irrigation: No irrigation is applied
-- 30-ufc: Irrigation demand is calculated if soil water content is less than 30% of usable field capacity
+- 35-ufc: Irrigation demand is calculated if soil water content is less than 35% of usable field capacity
 - 45-ufc: Irrigation demand is calculated if soil water content is less than 45% of usable field capacity
 - 50-ufc: Irrigation demand is calculated if soil water content is less than 50% of usable field capacity
 - 80-ufc: Irrigation demand is calculated if soil water content is less than 80% of usable field capacity
