@@ -11,8 +11,8 @@ import roger.tools.evaluation as eval_utils
 base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
 # merge nitrate model output into single file
-lys_experiments = ["lys2", "lys3", "lys8"]
-tm_structures = ["complete-mixing", "advection-dispersion-power", "time-variant_advection-dispersion-power"]
+lys_experiments = ["lys3", "lys8"]
+tm_structures = ["complete-mixing"]
 
 for lys_experiment in lys_experiments:
     # load hydrologic simulation
