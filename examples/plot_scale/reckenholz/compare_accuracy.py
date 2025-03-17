@@ -87,17 +87,29 @@ def main(tmp_dir):
     lys_experiments = ["lys2", "lys3", "lys8"]
     ll_df = []
     for lys_experiment in lys_experiments:
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / "KGE_bulk_samples.csv"
+        df_metric = pd.read_csv(file, sep=";")
+        df_metric.loc[:, "id"] = range(len(df_metric.index))
+        df_metric = df_metric.sort_values(by=["avg"], ascending=False)
+        idx_best100 = df_metric.loc[: df_metric.index[99], "id"].values.tolist()
         df_params_metrics = pd.read_csv(base_path / "output" / "svat_monte_carlo" / f"params_eff_{lys_experiment}_bulk_samples.txt", sep="\t")
-        df_params_metrics = df_params_metrics.sort_values(by=["KGE_q_ss_2011-2015"], ascending=False)
-        df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+        df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
+        cond = df_params_metrics["id"].isin(idx_best100)
+        df_params_metrics_100 = df_params_metrics.loc[cond, :]
         df_metrics = df_params_metrics_100.loc[:, "KGE_q_ss_2011-2015"].to_frame()
         df_metrics.columns = ["KGE_perc"]
         df_metrics["lys"] = _lys[lys_experiment]
         df_metrics["model"] = "non-explicit"
         ll_df.append(df_metrics)
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_monte_carlo" / "KGE_bulk_samples.csv"
+        df_metric = pd.read_csv(file, sep=";")
+        df_metric.loc[:, "id"] = range(len(df_metric.index))
+        df_metric = df_metric.sort_values(by=["avg"], ascending=False)
+        idx_best100 = df_metric.loc[: df_metric.index[99], "id"].values.tolist()
         df_params_metrics = pd.read_csv(base_path / "output" / "svat_crop_monte_carlo_crop-specific" / f"params_eff_{lys_experiment}_bulk_samples.txt", sep="\t")
-        df_params_metrics = df_params_metrics.sort_values(by=["KGE_q_ss_2011-2015"], ascending=False)
-        df_params_metrics_100 = df_params_metrics.iloc[:100, :]
+        df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
+        cond = df_params_metrics["id"].isin(idx_best100)
+        df_params_metrics_100 = df_params_metrics.loc[cond, :]
         df_metrics = df_params_metrics_100.loc[:, "KGE_q_ss_2011-2015"].to_frame()
         df_metrics.columns = ["KGE_perc"]
         df_metrics["lys"] = _lys[lys_experiment]

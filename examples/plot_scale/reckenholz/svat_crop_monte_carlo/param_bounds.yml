@@ -17,7 +17,7 @@ frac_lp:
 # permanent wilting point of soil (-)
 theta_pwp:
 - 0.1
-- 0.3
+- 0.25
 # saturated hydraulic conductivity (mm/h)
 ks:
 - 1

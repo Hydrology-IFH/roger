@@ -12,7 +12,8 @@ import roger
 
 @click.command("main")
 def main():
-    base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh")
+    # base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh")
+    base_path = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh")
 
     # identifiers for simulations
     locations = ["freiburg", "lahr", "muellheim", 

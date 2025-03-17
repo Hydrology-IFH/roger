@@ -209,8 +209,11 @@ def main(tmp_dir):
     fig, axs = plt.subplots(3, 1, sharey=True, sharex=True, figsize=(6, 4))
     for i, lys_experiment in enumerate(lys_experiments):
         # load parameters and metrics
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_bulk_samples.txt", sep="\t")
-        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_2011-2015"]
+        file = Path(__file__).parent / "parameters.csv"
+        df_params_metrics = pd.read_csv(file, sep=";", skiprows=1)
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / "KGE_bulk_samples.csv"
+        df_metric = pd.read_csv(file, sep=";")
+        df_params_metrics["E_multi"] = df_metric["avg"]
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
@@ -273,8 +276,11 @@ def main(tmp_dir):
     fig, axs = plt.subplots(3, 1, sharey=True, sharex=True, figsize=(6, 4))
     for i, lys_experiment in enumerate(lys_experiments):
         # load parameters and metrics
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_bulk_samples.txt", sep="\t")
-        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_2011-2015"]
+        file = Path(__file__).parent / "parameters.csv"
+        df_params_metrics = pd.read_csv(file, sep=";", skiprows=1)
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / "KGE_bulk_samples.csv"
+        df_metric = pd.read_csv(file, sep=";")
+        df_params_metrics["E_multi"] = df_metric["avg"]
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
@@ -344,8 +350,11 @@ def main(tmp_dir):
     fig, axs = plt.subplots(3, 1, sharey=True, sharex=True, figsize=(6, 4))
     for i, lys_experiment in enumerate(lys_experiments):
         # load parameters and metrics
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_bulk_samples.txt", sep="\t")
-        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_2011-2015"]
+        file = Path(__file__).parent / "parameters.csv"
+        df_params_metrics = pd.read_csv(file, sep=";", skiprows=1)
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / "KGE_bulk_samples.csv"
+        df_metric = pd.read_csv(file, sep=";")
+        df_params_metrics["E_multi"] = df_metric["avg"]
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
@@ -409,8 +418,11 @@ def main(tmp_dir):
     fig, axs = plt.subplots(3, 1, sharey=True, sharex=True, figsize=(6, 4))
     for i, lys_experiment in enumerate(lys_experiments):
         # load parameters and metrics
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_bulk_samples.txt", sep="\t")
-        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_2011-2015"]
+        file = Path(__file__).parent / "parameters.csv"
+        df_params_metrics = pd.read_csv(file, sep=";", skiprows=1)
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / "KGE_bulk_samples.csv"
+        df_metric = pd.read_csv(file, sep=";")
+        df_params_metrics["E_multi"] = df_metric["avg"]
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
@@ -481,8 +493,11 @@ def main(tmp_dir):
         elif i == 2:
             i = 4
         # load parameters and metrics
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_bulk_samples.txt", sep="\t")
-        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_2011-2015"]
+        file = Path(__file__).parent / "parameters.csv"
+        df_params_metrics = pd.read_csv(file, sep=";", skiprows=1)
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / "KGE_bulk_samples.csv"
+        df_metric = pd.read_csv(file, sep=";")
+        df_params_metrics["E_multi"] = df_metric["avg"]
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
@@ -591,8 +606,11 @@ def main(tmp_dir):
         elif i == 2:
             i = 4
         # load parameters and metrics
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_bulk_samples.txt", sep="\t")
-        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_2011-2015"]
+        file = Path(__file__).parent / "parameters.csv"
+        df_params_metrics = pd.read_csv(file, sep=";", skiprows=1)
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / "KGE_bulk_samples.csv"
+        df_metric = pd.read_csv(file, sep=";")
+        df_params_metrics["E_multi"] = df_metric["avg"]
         df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
         df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
         idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
