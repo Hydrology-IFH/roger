@@ -23,7 +23,7 @@ def main():
     dict_crop_types = df_crop_water_stress.loc[:, "crop_type"].to_frame().to_dict()["crop_type"]
 
     # load the configuration file
-    with open(base_path.parent / "config.yml", "r") as file:
+    with open(base_path / "config.yml", "r") as file:
         config = yaml.safe_load(file)
 
     # identifiers of the simulations

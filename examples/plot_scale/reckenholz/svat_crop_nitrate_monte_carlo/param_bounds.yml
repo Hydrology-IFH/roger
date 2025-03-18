@@ -50,8 +50,8 @@ advection-dispersion-power:
   - 1
   # SAS parameter of percolation from root zone
   k_q:
-  - 1
-  - 10
+  - 0.5
+  - 5
 
 time-variant_advection-dispersion-power:
   alpha_transp:
