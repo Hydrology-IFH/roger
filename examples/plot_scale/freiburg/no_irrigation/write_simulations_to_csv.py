@@ -4,6 +4,7 @@ import xarray as xr
 import numpy as onp
 from cftime import num2date
 import pandas as pd
+import yaml
 import click
 
 
@@ -13,9 +14,9 @@ def main():
     dir_name = os.path.basename(str(Path(__file__).parent))
 
     # load the parameters
-    file = base_path.parent / "parameters.csv"
+    file = base_path / "parameters.csv"
     df_parameters = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
-    file = base_path.parent / "crop_water_stress.csv"
+    file = base_path / "crop_water_stress.csv"
     df_crop_water_stress = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
     df_crop_water_stress["crop_type"] = df_crop_water_stress.index
     df_crop_water_stress.index = df_crop_water_stress.loc[:, "lu_id"]
@@ -24,40 +25,13 @@ def main():
     df_crop_water_stress.index = df_crop_water_stress.loc[:, "lu_id"]
     dict_crop_water_stress = df_crop_water_stress.loc[:, "water_stress_frac"].to_frame().to_dict()["water_stress_frac"]
 
-    # identifiers of simulations
-    irrigation_demand_scenarios = ["35-ufc",
-                                   "45-ufc",
-                                   "50-ufc",
-                                   "80-ufc",
-                                   "crop-specific",
-                                   ]
-    crop_rotation_scenarios = ["winter-wheat_clover",
-                               "winter-wheat_silage-corn",
-                               "summer-wheat_winter-wheat",
-                               "summer-wheat_clover_winter-wheat",
-                               "winter-wheat_clover_silage-corn",
-                               "winter-wheat_sugar-beet_silage-corn",
-                               "summer-wheat_winter-wheat_silage-corn",
-                               "summer-wheat_winter-wheat_winter-rape",
-                               "winter-wheat_winter-rape",
-                               "winter-wheat_soybean_winter-rape",
-                               "sugar-beet_winter-wheat_winter-barley", 
-                               "grain-corn_winter-wheat_winter-rape", 
-                               "grain-corn_winter-wheat_winter-barley",
-                               "grain-corn_winter-wheat_clover",
-                               "winter-wheat_silage-corn_yellow-mustard",
-                               "summer-wheat_winter-wheat_yellow-mustard",
-                               "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
-                               "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
-                               "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                               "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
-                               "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                               "grain-corn_winter-wheat_winter-barley_yellow-mustard",
-                               "miscanthus",
-                               "bare-grass"]
-    crop_rotation_scenarios = ["grain-corn_winter-wheat_winter-rape", 
-                               "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                               ]
+    # load the configuration file
+    with open(base_path / "config.yml", "r") as file:
+        config = yaml.safe_load(file)
+
+    # identifiers of the simulations
+    irrigation_demand_scenarios = config["irrigation_scenarios"]
+    crop_rotation_scenarios = config["crop_rotation_scenarios"]
     soil_types = df_parameters.index.to_list()
     for irrigation_demand_scenario in irrigation_demand_scenarios:
         if irrigation_demand_scenario == "35-ufc":
@@ -108,14 +82,14 @@ def main():
                     df_simulation.loc[:, "lu_id"] = ds["lu_id"].isel(x=x, y=0).values
                     df_simulation.loc[:, "crop_type"] = [dict_crop_types[lu_id] for lu_id in ds["lu_id"].isel(x=x, y=0).values]
                     if irrigation_demand_scenario in ["35-ufc", "45-ufc", "50-ufc", "80-ufc"]:
-                        theta_irr = df_parameters.loc[f"{soil_type}_type", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}_type", "theta_ufc"])
+                        theta_irr = df_parameters.loc[f"{soil_type}", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}", "theta_ufc"])
                         irr_demand = (theta_irr - ds["theta_rz"].isel(x=x, y=0).values) * ds["z_root"].isel(x=x, y=0).values
                         irr_demand[irr_demand < 0] = 0
                         df_simulation.loc[:, "irrigation_demand"] = irr_demand
                     else:
                         c_irr_list = [dict_crop_water_stress[lu_id] for lu_id in ds["lu_id"].isel(x=x, y=0).values]
                         c_irr = onp.array(c_irr_list)
-                        theta_irr = df_parameters.loc[f"{soil_type}_type", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}_type", "theta_ufc"])
+                        theta_irr = df_parameters.loc[f"{soil_type}", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}", "theta_ufc"])
                         irr_demand = (theta_irr - ds["theta_rz"].isel(x=x, y=0).values) * ds["z_root"].isel(x=x, y=0).values
                         irr_demand[irr_demand < 0] = 0
                         df_simulation.loc[:, "irrigation_demand"] = irr_demand
