@@ -6,7 +6,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("--irrigation-scenario", type=click.Choice(["no_irrigation", "35-ufc", "45-ufc", "50-ufc", "80-ufc", "crop-specific"]), default="no_irrigation")
+@click.option("--irrigation-scenario", type=click.Choice(["no_irrigation", "35-ufc", "45-ufc", "50-ufc", "80-ufc", "crop-specific"]), default="crop-specific")
 @click.option("--crop-rotation-scenario", type=click.Choice(["winter-wheat_clover",
                                                              "winter-wheat_silage-corn",
                                                              "summer-wheat_winter-wheat",
@@ -30,7 +30,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
                                                              "grain-corn_winter-wheat_winter-barley_yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="miscanthus")
+                                                             "bare-grass"]), default="grain-corn_winter-wheat_winter-rape")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "nitrate")
 @roger_base_cli
 def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
@@ -41,7 +41,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
     from roger.core.utilities import _get_row_no
     from roger import runtime_settings as rs
 
-    tmp_dir = Path(tmp_dir) / "output" / "nitrate" / irrigation_scenario
+    tmp_dir = Path(tmp_dir) / irrigation_scenario
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
@@ -53,15 +53,15 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
         if irrigation_scenario == "no_irrigation":
             _input_dir = _base_path.parent / "output" / "no_irrigation"
         elif irrigation_scenario == "35-ufc":
-            _input_dir = _base_path.parent / "output" / "35-ufc"
+            _input_dir = _base_path.parent / "output" / "irrigation" / "35-ufc"
         elif irrigation_scenario == "45-ufc":
-            _input_dir = _base_path.parent / "output" / "45-ufc"
+            _input_dir = _base_path.parent / "output" / "irrigation" / "45-ufc"
         elif irrigation_scenario == "50-ufc":
-            _input_dir = _base_path.parent / "output" / "50-ufc"
+            _input_dir = _base_path.parent / "output" / "irrigation" / "50-ufc"
         elif irrigation_scenario == "80-ufc":
-            _input_dir = _base_path.parent / "output" / "80-ufc"
+            _input_dir = _base_path.parent / "output" / "irrigation" / "80-ufc"
         elif irrigation_scenario == "crop-specific":
-            _input_dir = _base_path.parent / "output" / "crop-specific"
+            _input_dir = _base_path.parent / "output" / "irrigation" / "crop-specific"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -665,10 +665,10 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 lut_fert2 = vs.lut_fert2
                 lut_fert3 = vs.lut_fert1
                 for i in range(500, 600):
-                    mask = vs.LU_ID[2:-2, 2:-2, vs.itt] == i
-                    mask1 = vs.LU_ID[2:-2, 2:-2, vs.itt] == i & vs.soil_fertility[2:-2, 2:-2] <= 2
-                    mask2 = vs.LU_ID[2:-2, 2:-2, vs.itt] == i & vs.soil_fertility[2:-2, 2:-2] > 2 & vs.soil_fertility[2:-2, 2:-2] <= 3
-                    mask3 = vs.LU_ID[2:-2, 2:-2, vs.itt] == i & vs.soil_fertility[2:-2, 2:-2] > 3
+                    mask = (vs.LU_ID[:, :, vs.itt] == i)
+                    mask1 = (vs.LU_ID[:, :, vs.itt] == i) & (vs.soil_fertility <= 2)
+                    mask2 = (vs.LU_ID[:, :, vs.itt] == i) & (vs.soil_fertility > 2) & (vs.soil_fertility <= 3)
+                    mask3 = (vs.LU_ID[:, :, vs.itt] == i) & (vs.soil_fertility > 3)
                     row_no = _get_row_no(vs.lut_nup[:, 0], i)
                     # set nitrogen uptake rate
                     vs.nup = update(
@@ -877,9 +877,10 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                         vs.kfix_rz = update(vs.kfix_rz, at[2:-2, 2:-2], npx.where(mask, 40 * (vs.soil_fertility[2:-2, 2:-2]/3.5), vs.kfix_rz[2:-2, 2:-2]))
                     # set fertilization
                     for i in range(500, 600):
-                        mask1 = vs.LU_ID[:, :, vs.itt+31] == i & vs.soil_fertility[2:-2, 2:-2] <= 2
-                        mask2 = vs.LU_ID[:, :, vs.itt+31] == i & vs.soil_fertility[2:-2, 2:-2] > 2 & vs.soil_fertility[2:-2, 2:-2] <= 3
-                        mask3 = vs.LU_ID[:, :, vs.itt+31] == i & vs.soil_fertility[2:-2, 2:-2] > 3
+                        mask = (vs.LU_ID[:, :, vs.itt+31] == i)
+                        mask1 = (vs.LU_ID[:, :, vs.itt+31] == i) & (vs.soil_fertility <= 2)
+                        mask2 = (vs.LU_ID[:, :, vs.itt+31] == i) & (vs.soil_fertility > 2) & (vs.soil_fertility <= 3)
+                        mask3 = (vs.LU_ID[:, :, vs.itt+31] == i) & (vs.soil_fertility > 3)
                         row_no = _get_row_no(vs.lut_nup[:, 0], i)
                         # set nitrogen uptake rate
                         vs.nup = update(

@@ -14,16 +14,16 @@ def main():
     dir_name = os.path.basename(str(Path(__file__).parent))
 
     # load the parameters
-    file = base_path.parent / "parameters.csv"
+    file = base_path / "parameters.csv"
     df_parameters = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
-    file = base_path.parent / "crop_water_stress.csv"
+    file = base_path / "crop_water_stress.csv"
     df_crop_water_stress = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
     df_crop_water_stress["crop_type"] = df_crop_water_stress.index
     df_crop_water_stress.index = df_crop_water_stress.loc[:, "lu_id"]
     dict_crop_types = df_crop_water_stress.loc[:, "crop_type"].to_frame().to_dict()["crop_type"]
 
     # load the configuration file
-    with open(base_path.parent / "config.yml", "r") as file:
+    with open(base_path / "config.yml", "r") as file:
         config = yaml.safe_load(file)
 
     irrigation_scenarios = config["irrigation_scenarios"]
