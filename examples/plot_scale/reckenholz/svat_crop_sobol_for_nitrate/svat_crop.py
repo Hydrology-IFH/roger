@@ -289,26 +289,13 @@ def main(lys_experiment, tmp_dir):
     def set_initial_conditions_crops_kernel(state):
         vs = state.variables
 
-        # calculate time since growing
-        t_grow = allocate(state.dimensions, ("x", "y", "crops"))
-        t_grow = update(
-            t_grow,
-            at[2:-2, 2:-2, :], npx.where(vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] > 0, (-1 / vs.root_growth_rate[2:-2, 2:-2, :]) * npx.log(1 / ((vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] / 1000 - vs.z_root_crop_max[2:-2, 2:-2, :] / 1000) * (-1 / (vs.z_root_crop_max[2:-2, 2:-2, :] / 1000 - vs.z_evap[2:-2, 2:-2, npx.newaxis] / 1000)))), 0)
-        )
-
-        vs.t_grow_cc = update(
-            vs.t_grow_cc,
-            at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
-        )
-
-        vs.t_grow_root = update(
-            vs.t_grow_root,
-            at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :]
+        vs.gdd_sum = update(
+            vs.gdd_sum,
+            at[2:-2, 2:-2, :, 2], 300
         )
 
         return KernelOutput(
-            t_grow_cc=vs.t_grow_cc,
-            t_grow_root=vs.t_grow_root,
+            gdd_sum=vs.gdd_sum,
         )
 
     @roger_kernel

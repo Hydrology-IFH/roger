@@ -84,6 +84,8 @@ AGES = ("ages",)
 NAGES = ("nages",)
 NEVENTS_FF = ("events_ff",)
 CROPS = ("crops",)
+CROPS_TO_OPTIMIZE = ("crops_to_optimize",)
+CROPS_TO_OPTIMIZE_ = ("crops_to_optimize_",)
 CR = ("cr",)
 N_SAS_PARAMS = ("n_sas_params",)
 N_STATIONS = ("n_stations",)
@@ -109,6 +111,8 @@ DIM_TO_SHAPE_VAR = {
     "ages": "ages",
     "nages": "nages",
     "crops": "ncrops",
+    "crops_to_optimize": "ncrops_to_optimize",
+    "crops_to_optimize_": 2,
     "cr": "ncr",
     "events_ff": "nevent_ff",
     "n_sas_params": "nsas",
@@ -2577,6 +2581,15 @@ VARIABLES = {
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
+    "km_denit_crops": Variable(
+        "Michaelis constant for denitrification",
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
+        "kg N ha-1 year-1",
+        "Michaelis constant for denitrification",
+        write_to_restart=True,
+        time_dependent=False,
+        active=lambda settings: settings.enable_nitrate & settings.enable_crop_optimization,
+    ),
     "dmax_denit_rz": Variable(
         "maximum denitrification rate",
         CATCH_GRID,
@@ -2585,6 +2598,15 @@ VARIABLES = {
         write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
+    ),
+    "dmax_denit_crops": Variable(
+        "maximum denitrification rate",
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
+        "kg N ha-1 year-1",
+        "maximum denitrification rate",
+        write_to_restart=True,
+        time_dependent=False,
+        active=lambda settings: settings.enable_nitrate & settings.enable_crop_optimization,
     ),
     "km_nit_rz": Variable(
         "Michaelis constant for nitrification",
@@ -2595,6 +2617,15 @@ VARIABLES = {
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
     ),
+    "km_nit_crops": Variable(
+        "Michaelis constant for nitrification",
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
+        "kg N ha-1 year-1",
+        "Michaelis constant for nitrification",
+        write_to_restart=True,
+        time_dependent=False,
+        active=lambda settings: settings.enable_nitrate & settings.enable_crop_optimization,
+    ),
     "dmax_nit_rz": Variable(
         "maximum nitrification rate",
         CATCH_GRID,
@@ -2603,6 +2634,15 @@ VARIABLES = {
         write_to_restart=True,
         time_dependent=False,
         active=lambda settings: settings.enable_nitrate,
+    ),
+    "dmax_nit_crops": Variable(
+        "maximum nitrification rate",
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
+        "kg N ha-1 year-1",
+        "maximum nitrification rate",
+        write_to_restart=True,
+        time_dependent=False,
+        active=lambda settings: settings.enable_nitrate & settings.enable_crop_optimization,
     ),
     "kmin_rz": Variable(
         "constant soil nitrogen mineralization rate",
@@ -5293,6 +5333,16 @@ VARIABLES = {
         initial=1,
         active=lambda settings: settings.enable_offline_transport,
     ),
+    "alpha_transp_crops": Variable(
+        "partition coefficient of transpiration",
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
+        "-",
+        "partition coefficient of transpiration",
+        time_dependent=False,
+        write_to_restart=True,
+        initial=1,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_optimization,
+    ),
     "alpha_q": Variable(
         "partition coefficient of drainage",
         CATCH_GRID,
@@ -5302,6 +5352,76 @@ VARIABLES = {
         write_to_restart=True,
         initial=1,
         active=lambda settings: settings.enable_offline_transport,
+    ),
+    "alpha_q_crops": Variable(
+        "partition coefficient of drainage",
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
+        "-",
+        "partition coefficient of drainage",
+        time_dependent=False,
+        write_to_restart=True,
+        initial=1,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_optimization,
+    ),
+    "k_transp_crops": Variable(
+        "SAS parameter of transpiration",
+        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        "-",
+        "SAS parameter of transpiration",
+        time_dependent=False,
+        write_to_restart=True,
+        initial=1,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_optimization,
+    ),
+    "c1_transp_crops": Variable(
+        "SAS parameter of transpiration",
+        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        "-",
+        "SAS parameter of transpiration",
+        time_dependent=False,
+        write_to_restart=True,
+        initial=1,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_optimization,
+    ),
+    "c2_transp_crops": Variable(
+        "SAS parameter of transpiration",
+        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        "-",
+        "SAS parameter of transpiration",
+        time_dependent=False,
+        write_to_restart=True,
+        initial=1,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_optimization,
+    ),
+    "k_q_crops": Variable(
+        "SAS parameter of drainage",
+        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        "-",
+        "SAS parameter of drainage",
+        time_dependent=False,
+        write_to_restart=True,
+        initial=1,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_optimization,
+    ),
+    "c1_q_crops": Variable(
+        "SAS parameter of drainage",
+        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        "-",
+        "SAS parameter of drainage",
+        time_dependent=False,
+        write_to_restart=True,
+        initial=1,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_optimization,
+    ),
+    "c2_q_crops": Variable(
+        "SAS parameter of drainage",
+        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        "-",
+        "SAS parameter of drainage",
+        time_dependent=False,
+        write_to_restart=True,
+        initial=1,
+        active=lambda settings: settings.enable_offline_transport & settings.enable_crop_optimization,
     ),
     # event variables
     "prec_event_csum": Variable(

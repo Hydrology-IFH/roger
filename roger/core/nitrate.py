@@ -610,25 +610,11 @@ def calc_nitrogen_cycle_kernel(state):
         vs.ma_rz[2:-2, 2:-2, :],
     )
 
-    vs.ma_ss = update(
-        vs.ma_ss,
-        at[2:-2, 2:-2, :],
-        calc_nit_soil(state, vs.Nmin_ss, vs.km_nit_ss, vs.dmax_nit_ss, vs.sa_ss, vs.S_sat_ss)[
-            2:-2, 2:-2, :
-        ]
-        * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
-    )
 
     vs.Nmin_ss = update_add(
         vs.Nmin_ss,
         at[2:-2, 2:-2, vs.tau, :],
         -vs.ma_ss[2:-2, 2:-2, :],
-    )
-
-    vs.msa_ss = update_add(
-        vs.msa_ss,
-        at[2:-2, 2:-2, vs.tau, :],
-        vs.ma_ss[2:-2, 2:-2, :],
     )
 
     vs.mr_rz = update(

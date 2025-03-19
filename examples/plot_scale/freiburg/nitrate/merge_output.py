@@ -16,7 +16,7 @@ def main():
     base_path = Path(__file__).parent.parent
     dir_name = os.path.basename(str(Path(__file__).parent))
     # load the configuration file
-    with open(base_path.parent / "config.yml", "r") as file:
+    with open(base_path / "config.yml", "r") as file:
         config = yaml.safe_load(file)
 
     # identifiers of the simulations
