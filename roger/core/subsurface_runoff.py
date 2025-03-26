@@ -977,7 +977,7 @@ def calc_potential_percolation_ss(state):
         at[2:-2, 2:-2],
         npx.where(
             (vs.z_gw[2:-2, 2:-2, vs.tau] > 10) & (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 > vs.z_soil[2:-2, 2:-2]) & (vs.z_sat[2:-2, 2:-2, vs.tau] > 0),
-            npx.fmin(npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks[2:-2, 2:-2] * vs.dt), vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt),
+            npx.fmin(npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks_ss[2:-2, 2:-2] * vs.dt), vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt),
                 npx.fmin(
                     vs.kf[2:-2, 2:-2] * vs.dt,
                     (
@@ -987,7 +987,7 @@ def calc_potential_percolation_ss(state):
                             * npx.power((z[2:-2, 2:-2]) / (-vs.ha[2:-2, 2:-2] * 10.2), -vs.n_salv[2:-2, 2:-2])
                         )
                     )
-                    * vs.dt * vs.ks[2:-2, 2:-2],
+                    * vs.dt * vs.ks_ss[2:-2, 2:-2],
                 )
             )
         * vs.maskCatch[2:-2, 2:-2],
@@ -998,7 +998,7 @@ def calc_potential_percolation_ss(state):
         at[2:-2, 2:-2],
         npx.where(
             (vs.z_gw[2:-2, 2:-2, vs.tau] <= 10) & (vs.z_gw[2:-2, 2:-2, vs.tau] * 1000 > vs.z_soil[2:-2, 2:-2]) & (vs.z_sat[2:-2, 2:-2, vs.tau] > 0),
-            npx.fmin(npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks[2:-2, 2:-2] * vs.dt), vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt),
+            npx.fmin(npx.fmin(vs.kf[2:-2, 2:-2] * vs.dt, vs.ks_ss[2:-2, 2:-2] * vs.dt), vs.k_ss[2:-2, 2:-2, vs.tau] * vs.dt),
                 npx.fmin(
                     vs.kf[2:-2, 2:-2] * vs.dt,
                     (
@@ -1010,7 +1010,7 @@ def calc_potential_percolation_ss(state):
                         + npx.power(-vs.h_ss[2:-2, 2:-2, vs.tau] / -vs.ha[2:-2, 2:-2], -vs.n_salv[2:-2, 2:-2])
                         + (vs.n_salv[2:-2, 2:-2] - 1)
                         * npx.power((z[2:-2, 2:-2]) / (-vs.ha[2:-2, 2:-2] * 10.2), -vs.n_salv[2:-2, 2:-2])
-                    ) * vs.dt * vs.ks[2:-2, 2:-2] * (-1),
+                    ) * vs.dt * vs.ks_ss[2:-2, 2:-2] * (-1),
                 )
             )
         * vs.maskCatch[2:-2, 2:-2],
@@ -1061,7 +1061,7 @@ def calc_potential_percolation_ss(state):
                 + (vs.n_salv[2:-2, 2:-2] - 1)
                 * npx.power((z[2:-2, 2:-2]) / (-vs.ha[2:-2, 2:-2] * 10.2), -vs.n_salv[2:-2, 2:-2])
             )
-        ) * vs.dt * vs.ks[2:-2, 2:-2]
+        ) * vs.dt * vs.ks_ss[2:-2, 2:-2]
         * vs.maskCatch[2:-2, 2:-2],
     )
     cpr_pot = update(
