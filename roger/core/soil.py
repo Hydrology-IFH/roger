@@ -486,12 +486,35 @@ def calc_parameters_root_zone_kernel(state):
 @roger_kernel
 def calc_parameters_subsoil_kernel(state):
     vs = state.variables
+    settings = state.settings
 
-    vs.S_ac_ss = update(
-        vs.S_ac_ss,
-        at[2:-2, 2:-2],
-        (vs.theta_ac[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2],
-    )
+    if settings.enable_soil_compaction:
+        mask1 = (vs.z_soil > 500)
+        mask2 = (vs.z_root[:, :, vs.tau] >= 500)
+
+        c_compact = allocate(state.dimensions, ("x", "y"))
+    
+        c_compact = update(
+            c_compact,
+            at[2:-2, 2:-2],
+            npx.where(mask1[2:-2, 2:-2], (500 - vs.z_root[2:-2, 2:-2, vs.tau]) / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]), (500 - vs.z_root[2:-2, 2:-2, vs.tau]) / (500 - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2],
+        )
+        c_compact = update(
+            c_compact,
+            at[2:-2, 2:-2],
+            npx.where(mask2[2:-2, 2:-2], 1, c_compact[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        )
+        vs.S_ac_ss = update(
+            vs.S_ac_ss,
+            at[2:-2, 2:-2],
+            (((1 - c_compact[2:-2, 2:-2]) * vs.theta_ac[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) + (c_compact[2:-2, 2:-2] * vs.theta_ac_ss[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]))) * vs.maskCatch[2:-2, 2:-2],
+        )
+    else:
+        vs.S_ac_ss = update(
+            vs.S_ac_ss,
+            at[2:-2, 2:-2],
+            (vs.theta_ac[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2],
+        )
 
     vs.S_ufc_ss = update(
         vs.S_ufc_ss,
@@ -843,6 +866,7 @@ def calc_initial_conditions_root_zone_kernel(state):
 @roger_kernel
 def calc_initial_conditions_subsoil_kernel(state):
     vs = state.variables
+    settings = state.settings
 
     mask6 = vs.theta_ss[:, :, vs.tau] > vs.theta_pwp
     mask7 = vs.theta_ss[:, :, vs.tau] <= vs.theta_pwp

@@ -85,7 +85,7 @@ NAGES = ("nages",)
 NEVENTS_FF = ("events_ff",)
 CROPS = ("crops",)
 CROPS_TO_OPTIMIZE = ("crops_to_optimize",)
-CROPS_TO_OPTIMIZE_ = ("crops_to_optimize_",)
+CROPS_TO_OPTIMIZE_2 = ("crops_to_optimize_2",)
 CR = ("cr",)
 N_SAS_PARAMS = ("n_sas_params",)
 N_STATIONS = ("n_stations",)
@@ -112,7 +112,7 @@ DIM_TO_SHAPE_VAR = {
     "nages": "nages",
     "crops": "ncrops",
     "crops_to_optimize": "ncrops_to_optimize",
-    "crops_to_optimize_": 2,
+    "crops_to_optimize_2": 2,
     "cr": "ncr",
     "events_ff": "nevent_ff",
     "n_sas_params": "nsas",
@@ -1023,6 +1023,15 @@ VARIABLES = {
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
     ),
+    "lmpv_crop": Variable(
+        "potential length of vertical macropores",
+        CATCH_GRID,
+        "mm",
+        "potential length of vertical macropores",
+        time_dependent=False,
+        write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport & settings.enable_time_variant_macropores,
+    ),
     "lmpv_non_sat": Variable(
         "non-saturated length of vertical macropores",
         CATCH_GRID,
@@ -1056,6 +1065,15 @@ VARIABLES = {
         time_dependent=False,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
+    ),
+    "dmpv_crop": Variable(
+        "potential density of vertical macropores",
+        CATCH_GRID,
+        "1/m^2",
+        "potential density of vertical macropores",
+        time_dependent=False,
+        write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport & settings.enable_time_variant_macropores,
     ),
     "mp_drain_area": Variable(
         "drainage area of vertical macropores",
@@ -1119,6 +1137,15 @@ VARIABLES = {
         time_dependent=False,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
+    ),
+    "theta_ac_ss": Variable(
+        "air capacity of subsoil",
+        CATCH_GRID,
+        "-",
+        "air capacity of subsoil",
+        time_dependent=False,
+        write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport & settings.enable_soil_compaction,
     ),
     "theta_pwp": Variable(
         "permanent wilting point of soil",
@@ -1237,6 +1264,15 @@ VARIABLES = {
         CATCH_GRID,
         "mm/h",
         "Saturated hydraulic conductivity",
+        time_dependent=False,
+        write_to_restart=True,
+        active=lambda settings: not settings.enable_offline_transport,
+    ),
+    "ks_ss": Variable(
+        "Saturated hydraulic conductivity of the subsoil",
+        CATCH_GRID,
+        "mm/h",
+        "Saturated hydraulic conductivity of the subsoil",
         time_dependent=False,
         write_to_restart=True,
         active=lambda settings: not settings.enable_offline_transport,
@@ -5365,7 +5401,7 @@ VARIABLES = {
     ),
     "k_transp_crops": Variable(
         "SAS parameter of transpiration",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
         "-",
         "SAS parameter of transpiration",
         time_dependent=False,
@@ -5375,7 +5411,7 @@ VARIABLES = {
     ),
     "c1_transp_crops": Variable(
         "SAS parameter of transpiration",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
         "-",
         "SAS parameter of transpiration",
         time_dependent=False,
@@ -5385,7 +5421,7 @@ VARIABLES = {
     ),
     "c2_transp_crops": Variable(
         "SAS parameter of transpiration",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
         "-",
         "SAS parameter of transpiration",
         time_dependent=False,
@@ -5395,7 +5431,7 @@ VARIABLES = {
     ),
     "k_q_crops": Variable(
         "SAS parameter of drainage",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
         "-",
         "SAS parameter of drainage",
         time_dependent=False,
@@ -5405,7 +5441,7 @@ VARIABLES = {
     ),
     "c1_q_crops": Variable(
         "SAS parameter of drainage",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
         "-",
         "SAS parameter of drainage",
         time_dependent=False,
@@ -5415,7 +5451,7 @@ VARIABLES = {
     ),
     "c2_q_crops": Variable(
         "SAS parameter of drainage",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_,
+        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
         "-",
         "SAS parameter of drainage",
         time_dependent=False,

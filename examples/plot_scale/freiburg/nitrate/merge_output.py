@@ -28,19 +28,19 @@ def main():
         if os.path.exists(str(base_path / "output" / dir_name / irrigation_scenario)):
             for crop_rotation_scenario in crop_rotation_scenarios:
                 crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
-                path = str(base_path / "output" / dir_name/ irrigation_scenario / f"SVATCROP_{crop_rotation_scenario}.*.nc")
-                output_hm_file = base_path / "output" / dir_name/ irrigation_scenario / f"SVATCROP_{crop_rotation_scenario}.nc"
+                path = str(base_path / "output" / dir_name/ irrigation_scenario / f"SVATCROPNITRATE_{irrigation_scenario}_{crop_rotation_scenario}.*.nc")
+                output_hm_file = base_path / "output" / dir_name/ irrigation_scenario / f"SVATCROPNITRATE_{irrigation_scenario}_{crop_rotation_scenario}.nc"
                 if not os.path.exists(output_hm_file):
                     diag_files = glob.glob(path)
                     if diag_files:
                         with h5netcdf.File(output_hm_file, "w", decode_vlen_strings=False) as f:
                             f.attrs.update(
                                 date_created=datetime.datetime.today().isoformat(),
-                                title=f"RoGeR simulations using DWD station Freiburg as input and {crop_rotation_scenario1} as crop rotation",
+                                title=f"RoGeR-SAS-Nitrate simulations with {crop_rotation_scenario1} as crop rotation",
                                 institution="University of Freiburg, Chair of Hydrology",
                                 references="",
                                 comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                                model_structure="SVAT model with free drainage and crop phenology",
+                                model_structure="SVAT model with free drainage and crop phenology and time-variant power law distribution as SAS function with advective-dispersive parameters",
                                 roger_version=f"{roger.__version__}",
                             )
                             # collect dimensions
@@ -87,6 +87,7 @@ def main():
                                             v = f.create_variable(
                                                 var_sim, ("x", "y"), float, compression="gzip", compression_opts=1
                                             )
+                                            print(var_sim)
                                             vals = onp.array(var_obj, dtype=float)
                                             v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                                             v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])

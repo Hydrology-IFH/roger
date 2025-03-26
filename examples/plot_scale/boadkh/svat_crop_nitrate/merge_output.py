@@ -71,7 +71,7 @@ def main():
                             crop_rotation_scenario1 = crop_rotation_scenario.replace("_", ", ")
                             f.attrs.update(
                                 date_created=datetime.datetime.today().isoformat(),
-                                title=f"RoGeR nitrate transport simulations at {location} with crop rotation scenario {crop_rotation_scenario1} and {fertilization_intensity} fertilization intensity",
+                                title=f"RoGeR-SAS-Nitrate simulations at {location} with crop rotation scenario {crop_rotation_scenario1} and {fertilization_intensity} fertilization intensity",
                                 institution="University of Freiburg, Chair of Hydrology",
                                 references="",
                                 comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",

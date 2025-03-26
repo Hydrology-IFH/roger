@@ -38,6 +38,7 @@ def main():
                     base_path
                     / "output" 
                     / dir_name 
+                    / irrigation_scenario
                     / f"SVATCROPNITRATE_{irrigation_scenario}_{crop_rotation_scenario}.nc"
                 )
                 if os.path.exists(roger_file):
@@ -62,7 +63,7 @@ def main():
                         df_simulation = pd.DataFrame(
                             index=date, columns=["N_fert", "N_uptake", "N_leach", "NO3_leach_conc", "NO3_soil_conc", "lu_id", "crop_type"]
                         )
-                        df_simulation.loc[:, "N_fert"] = ds["N_fert"].isel(x=x, y=0).values * 0.01 # convert to mg/m2 to kg/ha
+                        df_simulation.loc[:, "N_fert"] = ds["Nfert"].isel(x=x, y=0).values * 0.01 # convert to mg/m2 to kg/ha
                         df_simulation.loc[:, "N_uptake"] = (ds["M_transp"].isel(x=x, y=0).values + ds["nh4_up"].isel(x=x, y=0).values) * 0.01 # convert to mg/m2 to kg/ha
                         df_simulation.loc[:, "N_leach"] = ds["M_q_ss"].isel(x=x, y=0).values * 0.01 # convert to mg/m2 to kg/ha
                         df_simulation.loc[:, "NO3_leach_conc"] = ds["C_q_ss"].isel(x=x, y=0).values * 4.43 # convert nitrate-nitrogen to nitrate

@@ -1777,6 +1777,7 @@ def recalc_soil_params(state):
     Recalculates parameters of root zone and subsoil after root growth/root loss.
     """
     vs = state.variables
+    settings = state.settings
 
     vs.S_ac_rz = update(
         vs.S_ac_rz,
@@ -1813,11 +1814,33 @@ def recalc_soil_params(state):
         * vs.maskCatch[2:-2, 2:-2],
     )
 
-    vs.S_ac_ss = update(
-        vs.S_ac_ss,
-        at[2:-2, 2:-2],
-        (vs.theta_ac[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2],
-    )
+    if settings.enable_soil_compaction:
+        mask1 = (vs.z_soil > 500)
+        mask2 = (vs.z_root[:, :, vs.tau] >= 500)
+
+        c_compact = allocate(state.dimensions, ("x", "y"))
+    
+        c_compact = update(
+            c_compact,
+            at[2:-2, 2:-2],
+            npx.where(mask1[2:-2, 2:-2], (500 - vs.z_root[2:-2, 2:-2, vs.tau]) / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]), (500 - vs.z_root[2:-2, 2:-2, vs.tau]) / (500 - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2],
+        )
+        c_compact = update(
+            c_compact,
+            at[2:-2, 2:-2],
+            npx.where(mask2[2:-2, 2:-2], 1, c_compact[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        )
+        vs.S_ac_ss = update(
+            vs.S_ac_ss,
+            at[2:-2, 2:-2],
+            (((1 - c_compact[2:-2, 2:-2]) * vs.theta_ac[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) + (c_compact[2:-2, 2:-2] * vs.theta_ac_ss[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]))) * vs.maskCatch[2:-2, 2:-2],
+        )
+    else:
+        vs.S_ac_ss = update(
+            vs.S_ac_ss,
+            at[2:-2, 2:-2],
+            (vs.theta_ac[2:-2, 2:-2] * (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2],
+        )
 
     vs.S_ufc_ss = update(
         vs.S_ufc_ss,
@@ -1863,6 +1886,43 @@ def recalc_soil_params(state):
         S_fc_ss=vs.S_fc_ss,
         S_sat_ss=vs.S_sat_ss,
     )
+
+@roger_kernel
+def recalc_macropores(state):
+    """
+    Recalculates macropores parameters after root growth/root loss.
+    """
+    vs = state.variables
+
+    mask_bare = (vs.lu_id == 599)
+    mask_crops = (vs.lu_id >= 500) & (vs.lu_id < 598)
+
+    vs.lmpv = update(
+        vs.lmpv,
+        at[2:-2, 2:-2],
+        npx.where(mask_crops[2:-2, 2:-2], vs.ground_cover[2:-2, 2:-2, vs.tau] * vs.lmpv_crop[2:-2, 2:-2], vs.lmpv[2:-2, 2:-2]),
+        )
+    vs.dmpv = update(
+        vs.dmpv,
+        at[2:-2, 2:-2],
+        npx.where(mask_crops[2:-2, 2:-2], npx.array(vs.ground_cover[2:-2, 2:-2, vs.tau] * vs.dmpv_crop[2:-2, 2:-2], dtype=npx.int32), vs.dmpv[2:-2, 2:-2]),
+    )
+    vs.lmpv = update(
+        vs.lmpv,
+        at[2:-2, 2:-2],
+        npx.where(mask_bare[2:-2, 2:-2], 0, vs.lmpv[2:-2, 2:-2]),
+        )
+    vs.dmpv = update(
+        vs.dmpv,
+        at[2:-2, 2:-2],
+        npx.where(mask_bare[2:-2, 2:-2], 0, vs.dmpv[2:-2, 2:-2]),
+    )
+
+    return KernelOutput(
+        lmpv=vs.lmpv,
+        dmpv=vs.dmpv,
+    )
+
 
 
 @roger_kernel
@@ -2151,6 +2211,8 @@ def calculate_crop_phenology(state):
             vs.update(update_S_int_ground_tot(state))
             vs.update(update_z_root(state))
             vs.update(recalc_soil_params(state))
+            if settings.enable_time_variant_macropores:
+                vs.update(recalc_macropores(state))
             vs.update(redistribution_pwp(state))
             vs.update(redistribution(state))
 

@@ -93,7 +93,7 @@ def main():
                         irr_demand = (theta_irr - ds["theta_rz"].isel(x=x, y=0).values) * ds["z_root"].isel(x=x, y=0).values
                         irr_demand[irr_demand < 0] = 0
                         df_simulation.loc[:, "irrigation_demand"] = irr_demand
-                    df_simulation.columns =[["[mm/day]", "[-]", "[mm]", "[-]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
+                    df_simulation.columns =[["[mm/day]", "[-]", "[mm]", "[-]", "[mm/day]", "[mm/day]", "[mm]", "", ""],
                                             ["precip", "canopy_cover", "z_root", "theta_rz", "transp", "perc", "irrigation_demand", "lu_id", "crop_type"]]
                     df_simulation.to_csv(
                         dir_csv_files / "simulation.csv", sep=";"
