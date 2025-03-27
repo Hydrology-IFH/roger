@@ -29,6 +29,9 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                                                              "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
                                                              "grain-corn_winter-wheat_winter-barley_yellow-mustard",
+                                                             "grain-corn",
+                                                             "grain-corn_yellow-mustard",
+                                                             "winter-wheat",
                                                              "yellow-mustard",
                                                              "miscanthus",
                                                              "bare-grass"]), default="grain-corn_winter-wheat_winter-rape_yellow-mustard")

@@ -35,6 +35,9 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                                                              "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
                                                              "grain-corn_winter-wheat_winter-barley_yellow-mustard",
+                                                             "grain-corn",
+                                                             "grain-corn_yellow-mustard",
+                                                             "winter-wheat",
                                                              "yellow-mustard",
                                                              "miscanthus",
                                                              "bare-grass"]), default="grain-corn_winter-wheat_winter-rape")
@@ -425,6 +428,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 "ta",
                 "irr_demand",
                 "theta_rz",
+                "theta_irr"
             ]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1

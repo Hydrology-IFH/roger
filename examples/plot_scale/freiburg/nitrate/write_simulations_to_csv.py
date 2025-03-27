@@ -72,6 +72,7 @@ def main():
                         df_simulation.loc[:, "crop_type"] = [dict_crop_types[lu_id] for lu_id in ds["lu_id"].isel(x=x, y=0).values]
                         df_simulation.columns =[["[kg N/ha/day]", "[kg N/ha/day]", "[kg N/ha/day]", "[mg/l]", "[mg/l]", "", ""],
                                                 ["N_fert", "N_uptake", "N_leach", "NO3_leach_conc", "NO3_soil_conc", "lu_id", "crop_type"]]
+                        df_simulation = df_simulation.iloc[1:, :] # remove initial values
                         df_simulation.to_csv(
                             dir_csv_files / "simulation.csv", sep=";"
                         )
