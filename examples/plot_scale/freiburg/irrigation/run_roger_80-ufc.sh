@@ -1,4 +1,7 @@
 #!/bin/bash
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario grain-corn
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario grain-corn_yellow-mustard
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario winter-wheat
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario winter-wheat_clover
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario winter-wheat_silage-corn
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario summer-wheat_winter-wheat
@@ -21,5 +24,3 @@ python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario sugar-beet_winter-wheat_winter-barley_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-rape_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-barley_yellow-mustard
-python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario miscanthus
-python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario bare-grass

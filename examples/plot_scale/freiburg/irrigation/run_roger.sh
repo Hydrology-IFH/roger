@@ -1,6 +1,9 @@
 #!/bin/bash
 eval "$(conda shell.bash hook)"
 conda activate roger
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario grain-corn
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario grain-corn_yellow-mustard
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario winter-wheat
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario winter-wheat_clover
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario winter-wheat_silage-corn
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario summer-wheat_winter-wheat
@@ -23,8 +26,9 @@ python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario sugar-beet_winter-wheat_winter-barley_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-rape_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-barley_yellow-mustard
-python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario miscanthus
-python svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario bare-grass
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario grain-corn
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario grain-corn_yellow-mustard
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario winter-wheat
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario winter-wheat_clover
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario winter-wheat_silage-corn
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario summer-wheat_winter-wheat
@@ -47,8 +51,9 @@ python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario sugar-beet_winter-wheat_winter-barley_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-rape_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-barley_yellow-mustard
-python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario miscanthus
-python svat_crop.py -b numpy -d cpu --irrigation-scenario 45-ufc --crop-rotation-scenario bare-grass
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario grain-corn
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario grain-corn_yellow-mustard
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario winter-wheat
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario winter-wheat_clover
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario winter-wheat_silage-corn
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario summer-wheat_winter-wheat
@@ -71,8 +76,9 @@ python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario sugar-beet_winter-wheat_winter-barley_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-rape_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-barley_yellow-mustard
-python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario miscanthus
-python svat_crop.py -b numpy -d cpu --irrigation-scenario 50-ufc --crop-rotation-scenario bare-grass
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario grain-corn
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario grain-corn_yellow-mustard
+python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario winter-wheat
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario winter-wheat_clover
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario winter-wheat_silage-corn
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario summer-wheat_winter-wheat
@@ -95,8 +101,9 @@ python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario sugar-beet_winter-wheat_winter-barley_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-rape_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-barley_yellow-mustard
-python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario miscanthus
-python svat_crop.py -b numpy -d cpu --irrigation-scenario 80-ufc --crop-rotation-scenario bare-grass
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario grain-corn
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario grain-corn_yellow-mustard
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario winter-wheat
 python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario winter-wheat_clover
 python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario winter-wheat_silage-corn
 python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario summer-wheat_winter-wheat
@@ -119,7 +126,5 @@ python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-r
 python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario sugar-beet_winter-wheat_winter-barley_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario grain-corn_winter-wheat_winter-rape_yellow-mustard
 python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario grain-corn_winter-wheat_winter-barley_yellow-mustard
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario miscanthus
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario bare-grass
 python merge_output.py
-python simulations_to_csv.py
+python write_simulations_to_csv.py

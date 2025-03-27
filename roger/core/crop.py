@@ -2035,7 +2035,7 @@ def set_crop_params(state):
         vs.theta_irr_crop = update(
             vs.theta_irr_crop,
             at[2:-2, 2:-2, :],
-            ((vs.water_stress_coeff_crop[2:-2, 2:-2, :] + 0.2) * vs.theta_ufc[2:-2, 2:-2, npx.newaxis])
+            (vs.water_stress_coeff_crop[2:-2, 2:-2, :] * vs.theta_ufc[2:-2, 2:-2, npx.newaxis])
             + vs.theta_pwp[2:-2, 2:-2, npx.newaxis],
         )
 

@@ -95,6 +95,7 @@ def main():
                         df_simulation.loc[:, "irrigation_demand"] = irr_demand
                     df_simulation.columns =[["[mm/day]", "[-]", "[mm]", "[-]", "[mm/day]", "[mm/day]", "[mm]", "", ""],
                                             ["precip", "canopy_cover", "z_root", "theta_rz", "transp", "perc", "irrigation_demand", "lu_id", "crop_type"]]
+                    df_simulation = df_simulation.iloc[1:, :] # remove initial values
                     df_simulation.to_csv(
                         dir_csv_files / "simulation.csv", sep=";"
                     )

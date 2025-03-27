@@ -6,6 +6,9 @@ irrigation_scenarios:
 - crop-specific
 
 crop_rotation_scenarios:
+- grain-corn
+- grain-corn_yellow-mustard
+- winter-wheat
 - winter-wheat_clover
 - winter-wheat_silage-corn
 - summer-wheat_winter-wheat
