@@ -24,6 +24,10 @@ def main():
     df_crop_water_stress = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
     df_crop_water_stress.index = df_crop_water_stress.loc[:, "lu_id"]
     dict_crop_water_stress = df_crop_water_stress.loc[:, "water_stress_frac"].to_frame().to_dict()["water_stress_frac"]
+    file = base_path / "crop_heat_stress.csv"
+    df_crop_heat_stress = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
+    df_crop_heat_stress.index = df_crop_heat_stress.loc[:, "lu_id"]
+    dict_crop_heat_stress = df_crop_heat_stress.loc[:, "ta_heat_stress"].to_frame().to_dict()["ta_heat_stress"]
 
     # load the configuration file
     with open(base_path / "config.yml", "r") as file:
@@ -69,7 +73,7 @@ def main():
                             os.makedirs(dir_csv_files)
                         # write simulation to csv
                         df_simulation = pd.DataFrame(
-                            index=date, columns=["precip", "irrig", "canopy_cover", "z_root", "irrigation_demand", "root_ventilation", "theta_rz", "theta_irrig", "theta_fc", "transp", "perc"]
+                            index=date, columns=["precip", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "perc", "lu_id", "crop_type"]
                         )
                         df_simulation.loc[:, "precip"] = onp.where(ds["irrig"].isel(x=x, y=0).values > 0, 0, ds["prec"].isel(x=x, y=0).values)
                         df_simulation.loc[:, "irrig"] = ds["irrig"].isel(x=x, y=0).values
@@ -80,6 +84,13 @@ def main():
                         df_simulation.loc[:, "theta_fc"] = df_parameters.loc[f"{soil_type}", "theta_pwp"] + df_parameters.loc[f"{soil_type}", "theta_ufc"]
                         df_simulation.loc[:, "transp"] = ds["transp"].isel(x=x, y=0).values
                         df_simulation.loc[:, "perc"] = ds["q_ss"].isel(x=x, y=0).values
+                        df_simulation.loc[:, "ta_max"] = ds["ta_max"].isel(x=x, y=0).values
+                        # calculate heat stress of crops
+                        df_simulation.loc[:, "heat_stress"] = 0
+                        ta_heat_stress_list = [dict_crop_heat_stress[lu_id] for lu_id in ds["lu_id"].isel(x=x, y=0).values]
+                        ta_heat_stress = onp.array(ta_heat_stress_list)
+                        cond = (df_simulation.loc[:, "ta_max"].values >= ta_heat_stress)
+                        df_simulation.loc[cond, "heat_stress"] = 1
                         df_simulation.loc[:, "lu_id"] = ds["lu_id"].isel(x=x, y=0).values
                         df_simulation.loc[:, "crop_type"] = [dict_crop_types[lu_id] for lu_id in ds["lu_id"].isel(x=x, y=0).values]
                         root_ventilation = ds["theta_rz"].isel(x=x, y=0).values - (df_parameters.loc[f"{soil_type}", "theta_pwp"] + df_parameters.loc[f"{soil_type}", "theta_ufc"])
@@ -95,8 +106,8 @@ def main():
                             c_irr = onp.array(c_irr_list)
                             theta_irr = df_parameters.loc[f"{soil_type}", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}", "theta_ufc"])
                             df_simulation.loc[:, "theta_irrig"] = theta_irr
-                        df_simulation.columns =[["[mm/day]", "[mm/day]", "[-]", "[mm]", "[mm]", "[%]", "[-]", "[-]", "[-]", "[mm/day]", "[mm/day]", "", ""],
-                                                ["precip", "irrig", "canopy_cover", "z_root", "irrigation_demand", "root_ventilation", "theta_rz", "theta_irrig", "theta_fc", "transp", "perc", "lu_id", "crop_type"]]
+                        df_simulation.columns =[["[mm/day]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "", ""],
+                                                ["precip", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "perc", "lu_id", "crop_type"]]
                         df_simulation = df_simulation.iloc[1:, :] # remove initial values
                         df_simulation.to_csv(
                             dir_csv_files / "simulation.csv", sep=";"

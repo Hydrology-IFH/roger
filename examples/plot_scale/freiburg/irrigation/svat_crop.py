@@ -440,6 +440,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 "ground_cover",
                 "lu_id",
                 "ta",
+                "ta_max",
                 "irr_demand",
                 "theta_rz",
                 "theta_irr"

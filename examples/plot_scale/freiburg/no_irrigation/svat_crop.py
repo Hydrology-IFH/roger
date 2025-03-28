@@ -400,6 +400,7 @@ def main(crop_rotation_scenario, tmp_dir):
                 "ground_cover",
                 "lu_id",
                 "ta",
+                "ta_max",
                 "theta_rz",
             ]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
