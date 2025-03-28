@@ -1,14 +1,27 @@
 irrigation_scenarios:
+- 20-ufc
 - 35-ufc
-- 45-ufc
 - 50-ufc
-- 80-ufc
 - crop-specific
 
 crop_rotation_scenarios:
 - grain-corn
 - grain-corn_yellow-mustard
+- silage-corn
+- silage-corn_yellow-mustard
+- summer-barley
+- summer-barley_yellow-mustard
+- clover
 - winter-wheat
+- winter-barley
+- winter-rape
+- faba-bean
+- potato-early
+- sugar-beet
+- sugar-beet_yellow-mustard
+- vegetables
+- strawberry
+- asparagus
 - winter-wheat_clover
 - winter-wheat_silage-corn
 - summer-wheat_winter-wheat

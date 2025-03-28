@@ -489,15 +489,15 @@ def calc_parameters_subsoil_kernel(state):
     settings = state.settings
 
     if settings.enable_soil_compaction:
-        mask1 = (vs.z_soil > 500)
-        mask2 = (vs.z_root[:, :, vs.tau] >= 500)
+        mask1 = (vs.z_soil > 300)
+        mask2 = (vs.z_root[:, :, vs.tau] >= 300)
 
         c_compact = allocate(state.dimensions, ("x", "y"))
     
         c_compact = update(
             c_compact,
             at[2:-2, 2:-2],
-            npx.where(mask1[2:-2, 2:-2], (500 - vs.z_root[2:-2, 2:-2, vs.tau]) / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]), (500 - vs.z_root[2:-2, 2:-2, vs.tau]) / (500 - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2],
+            npx.where(mask1[2:-2, 2:-2], (300 - vs.z_root[2:-2, 2:-2, vs.tau]) / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]), (300 - vs.z_root[2:-2, 2:-2, vs.tau]) / (300 - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2],
         )
         c_compact = update(
             c_compact,

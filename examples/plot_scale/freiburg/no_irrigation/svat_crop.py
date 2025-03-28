@@ -7,7 +7,25 @@ import pandas as pd
 import click
 from roger.cli.roger_run_base import roger_base_cli
 
-@click.option("--crop-rotation-scenario", type=click.Choice(["winter-wheat_clover",
+
+@click.option("--crop-rotation-scenario", type=click.Choice(["grain-corn",
+                                                             "grain-corn_yellow-mustard",
+                                                             "silage-corn",
+                                                             "silage-corn_yellow-mustard",
+                                                             "summer-barley",
+                                                             "summer-barley_yellow-mustard",
+                                                             "clover",
+                                                             "winter-wheat",
+                                                             "winter-barley",
+                                                             "winter-rape",
+                                                             "faba-bean",
+                                                             "potato-early",
+                                                             "sugar-beet",
+                                                             "sugar-beet_yellow-mustard",
+                                                             "vegetables",
+                                                             "strawberry",
+                                                             "asparagus",
+                                                             "winter-wheat_clover",
                                                              "winter-wheat_silage-corn",
                                                              "summer-wheat_winter-wheat",
                                                              "summer-wheat_clover_winter-wheat",
@@ -34,7 +52,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat",
                                                              "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="grain-corn_winter-wheat_winter-rape_yellow-mustard")
+                                                             "bare-grass"]), default="sugar-beet")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no_irrigation")
 @roger_base_cli
 def main(crop_rotation_scenario, tmp_dir):

@@ -1,6 +1,6 @@
 ;;[-]
 crop_type;lu_id;water_stress_frac
-bean;501;0.45
+bean;501;0.6
 amaranth;502;0.5
 other commercial crops;503;0.5
 artichoke;504;0.5
@@ -9,22 +9,22 @@ ornamental plant;506;0.5
 nettle;507;0.5
 buckwheat;508;0.5
 pea;509;0.475
-strawberry;510;0.2
+strawberry;510;0.6
 esparcet;511;0.5
 sunflower;512;0.5
 vegetables;513;0.4
 flax;514;0.5
-early potatoes;515;0.5
+early potatoes;515;0.6
 fodder root crops;516;0.5
 fodder legumes;517;0.575
 hemp;518;0.5
 home garden;519;0.5
 hop;520;0.5
-legumes;521;0.5
+legumes;521;0.6
 intensive fruit-growing;522;0.5
-potato;523;0.35
-clover;524;0.5
-grain corn;525;0.55
+potato;523;0.5
+clover;524;0.3
+grain corn;525;0.35
 herbs;526;0.4
 false flax;527;0.5
 lentil;528;0.5
@@ -38,47 +38,47 @@ rhubarb;535;0.5
 beetroot;536;0.5
 nuts;537;0.45
 summer mustard;538;0.5
-silage corn;539;0.5
+silage corn;539;0.35
 silphium;540;0.5
-soybean;541;0.5
+soybean;541;0.45
 summer barley;542;0.5
-summer wheat;543;0.55
-summer oat;544;0.5
-summer rape;545;0.5
-summer triticale;546;0.5
+summer wheat;543;0.35
+summer oat;544;0.35
+summer rape;545;0.35
+summer triticale;546;0.35
 sunflower;547;0.45
 other fruit-growing;548;0.7
 sorghum;549;0.55
-asparagus;550;0.45
+asparagus;550;0.5
 orchards;551;0.5
 sweet potato;552;0.5
 tobacco;553;0.5
 helianthus;554;0.5
 vetch;555;0.5
-winter barley;556;0.55
-winter wheat;557;0.55
-winter oat;558;0.55
-winter rape;559;0.6
-winter triticale;560;0.5
+winter barley;556;0.35
+winter wheat;557;0.35
+winter oat;558;0.35
+winter rape;559;0.35
+winter triticale;560;0.35
 chicory;561;0.5
 sweet corn;562;0.5
-sugar beet;563;0.5
+sugar beet;563;0.35
 winter green manure (Oct);564;0.5
 summer grass;565;0.5
 winter grass;566;0.5
 clover;567;0.5
 winter phacelia;568;0.5
-winter green manure (Aug);569;0.5
-winter green manure (Sep);570;0.5
-summer grass (growing only);571;0.5
-winter grass (growing only);572;0.5
-summer grass (continued);573;0.5
-winter grass (continued);574;0.5
-summer faba bean;575;0.45
-winter faba bean;576;0.45
-summer grain pea;577;0.475
-winter grain pea;578;0.475
-winter rye;579;0.55
+winter green manure (Aug);569;0.3
+winter green manure (Sep);570;0.3
+summer grass (growing only);571;0.3
+winter grass (growing only);572;0.3
+summer grass (continued);573;0.3
+winter grass (continued);574;0.3
+summer faba bean;575;0.6
+winter faba bean;576;0.6
+summer grain pea;577;0.6
+winter grain pea;578;0.6
+winter rye;579;0.35
 summer clover (growing only);580;0.5
 summer clover (continued winter);581;0.5
 summer clover (continued summer);582;0.5
@@ -91,4 +91,4 @@ yellow mustard (summer);588;0.5
 miscanthus (growing only);589;0.5
 miscanthus (continued winter);590;0.5
 miscanthus (continued summer);591;0.5
-bare;599;0.8
+bare;599;0
