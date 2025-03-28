@@ -685,9 +685,9 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 lut_fert3 = vs.lut_fert1
                 for i in range(500, 600):
                     mask = (vs.LU_ID[:, :, vs.itt] == i)
-                    mask1 = (vs.LU_ID[:, :, vs.itt] == i) & (vs.soil_fertility <= 2)
+                    mask3 = (vs.LU_ID[:, :, vs.itt] == i) & (vs.soil_fertility <= 2)
                     mask2 = (vs.LU_ID[:, :, vs.itt] == i) & (vs.soil_fertility > 2) & (vs.soil_fertility <= 3)
-                    mask3 = (vs.LU_ID[:, :, vs.itt] == i) & (vs.soil_fertility > 3)
+                    mask1 = (vs.LU_ID[:, :, vs.itt] == i) & (vs.soil_fertility > 3)
                     row_no = _get_row_no(vs.lut_nup[:, 0], i)
                     # set nitrogen uptake rate
                     vs.nup = update(
@@ -897,9 +897,9 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                     # set fertilization
                     for i in range(500, 600):
                         mask = (vs.LU_ID[:, :, vs.itt+31] == i)
-                        mask1 = (vs.LU_ID[:, :, vs.itt+31] == i) & (vs.soil_fertility <= 2)
+                        mask3 = (vs.LU_ID[:, :, vs.itt+31] == i) & (vs.soil_fertility <= 2)
                         mask2 = (vs.LU_ID[:, :, vs.itt+31] == i) & (vs.soil_fertility > 2) & (vs.soil_fertility <= 3)
-                        mask3 = (vs.LU_ID[:, :, vs.itt+31] == i) & (vs.soil_fertility > 3)
+                        mask1 = (vs.LU_ID[:, :, vs.itt+31] == i) & (vs.soil_fertility > 3)
                         row_no = _get_row_no(vs.lut_nup[:, 0], i)
                         # set nitrogen uptake rate
                         vs.nup = update(
