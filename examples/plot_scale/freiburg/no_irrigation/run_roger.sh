@@ -40,4 +40,5 @@ python svat_crop.py -b numpy -d cpu --crop-rotation-scenario summer-wheat_winter
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario sugar-beet_winter-wheat_winter-barley_yellow-mustard
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario grain-corn_winter-wheat_winter-rape_yellow-mustard
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario grain-corn_winter-wheat_winter-barley_yellow-mustard
-python merge_output.pypython simulations_to_csv.py
+# python merge_output.py
+# python write_simulations_to_csv.py
