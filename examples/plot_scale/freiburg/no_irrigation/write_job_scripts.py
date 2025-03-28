@@ -24,8 +24,8 @@ def main():
         lines.append(
             'python svat_crop.py -b numpy -d cpu --crop-rotation-scenario %s\n' % (crop_rotation_scenario)
         )
-    lines.append('python merge_output.py')
-    lines.append('python simulations_to_csv.py')
+    lines.append('python merge_output.py\n')
+    lines.append('python write_simulations_to_csv.py')
     file = open(file_path, "w")
     file.writelines(lines)
     file.close()
