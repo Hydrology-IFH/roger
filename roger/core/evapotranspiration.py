@@ -378,6 +378,14 @@ def calc_transp(state):
         vs.basal_transp_coeff[2:-2, 2:-2] * vs.k_stress_transp[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
+    # set transpiration to zero for crops if soil water content is greater than 80% of saturation
+    mask_anoxia = (vs.lu_id > 500) & (vs.lu_id < 599) & (vs.theta_rz[:, :, vs.tau] >= 0.8 * vs.theta_sat) 
+    vs.transp_coeff = update(
+        vs.transp_coeff,
+        at[2:-2, 2:-2],
+        npx.where(mask_anoxia[2:-2, 2:-2], 0, vs.transp_coeff[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     transp_fp = allocate(state.dimensions, ("x", "y"))
     transp_lp = allocate(state.dimensions, ("x", "y"))
 
@@ -688,7 +696,6 @@ def calc_evaporation_transport_virtualtracer_kernel(state):
     Calculates transport of soil evaporation
     """
     vs = state.variables
-    settings = state.settings
 
     vs.SA_rz = update(
         vs.SA_rz,
@@ -892,11 +899,20 @@ def calc_transpiration_transport_anion_kernel(state):
         npx.cumsum(vs.tt_transp[2:-2, 2:-2, :], axis=2),
     )
 
+    # crop nutrient uptake stops if soil water content is greater than 80% of saturation
+    alpha = allocate(state.dimensions, ("x", "y"), fill=1)
+    mask = (vs.lu_id > 500) & (vs.lu_id < 599) & (npx.sum(vs.sa_rz[:, :, vs.tau, :], axis=-1) >= 0.8 * vs.S_sat_rz) 
+    alpha = update(
+        alpha,
+        at[2:-2, 2:-2],
+        npx.where(mask[2:-2, 2:-2], 0, vs.alpha_transp[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+    )
+
     # calculate anion travel time distribution
     vs.mtt_transp = update(
         vs.mtt_transp,
         at[2:-2, 2:-2, :],
-        transport.calc_mtt(state, vs.sa_rz, vs.tt_transp, vs.transp, vs.msa_rz, vs.alpha_transp)[2:-2, 2:-2, :]
+        transport.calc_mtt(state, vs.sa_rz, vs.tt_transp, vs.transp, vs.msa_rz, alpha)[2:-2, 2:-2, :]
         * vs.maskCatch[2:-2, 2:-2, npx.newaxis],
     )
 

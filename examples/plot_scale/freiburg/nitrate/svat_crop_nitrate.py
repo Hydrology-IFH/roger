@@ -6,8 +6,25 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("--irrigation-scenario", type=click.Choice(["no_irrigation", "35-ufc", "45-ufc", "50-ufc", "80-ufc", "crop-specific"]), default="no_irrigation")
-@click.option("--crop-rotation-scenario", type=click.Choice(["winter-wheat_clover",
+@click.option("--irrigation-scenario", type=click.Choice(["no_irrigation", "15-ufc", "35-ufc", "50-ufc", "crop-specific"]), default="no_irrigation")
+@click.option("--crop-rotation-scenario", type=click.Choice(["grain-corn",
+                                                             "grain-corn_yellow-mustard",
+                                                             "silage-corn",
+                                                             "silage-corn_yellow-mustard",
+                                                             "summer-barley",
+                                                             "summer-barley_yellow-mustard",
+                                                             "clover",
+                                                             "winter-wheat",
+                                                             "winter-barley",
+                                                             "winter-rape",
+                                                             "faba-bean",
+                                                             "potato-early",
+                                                             "sugar-beet",
+                                                             "sugar-beet_yellow-mustard",
+                                                             "vegetables",
+                                                             "strawberry",
+                                                             "asparagus",
+                                                             "winter-wheat_clover",
                                                              "winter-wheat_silage-corn",
                                                              "summer-wheat_winter-wheat",
                                                              "summer-wheat_clover_winter-wheat",
@@ -32,8 +49,9 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "grain-corn",
                                                              "grain-corn_yellow-mustard",
                                                              "winter-wheat",
+                                                             "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="winter-wheat_clover")
+                                                             "bare-grass"]), default="grain-corn_winter-wheat_winter-rape_yellow-mustard")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "nitrate")
 @roger_base_cli
 def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
@@ -55,14 +73,12 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
 
         if irrigation_scenario == "no_irrigation":
             _input_dir = _base_path.parent / "output" / "no_irrigation"
+        elif irrigation_scenario == "20-ufc":
+            _input_dir = _base_path.parent / "output" / "irrigation" / "20-ufc"
         elif irrigation_scenario == "35-ufc":
             _input_dir = _base_path.parent / "output" / "irrigation" / "35-ufc"
-        elif irrigation_scenario == "45-ufc":
-            _input_dir = _base_path.parent / "output" / "irrigation" / "45-ufc"
         elif irrigation_scenario == "50-ufc":
             _input_dir = _base_path.parent / "output" / "irrigation" / "50-ufc"
-        elif irrigation_scenario == "80-ufc":
-            _input_dir = _base_path.parent / "output" / "irrigation" / "80-ufc"
         elif irrigation_scenario == "crop-specific":
             _input_dir = _base_path.parent / "output" / "irrigation" / "crop-specific"
 

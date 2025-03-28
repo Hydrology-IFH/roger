@@ -1,7 +1,21 @@
 #!/bin/bash
 python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario grain-corn
 python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario grain-corn_yellow-mustard
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario silage-corn
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario silage-corn_yellow-mustard
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario summer-barley
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario summer-barley_yellow-mustard
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario clover
 python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario winter-wheat
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario winter-barley
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario winter-rape
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario faba-bean
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario potato-early
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario sugar-beet
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario sugar-beet_yellow-mustard
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario vegetables
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario strawberry
+python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario asparagus
 python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario winter-wheat_clover
 python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario winter-wheat_silage-corn
 python svat_crop_nitrate.py -b numpy -d cpu --irrigation-scenario no_irrigation --crop-rotation-scenario summer-wheat_winter-wheat

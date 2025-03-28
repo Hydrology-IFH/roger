@@ -4,7 +4,7 @@ This modelling experiment investigates the impact of crop irrigation on groundwa
 
 - `figures/`: contains figures
 - `output/`: contains the simulations of RoGeR
-- `simulation.csv`: contains the time series of the variables simulated by RoGeR (precip: precipitation in mm/day; irrig: irrigation in mm/day; canopy_cover: crop canopy cover in -; z_root: crop root depth in mm; theta_rz: soil water content of the upper soil layer in -; transp: transpiration in mm/day; perc: percolation in mm/day; irrigation_demand: soil water deficit in mm; lu_id: land use identifier or RoGeR; crop_type: name of the crop)
+- `simulation.csv`: contains the time series of the variables simulated by RoGeR (precip: precipitation in mm/day; irrig: irrigation in mm/day; canopy_cover: crop canopy cover in -; z_root: crop root depth in mm; theta_rz: soil water content of the upper soil layer in -; theta_irrig: irrigation threshold of soil water content of the upper soil layer in -; theta_fc: soil water content at field capacity in -; transp: transpiration in mm/day; perc: percolation in mm/day; irrigation_demand: soil water deficit in mm; root_ventilation: available soil air for root ventilation in %; lu_id: land use identifier or RoGeR; crop_type: name of the crop)
 - `input/`: contains meteorological data (`PREC.txt`, `PET.txt`, `TA.txt`) of the DWD station Freiburg and the defined crop rotations (`crop_rotation_scenarios/`) from 2000 to 2024
 - `crop_water_stress.csv`: contains fraction of usable field capacity when crop water stress starts. IMPORTANT: Do not modify the file.
 - `parameters.csv`: contains the soil hydraulic parameters of RoGeR for three different soil types (z_soil: soil depth in mm; dmpv: density of vertical macropores in 1/$m^2$; lmpv: length of vertical macropores in mm; theta_ac: air capacity in -; theta_ufc: usable field capacity in -; theta_pwp: permanent wilting point in -; ks: saturated hydraulic conductivity in mm/h; kf: hydraulic conductivity of bedrock in mm/h; soil_fertility: soil fertility; clay: clay content in -)
@@ -18,13 +18,29 @@ Available soil types:
 
 Available irrigation demand rules:
 - no_irrigation: No irrigation is applied
+- 20-ufc: Irrigation demand is calculated if soil water content is less than 20% of usable field capacity
 - 35-ufc: Irrigation demand is calculated if soil water content is less than 35% of usable field capacity
-- 45-ufc: Irrigation demand is calculated if soil water content is less than 45% of usable field capacity
 - 50-ufc: Irrigation demand is calculated if soil water content is less than 50% of usable field capacity
-- 80-ufc: Irrigation demand is calculated if soil water content is less than 80% of usable field capacity
 - crop-specific: Irrigation demand is specifically calculated for each crop
 
 Crop rotations are repeated after three to four years. The following crop rotations are available:
+- grain-corn
+- grain-corn_yellow-mustard: yellow mustard, grain corn
+- silage-corn
+- silage-corn_yellow-mustard: yellow mustard, silage corn
+- summer-barley
+- summer-barley_yellow-mustard: yellow mustard, summer-barley
+- clover
+- winter-wheat
+- winter-barley
+- winter-rape
+- faba-bean
+- potato-early
+- sugar-beet
+- sugar-beet_yellow-mustard: yellow mustard, sugar beet
+- vegetables
+- strawberry
+- asparagus
 - winter-wheat_clover: winter wheat, clover, clover, winter wheat
 - winter-wheat_silage-corn: winter wheat, silage corn, winter wheat, silage corn
 - summer-wheat_winter-wheat: summer wheat, winter wheat, summer wheat, winter wheat
@@ -48,7 +64,7 @@ Crop rotations are repeated after three to four years. The following crop rotati
 - grain-corn_winter-wheat_winter-rape_yellow-mustard: grain corn, winter wheat, winter rape, winter wheat including yellow mustard before winter crop
 - grain-corn_winter-wheat_winter-barley_yellow-mustard: grain corn, winter wheat, winter barley including yellow mustard before winter crop
 - miscanthus: perennial miscanthus
-- bare-grass: bare land turning into grass
+- bare-grass: bare land turning into grass land
 
 ### no_irrigation
 No irrigation is applied i.e. irrigation demand is calculated without irrigation.
