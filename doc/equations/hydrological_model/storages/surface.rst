@@ -91,9 +91,9 @@ Short description of land use (lu_id)
 - `547`: sunflower
 - `548`: other fruit-growing
 - `549`: sorghum
-- `550`: asparagus
-- `551`: orchards
-- `552`: sweet potato
+- `550`: asparagus (growing only)
+- `551`: asparagus (continued winter)
+- `552`: asparagus (continued summer)
 - `553`: tobacco
 - `554`: helianthus
 - `555`: vetch
