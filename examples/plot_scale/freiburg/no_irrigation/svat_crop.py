@@ -357,7 +357,6 @@ def main(crop_rotation_scenario, tmp_dir):
                     at[2:-2, 2:-2, 2],
                     self._read_var_from_nc("crop", self._input_dir, f"{crop_rotation_scenario}.nc")[:, :, vs.itt_cr + 1],
                 )
-                print(vs.crop_type[2, 2, 1])
 
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
