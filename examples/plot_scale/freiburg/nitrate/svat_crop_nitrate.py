@@ -5,7 +5,7 @@ import numpy as onp
 import click
 from roger.cli.roger_run_base import roger_base_cli
 
-
+@click.option("--soil-compaction-scenario", type=click.Choice(["no_compaction", "compaction"]), default="no_compaction")
 @click.option("--irrigation-scenario", type=click.Choice(["no_irrigation", "15-ufc", "35-ufc", "50-ufc", "crop-specific"]), default="no_irrigation")
 @click.option("--crop-rotation-scenario", type=click.Choice(["grain-corn",
                                                              "grain-corn_yellow-mustard",
@@ -54,7 +54,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "bare-grass"]), default="grain-corn_winter-wheat_winter-rape_yellow-mustard")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "nitrate")
 @roger_base_cli
-def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
+def main(soil_compaction_scenario, irrigation_scenario, crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, update_add, at
@@ -72,15 +72,30 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
         _base_path = Path(__file__).parent
 
         if irrigation_scenario == "no_irrigation":
-            _input_dir = _base_path.parent / "output" / "no_irrigation"
+            if soil_compaction_scenario == "no_compaction":
+                _input_dir = _base_path.parent / "output" / "no-irrigation"
+            else:
+                _input_dir = _base_path.parent / "output" / "no-irrigation_soil-compaction"
         elif irrigation_scenario == "20-ufc":
-            _input_dir = _base_path.parent / "output" / "irrigation" / "20-ufc"
+            if soil_compaction_scenario == "no_compaction":
+                _input_dir = _base_path.parent / "output" / "irrigation" / "20-ufc"
+            else:
+                _input_dir = _base_path.parent / "output" / "irrigation_soil-compaction" / "20-ufc"
         elif irrigation_scenario == "35-ufc":
-            _input_dir = _base_path.parent / "output" / "irrigation" / "35-ufc"
+            if soil_compaction_scenario == "no_compaction":
+                _input_dir = _base_path.parent / "output" / "irrigation" / "35-ufc"
+            else:
+                _input_dir = _base_path.parent / "output" / "irrigation_soil-compaction" / "35-ufc"
         elif irrigation_scenario == "50-ufc":
-            _input_dir = _base_path.parent / "output" / "irrigation" / "50-ufc"
+            if soil_compaction_scenario == "no_compaction":
+                _input_dir = _base_path.parent / "output" / "irrigation" / "50-ufc"
+            else:
+                _input_dir = _base_path.parent / "output" / "irrigation_soil-compaction" / "50-ufc"
         elif irrigation_scenario == "crop-specific":
-            _input_dir = _base_path.parent / "output" / "irrigation" / "crop-specific"
+            if soil_compaction_scenario == "no_compaction":
+                _input_dir = _base_path.parent / "output" / "irrigation" / "crop-specific"
+            else:
+                _input_dir = _base_path.parent / "output" / "irrigation_soil-compaction" / "crop-specific"
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -109,7 +124,10 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATCROPNITRATE_{irrigation_scenario}_{crop_rotation_scenario}"
+            if soil_compaction_scenario == "no_compaction":
+                settings.identifier = f"SVATCROPNITRATE_{irrigation_scenario}_{crop_rotation_scenario}"
+            else:
+                settings.identifier = f"SVATCROPNITRATE_{irrigation_scenario}_{crop_rotation_scenario}_soil-compaction"
             settings.sas_solver = "deterministic"
             settings.sas_solver_substeps = 8
 

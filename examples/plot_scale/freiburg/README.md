@@ -66,8 +66,17 @@ Crop rotations are repeated after three to four years. The following crop rotati
 - miscanthus: perennial miscanthus
 - bare-grass: bare land turning into grass land
 
-### no_irrigation
+### no-irrigation
 No irrigation is applied i.e. irrigation demand is calculated without irrigation.
+
+- `svat_crop.py`: Setup of the RoGeR model
+- `merge_output.py`: Merges the model output into a single *.nc-file
+- `write_simulations_to_csv.py`: Writes simulations to *.csv-file
+- `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
+- `run_roger.sh`: Runs the RoGeR model to generate the simulations
+
+### no-irrigation_soil-compaction
+No irrigation is applied i.e. irrigation demand is calculated without irrigation. Additionally, soil compaction by agricultural wheel trafficking is considered. Soil compaction is implemented by reducing the saturated hydraulic conductivity and soil air capacity of the subsoil.
 
 - `svat_crop.py`: Setup of the RoGeR model
 - `merge_output.py`: Merges the model output into a single *.nc-file
@@ -84,8 +93,17 @@ No irrigation is applied i.e. irrigation demand is calculated without irrigation
 - `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
 - `run_roger.sh`: Runs the RoGeR model to generate the simulations
 
+### irrigation_soil-compaction
+30 mm per day are irrigated according to four irrigation demand rules. Additionally, soil compaction by agricultural wheel trafficking is considered. Soil compaction is implemented by reducing the saturated hydraulic conductivity and soil air capacity of the subsoil.
+
+- `svat_crop.py`: Setup of the RoGeR model
+- `merge_output.py`: Merges the model output into a single *.nc-file
+- `write_simulations_to_csv.py`: Writes simulations to *.csv-file
+- `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
+- `run_roger.sh`: Runs the RoGeR model to generate the simulations
+
 ### nitrate
-Nitrate leaching is simulated with irrigation and without irrigation.
+Nitrate leaching is simulated considering all combinations: no irrigation and no soil compaction, no irrigation and soil compaction, irrigation and no soil compaction, irrigation and soil compaction.
 
 - `parameters_sas_nitrate.nc`: contains the SAS and nitrate parameters of RoGeR for three different soil types
 - `svat_crop_nitrate.py`: Setup of the RoGeR-SAS model to simulate the nitrate transport 
