@@ -52,7 +52,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat",
                                                              "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="summer-barley")
+                                                             "bare-grass"]), default="grain-corn")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no_irrigation")
 @roger_base_cli
 def main(crop_rotation_scenario, tmp_dir):
@@ -357,6 +357,7 @@ def main(crop_rotation_scenario, tmp_dir):
                     at[2:-2, 2:-2, 2],
                     self._read_var_from_nc("crop", self._input_dir, f"{crop_rotation_scenario}.nc")[:, :, vs.itt_cr + 1],
                 )
+                print(vs.crop_type[2, 2, 1])
 
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
