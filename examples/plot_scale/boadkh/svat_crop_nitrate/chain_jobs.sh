@@ -300,106 +300,106 @@
 # sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_clover_low_Nfert_slurm.sh
 # sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_clover_medium_Nfert_slurm.sh
 # sleep 18h
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_miscanthus_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_miscanthus_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_miscanthus_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_clover_winter-wheat_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_clover_winter-wheat_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_clover_winter-wheat_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_silage-corn_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_silage-corn_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_silage-corn_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_high_Nfert_slurm.sh
-sleep 18h
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_soybean_winter-rape_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_soybean_winter-rape_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_soybean_winter-rape_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_winter-rape_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_winter-rape_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_winter-rape_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_bare-grass_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_bare-grass_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_bare-grass_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_clover_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_clover_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_clover_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_miscanthus_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_miscanthus_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_miscanthus_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_yellow-mustard_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_yellow-mustard_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_yellow-mustard_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_clover_winter-wheat_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_clover_winter-wheat_low_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_clover_winter-wheat_medium_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_winter-wheat_high_Nfert_slurm.sh
-sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_winter-wheat_low_Nfert_slurm.sh
-sleep 18h
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-barley_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_grain-corn_winter-wheat_winter-rape_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_miscanthus_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_miscanthus_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_miscanthus_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_sugar-beet_winter-wheat_winter-barley_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_clover_winter-wheat_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_clover_winter-wheat_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_clover_winter-wheat_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_silage-corn_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_winter-rape_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_summer-wheat_winter-wheat_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_silage-corn_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_silage-corn_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_clover_silage-corn_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_high_Nfert_slurm.sh
+# sleep 18h
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_silage-corn_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_soybean_winter-rape_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_soybean_winter-rape_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_soybean_winter-rape_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_sugar-beet_silage-corn_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_winter-rape_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_winter-rape_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_freiburg_winter-wheat_winter-rape_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_bare-grass_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_bare-grass_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_bare-grass_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_clover_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_clover_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_clover_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-barley_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_grain-corn_winter-wheat_winter-rape_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_miscanthus_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_miscanthus_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_miscanthus_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_yellow-mustard_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_yellow-mustard_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_sugar-beet_winter-wheat_winter-barley_yellow-mustard_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_clover_winter-wheat_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_clover_winter-wheat_low_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_clover_winter-wheat_medium_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_winter-wheat_high_Nfert_slurm.sh
+# sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_winter-wheat_low_Nfert_slurm.sh
+# sleep 18h
 sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_winter-wheat_medium_Nfert_slurm.sh
 sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_winter-wheat_silage-corn_high_Nfert_slurm.sh
 sbatch --partition single svat_crop_nitrate_gottmadingen_summer-wheat_winter-wheat_silage-corn_low_Nfert_slurm.sh
