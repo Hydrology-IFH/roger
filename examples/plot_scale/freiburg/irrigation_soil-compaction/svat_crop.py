@@ -133,6 +133,8 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
 
             settings.zroot_to_zsoil_max = 0.5
 
+            settings.enable_irrigation = True
+            settings.enable_net_irrigation = True
             settings.enable_time_variant_macropores = False
             settings.enable_soil_compaction = True
             settings.enable_crop_water_stress = True
