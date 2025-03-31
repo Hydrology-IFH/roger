@@ -1958,7 +1958,6 @@ def set_crop_params(state):
             at[2:-2, 2:-2, :],
             npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 4], vs.doy_end[2:-2, 2:-2, :]),
         )
-        print(vs.lut_crops[-1, 4])
         vs.gdd_start = update(
             vs.gdd_start,
             at[2:-2, 2:-2, :],

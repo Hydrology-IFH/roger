@@ -5904,7 +5904,7 @@ VARIABLES = {
         "",
         "day of year of sowing",
         write_to_restart=True,
-        dtype=runtime_settings.int_type,
+        # dtype=runtime_settings.int_type,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "doy_mid": Variable(
@@ -5913,7 +5913,7 @@ VARIABLES = {
         "",
         "day of year of full canopy",
         write_to_restart=True,
-        dtype=runtime_settings.int_type,
+        # dtype=runtime_settings.int_type,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "doy_dec": Variable(
@@ -5922,7 +5922,7 @@ VARIABLES = {
         "",
         "day of year of crop canopy decay",
         write_to_restart=True,
-        dtype=runtime_settings.int_type,
+        # dtype=runtime_settings.int_type,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "doy_end": Variable(
@@ -5931,7 +5931,7 @@ VARIABLES = {
         "",
         "day of year of harvesting",
         write_to_restart=True,
-        dtype=runtime_settings.int_type,
+        # dtype=runtime_settings.int_type,
         active=lambda settings: not settings.enable_offline_transport and settings.enable_crop_phenology,
     ),
     "ta_base": Variable(
