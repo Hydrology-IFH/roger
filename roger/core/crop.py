@@ -1325,6 +1325,9 @@ def update_lu_id(state):
         vs.lu_id, at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 2], vs.lu_id[2:-2, 2:-2])
     )
 
+    print("crop_type", vs.crop_type[2, 2, 1])
+    print("lu_id", vs.lu_id[2, 2])
+
     return KernelOutput(lu_id=vs.lu_id)
 
 @roger_kernel
