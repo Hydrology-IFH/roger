@@ -1325,10 +1325,6 @@ def update_lu_id(state):
         vs.lu_id, at[2:-2, 2:-2], npx.where(mask3[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 2], vs.lu_id[2:-2, 2:-2])
     )
 
-    print(vs.doy_start[2, 2, 2], vs.doy_end[2, 2, 0])
-    print("crop_type", vs.crop_type[2, 2, 2])
-    print("lu_id", vs.lu_id[2, 2])
-
     return KernelOutput(lu_id=vs.lu_id)
 
 @roger_kernel
@@ -1960,6 +1956,7 @@ def set_crop_params(state):
             at[2:-2, 2:-2, :],
             npx.where(mask[2:-2, 2:-2, :], vs.lut_crops[row_no, 4], vs.doy_end[2:-2, 2:-2, :]),
         )
+        print(vs.lut_crops[-1, 4])
         vs.gdd_start = update(
             vs.gdd_start,
             at[2:-2, 2:-2, :],
