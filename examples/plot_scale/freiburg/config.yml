@@ -6,11 +6,11 @@ irrigation_scenarios:
 
 crop_rotation_scenarios:
 - grain-corn
-- grain-corn_yellow-mustard
+# - grain-corn_yellow-mustard
 - silage-corn
-- silage-corn_yellow-mustard
+# - silage-corn_yellow-mustard
 - summer-barley
-- summer-barley_yellow-mustard
+# - summer-barley_yellow-mustard
 - clover
 # - winter-wheat
 # - winter-barley
@@ -18,7 +18,7 @@ crop_rotation_scenarios:
 - faba-bean
 - potato-early
 - sugar-beet
-- sugar-beet_yellow-mustard
+# - sugar-beet_yellow-mustard
 - vegetables
 - strawberry
 - asparagus
