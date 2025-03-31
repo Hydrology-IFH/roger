@@ -263,7 +263,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
             vs.root_growth_scale = update(
                 vs.root_growth_scale,
                 at[2:-2, 2:-2],
-                0.5,
+                0.7,
             )
             vs.canopy_growth_scale = update(
                 vs.canopy_growth_scale,
