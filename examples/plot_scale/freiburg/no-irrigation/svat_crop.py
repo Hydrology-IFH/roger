@@ -53,7 +53,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "yellow-mustard",
                                                              "miscanthus",
                                                              "bare-grass"]), default="grain-corn")
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no_irrigation")
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no-irrigation")
 @roger_base_cli
 def main(crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
