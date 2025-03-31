@@ -1,11 +1,11 @@
 #!/bin/bash
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario grain-corn
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario silage-corn
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario summer-barley
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario clover
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario faba-bean
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario potato-early
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario sugar-beet
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario vegetables
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario strawberry
-python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario asparagus
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario grain-corn &
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario silage-corn &
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario summer-barley &
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario clover &
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario faba-bean &
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario potato-early &
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario sugar-beet &
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario vegetables &
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario strawberry &
+python svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario asparagus &
