@@ -56,7 +56,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat",
                                                              "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="grain-corn_winter-wheat_winter-rape_yellow-mustard")
+                                                             "bare-grass"]), default="grain-corn")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "irrigation")
 @roger_base_cli
 def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
