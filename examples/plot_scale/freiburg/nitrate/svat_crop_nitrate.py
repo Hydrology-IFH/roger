@@ -51,7 +51,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat",
                                                              "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="grain-corn_winter-wheat_winter-rape_yellow-mustard")
+                                                             "bare-grass"]), default="grain-corn")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "nitrate")
 @roger_base_cli
 def main(soil_compaction_scenario, irrigation_scenario, crop_rotation_scenario, tmp_dir):
@@ -62,7 +62,28 @@ def main(soil_compaction_scenario, irrigation_scenario, crop_rotation_scenario, 
     from roger.core.utilities import _get_row_no
     from roger import runtime_settings as rs
 
-    tmp_dir = Path(tmp_dir) / irrigation_scenario
+    if soil_compaction_scenario == "no_compaction":
+        if irrigation_scenario == "no_irrigation":
+            tmp_dir = Path(tmp_dir) / "no-irrigation"
+        elif irrigation_scenario == "20-ufc":
+            tmp_dir = Path(tmp_dir) / "irrigation" / "20-ufc"
+        elif irrigation_scenario == "35-ufc":
+            tmp_dir = Path(tmp_dir) / "irrigation" / "35-ufc"
+        elif irrigation_scenario == "50-ufc":
+            tmp_dir = Path(tmp_dir) / "irrigation" / "50-ufc"
+        elif irrigation_scenario == "crop-specific":
+            tmp_dir = Path(tmp_dir) / "irrigation" / "crop-specific"
+    else:
+        if irrigation_scenario == "no_irrigation":
+            tmp_dir = Path(tmp_dir) / "no-irrigation_soil-compaction"
+        elif irrigation_scenario == "20-ufc":
+            tmp_dir = Path(tmp_dir) / "irrigation_soil-compaction" / "20-ufc"
+        elif irrigation_scenario == "35-ufc":
+            tmp_dir = Path(tmp_dir) / "irrigation_soil-compaction" / "35-ufc"
+        elif irrigation_scenario == "50-ufc":
+            tmp_dir = Path(tmp_dir) / "irrigation_soil-compaction" / "50-ufc"
+        elif irrigation_scenario == "crop-specific":
+            tmp_dir = Path(tmp_dir) / "irrigation_soil-compaction" / "crop-specific"
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
