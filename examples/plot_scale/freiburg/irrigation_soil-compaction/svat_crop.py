@@ -67,7 +67,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
     from roger.tools.setup import write_forcing, write_crop_rotation
     import roger.lookuptables as lut
 
-    tmp_dir = Path(tmp_dir)
+    tmp_dir = Path(tmp_dir) / irrigation_scenario
 
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
@@ -117,7 +117,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATCROP_{crop_rotation_scenario}_debug"
+            settings.identifier = f"SVATCROP_{crop_rotation_scenario}"
 
             settings.nx = self._get_nx(self._base_path.parent, "parameters.nc")
             settings.ny = 1

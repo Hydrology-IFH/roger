@@ -113,7 +113,7 @@ def main(crop_rotation_scenario, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATCROP_{crop_rotation_scenario}_debug"
+            settings.identifier = f"SVATCROP_{crop_rotation_scenario}"
 
             settings.nx = self._get_nx(self._base_path.parent, "parameters.nc")
             settings.ny = 1
