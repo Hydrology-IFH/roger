@@ -36,7 +36,7 @@ def main(tmp_dir):
         file = base_path / "output" / "svat_crop_monte_carlo_crop-specific" / f"params_eff_{lys_experiment}_bulk_samples.txt"
         df_params_metrics = pd.read_csv(file, sep="\t")
         df_metric_lysimeters.loc[:, lys_experiment] = df_params_metrics["KGE_q_ss_2011-2015"]
-    df_metric_lysimeters["avg"] = df_metric_lysimeters.loc[:, "lys2":"lys8"].mean(axis=1)
+    df_metric_lysimeters["avg"] = df_metric_lysimeters.loc[:, "lys2":"lys8"].mean(axis=1, skipna=False)
     file = base_path / "output" / "svat_crop_monte_carlo_crop-specific" / "KGE_bulk_samples.csv"
     df_metric_lysimeters.to_csv(file, header=True, index=False, sep=";")
 

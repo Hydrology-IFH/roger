@@ -42,8 +42,8 @@ def main(tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
-        # base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
-        base_path = Path(__file__).parent.parent
+        base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
+        # base_path = Path(__file__).parent.parent
 
     # directory of results
     base_path_output = base_path / "output" / "svat_crop_monte_carlo_crop-specific"
@@ -94,12 +94,12 @@ def main(tmp_dir):
     lys_experiments = ["lys2", "lys3", "lys8"]
     for lys_experiment in lys_experiments:
         # load parameters and metrics
-        df_params_metrics = pd.read_csv(base_path_output / f"params_eff_{lys_experiment}_bulk_samples.txt", sep="\t")
-        df_params_metrics["E_multi"] = df_params_metrics["KGE_q_ss_2011-2015"]
-        df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
-        df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
-        idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
-        idx_best = idx_best100[0]        
+        df_metric = pd.read_csv(base_path_output / "KGE_bulk_samples.csv", sep=";")
+        df_metric["E_multi"] = df_metric["avg"]
+        df_metric.loc[:, "id"] = range(len(df_metric.index))
+        df_metric = df_metric.sort_values(by=["E_multi"], ascending=False)
+        idx_best100 = df_metric.loc[: df_metric.index[99], "id"].values.tolist()
+        idx_best = idx_best100[0]             
         # load simulation
         sim_hm_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
         ds_sim_hm = xr.open_dataset(sim_hm_file, engine="h5netcdf")
