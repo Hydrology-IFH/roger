@@ -18,8 +18,8 @@ def main(tmp_dir):
     if tmp_dir:
         base_path = Path(tmp_dir)
     else:
-        # base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
-        base_path = Path(__file__).parent.parent
+        base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
+        # base_path = Path(__file__).parent.parent
 
     # directory of results
     base_path_output = base_path / "output"
@@ -68,91 +68,103 @@ def main(tmp_dir):
         df_idx_bs.loc[:, 'sol'] = ds_obs['NO3_PERC'].isel(x=0, y=0).values
         idx_bs = df_idx_bs['sol'].dropna().index
         perc_bs_sim = onp.zeros((nx, 1, len(idx)))
+        transp_bs_sim = onp.zeros((nx, 1, len(idx)))
         perc_bs_obs = onp.zeros((nx, 1, len(idx)))
+        perc_bs_sim[:, :, :] = onp.nan
+        transp_bs_sim[:, :, :] = onp.nan
 
         for nrow in range(nx):
-            # calculate simulated nitrate bulk samples
-            sample_no = pd.DataFrame(index=idx_bs, columns=['sample_no'])
-            sample_no['sample_no'] = range(len(sample_no.index))
-            df_perc_bs = pd.DataFrame(index=idx, columns=['perc', 'NO3_mass'])
-            df_perc_bs['perc_sim'] = ds_sim['q_ss'].isel(x=nrow, y=0).values
-            df_perc_bs.loc[df_perc_bs.index[1]:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
-            df_perc_bs = df_perc_bs.join(sample_no)
-            df_perc_bs.loc[:, 'sample_no'] = df_perc_bs.loc[:, 'sample_no'].bfill(limit=14)
-            perc_sim_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'perc_sim']
-            perc_obs_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'perc_obs']
-            sample_no['perc_sim_sum'] = perc_sim_sum.values
-            sample_no['perc_obs_sum'] = perc_obs_sum.values
-            df_perc_bs = df_perc_bs.join(sample_no['perc_sim_sum'])
-            df_perc_bs = df_perc_bs.join(sample_no['perc_obs_sum'])
-            # volume of observed bulk samples
-            perc_bs_obs[nrow, 0, :] = df_perc_bs.loc[:, 'perc_obs_sum'].values.astype(float)
-            # volume of simulated bulk samples
-            perc_bs_sim[nrow, 0, :] = df_perc_bs.loc[:, 'perc_sim_sum'].values.astype(float)
+            df_ground_cover = pd.DataFrame(index=idx, columns=['ground_cover'])
+            df_ground_cover['ground_cover'] = ds_sim['ground_cover'].isel(x=nrow, y=0).values
+            cond = (df_ground_cover.index.month == 7) & (df_ground_cover.index.day == 1)
+            gc_0701 = df_ground_cover.loc[cond, 'ground_cover'].min()
 
-            sim_vals = perc_bs_sim[nrow, 0, :]
-            sim_vals = onp.where(sim_vals == 0, onp.nan, sim_vals)
-            obs_vals = perc_bs_obs[nrow, 0, 1:]
-            obs_vals = onp.where(obs_vals == 0, onp.nan, obs_vals)
-            df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
-            df_obs.loc[:, 'obs'] = obs_vals
+            if gc_0701 > 0.5:
+                # calculate simulated bulk samples
+                sample_no = pd.DataFrame(index=idx_bs, columns=['sample_no'])
+                sample_no['sample_no'] = range(len(sample_no.index))
+                df_perc_bs = pd.DataFrame(index=idx, columns=['perc', 'NO3_mass'])
+                df_perc_bs['perc_sim'] = ds_sim['q_ss'].isel(x=nrow, y=0).values
+                df_perc_bs['transp_sim'] = ds_sim['transp'].isel(x=nrow, y=0).values
+                df_perc_bs.loc[df_perc_bs.index[1]:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
+                df_perc_bs = df_perc_bs.join(sample_no)
+                df_perc_bs.loc[:, 'sample_no'] = df_perc_bs.loc[:, 'sample_no'].bfill(limit=14)
+                perc_sim_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'perc_sim']
+                transp_sim_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'transp_sim']
+                perc_obs_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'perc_obs']
+                sample_no['perc_sim_sum'] = perc_sim_sum.values
+                sample_no['transp_sim_sum'] = transp_sim_sum.values
+                sample_no['perc_obs_sum'] = perc_obs_sum.values
+                df_perc_bs = df_perc_bs.join(sample_no['perc_sim_sum'])
+                df_perc_bs = df_perc_bs.join(sample_no['transp_sim_sum'])
+                df_perc_bs = df_perc_bs.join(sample_no['perc_obs_sum'])
+                # volume of observed bulk samples
+                perc_bs_obs[nrow, 0, :] = df_perc_bs.loc[:, 'perc_obs_sum'].values.astype(float)
+                # volume of simulated bulk samples
+                perc_bs_sim[nrow, 0, :] = df_perc_bs.loc[:, 'perc_sim_sum'].values.astype(float)
+                transp_bs_sim[nrow, 0, :] = df_perc_bs.loc[:, 'transp_sim_sum'].values.astype(float)
 
-            # calculate metrics
-            var_sim = "q_ss"
-            df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
-            df_eval = df_eval.dropna()
-            obs_vals = df_eval.loc[:, 'obs'].values.astype(float)[1:]
-            sim_vals = df_eval.loc[:, 'sim'].values.astype(float)[1:]
-            key_kge = f'KGE_{var_sim}'
-            df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
-            key_kge_alpha = f'KGE_alpha_{var_sim}'
-            df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
-            key_kge_beta = f'KGE_beta_{var_sim}'
-            df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
-            key_r = f'r_{var_sim}'
-            df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
-            key_mae = "MAE_" + var_sim
-            df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals, sim_vals)
-            key_mae = "50AE_" + var_sim
-            df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals, sim_vals)
-            key_rbs = "RBS_" + var_sim
-            df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals, sim_vals)
+                sim_vals = perc_bs_sim[nrow, 0, :]
+                sim_vals = onp.where(sim_vals == 0, onp.nan, sim_vals)
+                obs_vals = perc_bs_obs[nrow, 0, 1:]
+                obs_vals = onp.where(obs_vals == 0, onp.nan, obs_vals)
+                df_obs = pd.DataFrame(index=date_obs, columns=['obs'])
+                df_obs.loc[:, 'obs'] = obs_vals
 
-            obs_vals_year = df_eval.loc['2011':'2015', "obs"].values.astype(float)
-            sim_vals_year = df_eval.loc['2011':'2015', "sim"].values.astype(float)
-            year = "2011-2015"
-            key_kge = f'KGE_{var_sim}_{year}'
-            df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
-            key_kge_alpha = "KGE_alpha_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
-            key_kge_beta = "KGE_beta_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
-            key_r = "r_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
-            key_mae = "MAE_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
-            key_mae = "50AE_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
-            key_rbs = "RBS_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
+                # calculate metrics
+                var_sim = "q_ss"
+                df_eval = eval_utils.join_obs_on_sim(date_sim, sim_vals, df_obs)
+                df_eval = df_eval.dropna()
+                obs_vals = df_eval.loc[:, 'obs'].values.astype(float)[1:]
+                sim_vals = df_eval.loc[:, 'sim'].values.astype(float)[1:]
+                key_kge = f'KGE_{var_sim}'
+                df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
+                key_kge_alpha = f'KGE_alpha_{var_sim}'
+                df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals, sim_vals)
+                key_kge_beta = f'KGE_beta_{var_sim}'
+                df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals, sim_vals)
+                key_r = f'r_{var_sim}'
+                df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals, sim_vals)
+                key_mae = "MAE_" + var_sim
+                df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals, sim_vals)
+                key_mae = "50AE_" + var_sim
+                df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals, sim_vals)
+                key_rbs = "RBS_" + var_sim
+                df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals, sim_vals)
 
-            obs_vals_year = df_eval.loc['2016':'2017', "obs"].values.astype(float)
-            sim_vals_year = df_eval.loc['2016':'2017', "sim"].values.astype(float)
-            year = "2016-2017"
-            key_kge = f'KGE_{var_sim}_{year}'
-            df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
-            key_kge_alpha = "KGE_alpha_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
-            key_kge_beta = "KGE_beta_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
-            key_r = "r_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
-            key_mae = "MAE_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
-            key_mae = "50AE_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
-            key_rbs = "RBS_" + var_sim + f"_{year}"
-            df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
+                obs_vals_year = df_eval.loc['2011':'2015', "obs"].values.astype(float)
+                sim_vals_year = df_eval.loc['2011':'2015', "sim"].values.astype(float)
+                key_kge = f'KGE_{var_sim}_2011-2015'
+                df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
+                key_kge_alpha = "KGE_alpha_" + var_sim + "_2011-2015"
+                df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
+                key_kge_beta = "KGE_beta_" + var_sim + "_2011-2015"
+                df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
+                key_r = "r_" + var_sim + "_2011-2015"
+                df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
+                key_mae = "MAE_" + var_sim + "_2011-2015"
+                df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
+                key_mae = "50AE_" + var_sim + "_2011-2015"
+                df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
+                key_rbs = "RBS_" + var_sim + "_2011-2015"
+                df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
+
+                obs_vals_year = df_eval.loc['2016':'2017', "obs"].values.astype(float)
+                sim_vals_year = df_eval.loc['2016':'2017', "sim"].values.astype(float)
+                key_kge = f'KGE_{var_sim}_2016-2017'
+                df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals_year, sim_vals_year)
+                key_kge_alpha = "KGE_alpha_" + var_sim + "_2016-2017"
+                df_params_metrics.loc[nrow, key_kge_alpha] = eval_utils.calc_kge_alpha(obs_vals_year, sim_vals_year)
+                key_kge_beta = "KGE_beta_" + var_sim + "_2016-2017"
+                df_params_metrics.loc[nrow, key_kge_beta] = eval_utils.calc_kge_beta(obs_vals_year, sim_vals_year)
+                key_r = "r_" + var_sim + "_2016-2017"
+                df_params_metrics.loc[nrow, key_r] = eval_utils.calc_temp_cor(obs_vals_year, sim_vals_year)
+                key_mae = "MAE_" + var_sim + "_2016-2017"
+                df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_mae(obs_vals_year, sim_vals_year)
+                key_mae = "50AE_" + var_sim + "_2016-2017"
+                df_params_metrics.loc[nrow, key_mae] = eval_utils.calc_50ae(obs_vals_year, sim_vals_year)
+                key_rbs = "RBS_" + var_sim + "_2016-2017"
+                df_params_metrics.loc[nrow, key_rbs] = eval_utils.calc_rbs(obs_vals_year, sim_vals_year)
 
             # for year in range(2011, 2018):
             #     obs_vals_year = df_eval.loc[f'{year}', "obs"].values.astype(float)
@@ -190,6 +202,13 @@ def main(tmp_dir):
             except ValueError:
                 var_obj = f.variables.get("q_ss_bs")
                 var_obj[:, :, :] = perc_bs_sim
+            try:
+                v = f.create_variable("transp_bs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
+                v[:, :, :] = transp_bs_sim
+                v.attrs.update(long_name="Volume of simulated bulk samples", units="mm")
+            except ValueError:
+                var_obj = f.variables.get("transp_bs")
+                var_obj[:, :, :] = transp_bs_sim
             try:
                 v = f.create_variable("q_ss_bs_obs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
                 v[:, :, :] = perc_bs_obs

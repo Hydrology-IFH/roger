@@ -70,6 +70,8 @@ def main(tmp_dir):
         perc_bs_sim = onp.zeros((nx, 1, len(idx)))
         transp_bs_sim = onp.zeros((nx, 1, len(idx)))
         perc_bs_obs = onp.zeros((nx, 1, len(idx)))
+        perc_bs_sim[:, :, :] = onp.nan
+        transp_bs_sim[:, :, :] = onp.nan
 
         for nrow in range(nx):
             df_ground_cover = pd.DataFrame(index=idx, columns=['ground_cover'])

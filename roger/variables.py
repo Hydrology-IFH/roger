@@ -85,7 +85,6 @@ NAGES = ("nages",)
 NEVENTS_FF = ("events_ff",)
 CROPS = ("crops",)
 CROPS_TO_OPTIMIZE = ("crops_to_optimize",)
-CROPS_TO_OPTIMIZE_2 = ("crops_to_optimize_2",)
 CR = ("cr",)
 N_SAS_PARAMS = ("n_sas_params",)
 N_STATIONS = ("n_stations",)
@@ -112,7 +111,6 @@ DIM_TO_SHAPE_VAR = {
     "nages": "nages",
     "crops": "ncrops",
     "crops_to_optimize": "ncrops_to_optimize",
-    "crops_to_optimize_2": 2,
     "cr": "ncr",
     "events_ff": "nevent_ff",
     "n_sas_params": "nsas",
@@ -5401,7 +5399,7 @@ VARIABLES = {
     ),
     "k_transp_crops": Variable(
         "SAS parameter of transpiration",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
         "-",
         "SAS parameter of transpiration",
         time_dependent=False,
@@ -5411,7 +5409,7 @@ VARIABLES = {
     ),
     "c1_transp_crops": Variable(
         "SAS parameter of transpiration",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
         "-",
         "SAS parameter of transpiration",
         time_dependent=False,
@@ -5421,7 +5419,7 @@ VARIABLES = {
     ),
     "c2_transp_crops": Variable(
         "SAS parameter of transpiration",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
         "-",
         "SAS parameter of transpiration",
         time_dependent=False,
@@ -5431,7 +5429,7 @@ VARIABLES = {
     ),
     "k_q_crops": Variable(
         "SAS parameter of drainage",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
         "-",
         "SAS parameter of drainage",
         time_dependent=False,
@@ -5441,7 +5439,7 @@ VARIABLES = {
     ),
     "c1_q_crops": Variable(
         "SAS parameter of drainage",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
         "-",
         "SAS parameter of drainage",
         time_dependent=False,
@@ -5451,7 +5449,7 @@ VARIABLES = {
     ),
     "c2_q_crops": Variable(
         "SAS parameter of drainage",
-        CATCH_GRID + CROPS_TO_OPTIMIZE_2,
+        CATCH_GRID + CROPS_TO_OPTIMIZE,
         "-",
         "SAS parameter of drainage",
         time_dependent=False,

@@ -28,8 +28,8 @@ def main():
         if os.path.exists(str(base_path / "output" / dir_name / irrigation_scenario)):
             for crop_rotation_scenario in crop_rotation_scenarios:
                 crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
-                path = str(base_path / "output" / dir_name/ irrigation_scenario / f"SVATCROP_{crop_rotation_scenario}.*.nc")
-                output_hm_file = base_path / "output" / dir_name/ irrigation_scenario / f"SVATCROP_{crop_rotation_scenario}.nc"
+                path = str(base_path / "output" / dir_name / irrigation_scenario / f"SVATCROP_{crop_rotation_scenario}.*.nc")
+                output_hm_file = base_path / "output" / dir_name / irrigation_scenario / f"SVATCROP_{crop_rotation_scenario}.nc"
                 if not os.path.exists(output_hm_file):
                     diag_files = glob.glob(path)
                     if diag_files:

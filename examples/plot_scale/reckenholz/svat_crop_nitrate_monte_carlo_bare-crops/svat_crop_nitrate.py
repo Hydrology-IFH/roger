@@ -100,8 +100,8 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             settings.enable_nitrate = True
             settings.tm_structure = transport_model_structure
 
-            settings.enable_crops_to_optimize = True
-            settings.ncrops_to_optimize = 8
+            settings.enable_crop_optimization = True
+            settings.ncrops_to_optimize = 2
 
         @roger_routine(
             dist_safe=False,
@@ -160,7 +160,15 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 "sas_params_re_rg",
                 "sas_params_re_rl",
                 "alpha_transp",
+                "alpha_transp_crops",
                 "alpha_q",
+                "alpha_q_crops",
+                "k_transp_crops",
+                "k_q_crops",
+                "c1_transp_crops",
+                "c2_transp_crops",
+                "c1_q_crops",
+                "c2_q_crops",
                 "km_denit_rz",
                 "km_denit_crops",
                 "km_denit_ss",
@@ -190,17 +198,22 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs = state.variables
             settings = state.settings
 
-            for i, crop_id in enumerate([563, 557, 559, 560, 539, 556, 564, 599]):
-                crop = self._dict_crops[crop_id]
-                # partition coefficients
-                vs.alpha_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, i], self._read_var_from_nc(f"alpha_transp_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-                vs.alpha_q_crops = update(vs.alpha_q_crops, at[2:-2, 2:-2, i], self._read_var_from_nc(f"alpha_q_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-                # denitrification parameters
-                vs.km_denit_crops = update(vs.km_denit_crops, at[2:-2, 2:-2, i], self._read_var_from_nc(f"km_denit_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-                vs.dmax_denit_crops = update(vs.dmax_denit_crops, at[2:-2, 2:-2, i], self._read_var_from_nc(f"dmax_denit_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-                # nitrification parameters
-                vs.km_nit_crops = update(vs.km_nit_crops, at[2:-2, 2:-2, i], self._read_var_from_nc(f"km_nit_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-                vs.dmax_nit_crops = update(vs.dmax_nit_crops, at[2:-2, 2:-2, i], self._read_var_from_nc(f"dmax_nit_{crop}", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            # partition coefficients
+            vs.alpha_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("alpha_transp_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.alpha_q_crops = update(vs.alpha_q_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("alpha_q_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.alpha_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("alpha_transp_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.alpha_q_crops = update(vs.alpha_q_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("alpha_q_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            # denitrification parameters
+            vs.km_denit_crops = update(vs.km_denit_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("km_denit_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.dmax_denit_crops = update(vs.dmax_denit_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("dmax_denit_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.km_denit_crops = update(vs.km_denit_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("km_denit_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.dmax_denit_crops = update(vs.dmax_denit_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("dmax_denit_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            # nitrification parameters
+            vs.km_nit_crops = update(vs.km_nit_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("km_nit_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.dmax_nit_crops = update(vs.dmax_nit_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("dmax_nit_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.km_nit_crops = update(vs.km_nit_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("km_nit_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.dmax_nit_crops = update(vs.dmax_nit_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("dmax_nit_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+
 
             vs.S_PWP_RZ = update(vs.S_PWP_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_pwp_rz", self._input_dir1, f'SVATCROP_{lys_experiment}_bootstrap.nc'))
             vs.S_SAT_RZ = update(vs.S_SAT_RZ, at[2:-2, 2:-2, :], self._read_var_from_nc("S_sat_rz", self._input_dir1, f'SVATCROP_{lys_experiment}_bootstrap.nc'))
@@ -213,19 +226,19 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs.S_sat_ss = update(vs.S_sat_ss, at[2:-2, 2:-2], self._read_var_from_nc("S_sat_ss", self._input_dir1, f'SVATCROP_{lys_experiment}_bootstrap.nc')[:, :, 0])
 
             # partition coefficients
-            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._read_var_from_nc("alpha_transp_winter-barley", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._read_var_from_nc("alpha_q_winter-barley", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], self._read_var_from_nc("alpha_transp_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], self._read_var_from_nc("alpha_q_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
             # denitrification parameters
-            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit_winter-barley", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_denit_winter-barley", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_denit_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("km_denit_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
             # nitrification parameters
-            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit_winter-barley", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit_winter-barley", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_nit_winter-barley", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], self._read_var_from_nc("dmax_denit_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("km_nit_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
             vs.km_nit_ss = update(vs.km_nit_ss, at[2:-2, 2:-2], 0)
-            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit_winter-barley", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], self._read_var_from_nc("dmax_nit_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
             vs.dmax_nit_ss = update(vs.dmax_nit_ss, at[2:-2, 2:-2], 0)
-            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kmin_winter-barley", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+            vs.kmin_rz = update(vs.kmin_rz, at[2:-2, 2:-2], self._read_var_from_nc("kmin", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
             vs.kmin_ss = update(vs.kmin_ss, at[2:-2, 2:-2], 0)
             # gaseous loss parameters
             vs.kngl_rz = update(vs.kngl_rz, at[2:-2, 2:-2], 40)
@@ -241,9 +254,9 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 vs.sas_params_re_rg = update(vs.sas_params_re_rg, at[2:-2, 2:-2, 0], 1)
                 vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 1)
             elif transport_model_structure == 'advection-dispersion-power':
-                vs.k_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("k_transp_crops", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+                vs.k_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("k_transp_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                 vs.k_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_transp_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-                vs.k_q_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("k_q_crops", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+                vs.k_q_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("k_q_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                 vs.k_q_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("k_q_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.25)
@@ -260,13 +273,13 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
                 vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_re_rl = update(vs.sas_params_re_rl, at[2:-2, 2:-2, 1], 3)
             elif settings.tm_structure == "time-variant_advection-dispersion-power":
-                vs.c1_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("c1_transp_crops", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+                vs.c1_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("c1_transp_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                 vs.c1_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("c1_transp_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-                vs.c1_q_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("c1_q_crops", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+                vs.c1_q_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("c1_q_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                 vs.c1_q_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("c1_q_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-                vs.c2_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("c2_transp_crops", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+                vs.c2_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("c2_transp_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                 vs.c2_transp_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("c2_transp_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
-                vs.c2_q_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("c2_q_crops", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
+                vs.c2_q_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 0], self._read_var_from_nc("c2_q_crop", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                 vs.c2_q_crops = update(vs.alpha_transp_crops, at[2:-2, 2:-2, 1], self._read_var_from_nc("c2_q_bare", self._base_path, f"parameters_for_{transport_model_structure}_{lys_experiment}.nc"))
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 0], 6)
                 vs.sas_params_evap_soil = update(vs.sas_params_evap_soil, at[2:-2, 2:-2, 1], 0.25)
@@ -353,58 +366,31 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs.z_root = update(vs.z_root, at[2:-2, 2:-2, vs.tau], vs.Z_ROOT[2:-2, 2:-2, vs.itt])
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.LU_ID[2:-2, 2:-2, vs.itt])
                 
-            if vs.itt < settings.nitt - 31:
-                if (vs.LU_ID[2:-2, 2:-2, vs.itt+30] != vs.LU_ID[2:-2, 2:-2, vs.itt+31]).any():
-                    lu_id = int(vs.LU_ID[2, 2, vs.itt])
-                    crop = self._dict_crops[lu_id]
-                    if lu_id == 563:
-                        i = 0
-                        _i = 0
-                    elif lu_id == 557:
-                        i = 1
-                        _i = 0
-                    elif lu_id == 559:
-                        i = 2
-                        _i = 0
-                    elif lu_id == 560:
-                        i = 3
-                        _i = 0
-                    elif lu_id == 539:
-                        i = 4
-                        _i = 0
-                    elif lu_id == 556:
-                        i = 5
-                        _i = 0
-                    elif lu_id == 564:
-                        i = 6
-                        _i = 0
-                    elif lu_id == 599:
-                        i = 7
-                        _i = 1 
-                    # partition coefficients
-                    vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], vs.alpha_transp_crops[2:-2, 2:-2, i])
-                    vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], vs.alpha_q_crops[2:-2, 2:-2, i])
-                    # denitrification parameters
-                    vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], vs.km_denit_crops[2:-2, 2:-2, i])
-                    vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], vs.km_denit_crops[2:-2, 2:-2, i])
-                    # nitrification parameters
-                    vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], vs.dmax_denit_crops[2:-2, 2:-2, i])
-                    vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], vs.dmax_denit_crops[2:-2, 2:-2, i])
-                    vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], vs.km_nit_crops[2:-2, 2:-2, i])
-                    vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], vs.dmax_nit_crops[2:-2, 2:-2, i])
+            mask_bare = (vs.z_root[:, :, vs.tau] <= 200) 
+            # partition coefficients
+            vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], npx.where(mask_bare[2:-2, 2:-2], vs.alpha_transp_crops[2:-2, 2:-2, 0], vs.alpha_transp_crops[2:-2, 2:-2, 1]))
+            vs.alpha_q = update(vs.alpha_q, at[2:-2, 2:-2], npx.where(mask_bare[2:-2, 2:-2], vs.alpha_q_crops[2:-2, 2:-2, 0], vs.alpha_q_crops[2:-2, 2:-2, 1]))
+            # denitrification parameters
+            vs.km_denit_rz = update(vs.km_denit_rz, at[2:-2, 2:-2], npx.where(mask_bare[2:-2, 2:-2], vs.km_denit_crops[2:-2, 2:-2, 0], vs.km_denit_crops[2:-2, 2:-2, 1]))
+            vs.km_denit_ss = update(vs.km_denit_ss, at[2:-2, 2:-2], npx.where(mask_bare[2:-2, 2:-2], vs.km_denit_crops[2:-2, 2:-2, 0], vs.km_denit_crops[2:-2, 2:-2, 1]))
+            vs.dmax_denit_rz = update(vs.dmax_denit_rz, at[2:-2, 2:-2], npx.where(mask_bare[2:-2, 2:-2], vs.km_denit_crops[2:-2, 2:-2, 0], vs.dmax_denit_crops[2:-2, 2:-2, 1]))
+            vs.dmax_denit_ss = update(vs.dmax_denit_ss, at[2:-2, 2:-2], npx.where(mask_bare[2:-2, 2:-2], vs.dmax_denit_crops[2:-2, 2:-2, 0], vs.dmax_denit_crops[2:-2, 2:-2, 1]))
+            # nitrification parameters
+            vs.km_nit_rz = update(vs.km_nit_rz, at[2:-2, 2:-2], npx.where(mask_bare[2:-2, 2:-2], vs.km_nit_crops[2:-2, 2:-2, 0], vs.km_nit_crops[2:-2, 2:-2, 1]))
+            vs.dmax_nit_rz = update(vs.dmax_nit_rz, at[2:-2, 2:-2], npx.where(mask_bare[2:-2, 2:-2], vs.dmax_nit_crops[2:-2, 2:-2, 0], vs.dmax_nit_crops[2:-2, 2:-2, 1]))
 
-                    # sas parameters
-                    if settings.tm_structure == 'advection-dispersion-power':
-                        vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], vs.k_transp_crops[2:-2, 2:-2, _i])
-                        vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], vs.k_q_crops[2:-2, 2:-2, _i])
-                        vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], vs.k_q_crops[2:-2, 2:-2, _i])
-                    elif settings.tm_structure == 'time-variant_advection-dispersion-power':
-                        vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], vs.c1_transp_crops[2:-2, 2:-2, _i])
-                        vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], vs.c2_transp_crops[2:-2, 2:-2, _i])
-                        vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], vs.c1_q_crops[2:-2, 2:-2, _i])
-                        vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], vs.c2_q_crops[2:-2, 2:-2, _i])
-                        vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], vs.c1_q_crops[2:-2, 2:-2, _i])
-                        vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], vs.c2_q_crops[2:-2, 2:-2, _i])
+            # sas parameters
+            if settings.tm_structure == 'advection-dispersion-power':
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 1], npx.where(mask_bare[2:-2, 2:-2], vs.k_transp_crops[2:-2, 2:-2, 0], vs.k_transp_crops[2:-2, 2:-2, 1]))
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 1], npx.where(mask_bare[2:-2, 2:-2], vs.k_q_crops[2:-2, 2:-2, 0], vs.k_q_crops[2:-2, 2:-2, 1]))
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 1], npx.where(mask_bare[2:-2, 2:-2], vs.k_q_crops[2:-2, 2:-2, 0], vs.k_q_crops[2:-2, 2:-2, 1]))
+            elif settings.tm_structure == 'time-variant_advection-dispersion-power':
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], npx.where(mask_bare[2:-2, 2:-2], vs.c1_transp_crops[2:-2, 2:-2, 0], vs.c1_transp_crops[2:-2, 2:-2, 1]))
+                vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], npx.where(mask_bare[2:-2, 2:-2], vs.c2_transp_crops[2:-2, 2:-2, 0], vs.c2_transp_crops[2:-2, 2:-2, 1]))
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], npx.where(mask_bare[2:-2, 2:-2], vs.c1_q_crops[2:-2, 2:-2, 0], vs.c1_q_crops[2:-2, 2:-2, 1]))
+                vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], npx.where(mask_bare[2:-2, 2:-2], vs.c2_q_crops[2:-2, 2:-2, 0], vs.c2_q_crops[2:-2, 2:-2, 1]))
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], npx.where(mask_bare[2:-2, 2:-2], vs.c1_q_crops[2:-2, 2:-2, 0], vs.c1_q_crops[2:-2, 2:-2, 1]))
+                vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], npx.where(mask_bare[2:-2, 2:-2], vs.c2_q_crops[2:-2, 2:-2, 0], vs.c2_q_crops[2:-2, 2:-2, 1]))
 
 
         @roger_routine(
@@ -702,11 +688,6 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
         vs.Nmin_in = update_add(vs.Nmin_in, at[2:-2, 2:-2], -vs.Nmin_in[2:-2, 2:-2] * inf_ratio[2:-2, 2:-2])
         vs.Nmin_in = update(vs.Nmin_in, at[2:-2, 2:-2], npx.where((vs.Nmin_in[2:-2, 2:-2] < 0), 0, vs.Nmin_in[2:-2, 2:-2]))
         vs.inf_in_tracer = update(vs.inf_in_tracer, at[2:-2, 2:-2], npx.where((vs.inf_in_tracer[2:-2, 2:-2] > settings.cum_inf_for_N_input), 0, vs.inf_in_tracer[2:-2, 2:-2]))
-
-        # apply organic nitrogen fertilizer (contains 48% NH4)
-        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], 0)
-        vs.Nfert_org = update(vs.Nfert_org , at[2:-2, 2:-2], vs.NORG_IN[2:-2, 2:-2, vs.itt])
-        vs.Nfert_org = update(vs.Nfert_org, at[2:-2, 2:-2], npx.where(vs.Nfert_org[2:-2, 2:-2] < 0, 0, vs.Nfert_org[2:-2, 2:-2]))        
 
         vs.Nmin_rz = update_add(
             vs.Nmin_rz,

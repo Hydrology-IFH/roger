@@ -23,7 +23,7 @@ def main(job_type):
             if job_type == 'single-node':
                 tm1 = transport_models_abrev[tm]
                 tms = tm.replace(" ", "_")
-                script_name = f'svat_crop_{tracer}_{tm1}_mc-cs_{lys}'
+                script_name = f'svat_crop_{tracer}_{tm1}_mc-bc_{lys}'
                 output_path_ws = base_path_ws / 'reckenholz' / 'svat_crop_nitrate_monte_carlo_bare-crops'
                 lines = []
                 lines.append('#!/bin/bash\n')
