@@ -93,7 +93,7 @@ def main():
                         df_simulation.loc[cond, "heat_stress"] = 1
                         df_simulation.loc[:, "lu_id"] = ds["lu_id"].isel(x=x, y=0).values
                         df_simulation.loc[:, "crop_type"] = [dict_crop_types[lu_id] for lu_id in ds["lu_id"].isel(x=x, y=0).values]
-                        root_ventilation = ds["theta_rz"].isel(x=x, y=0).values - (df_parameters.loc[f"{soil_type}", "theta_pwp"] + df_parameters.loc[f"{soil_type}", "theta_ufc"])
+                        root_ventilation = (ds["theta_rz"].isel(x=x, y=0).values - (df_parameters.loc[f"{soil_type}", "theta_pwp"] + df_parameters.loc[f"{soil_type}", "theta_ufc"])) / df_parameters.loc[f"{soil_type}", "theta_ac"]
                         root_ventilation[root_ventilation < 0] = 0
                         root_ventilation[root_ventilation > 1] = 1
                         root_ventilation = (1 - root_ventilation) * 100
