@@ -420,6 +420,7 @@ def main(crop_rotation_scenario, tmp_dir):
                 "ground_cover",
                 "lu_id",
                 "ta",
+                "ta_max",
                 "theta_rz",
                 "ks",
                 "ks_ss"

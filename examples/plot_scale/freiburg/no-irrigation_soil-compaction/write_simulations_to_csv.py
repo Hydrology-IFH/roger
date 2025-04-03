@@ -83,7 +83,7 @@ def main():
                     df_simulation.loc[:, "theta_irrig"] = df_parameters.loc[f"{soil_type}", "theta_pwp"] + df_parameters.loc[f"{soil_type}", "theta_ufc"]
                     df_simulation.loc[:, "transp"] = ds["transp"].isel(x=x, y=0).values
                     df_simulation.loc[:, "perc"] = ds["q_ss"].isel(x=x, y=0).values
-                    df_simulation.loc[:, "ta_max"] = ds["ta_max"].isel(x=x, y=0).values
+                    df_simulation.loc[:, "ta_max"] = ds["ta"].isel(x=x, y=0).values
                     # calculate heat stress of crops
                     df_simulation.loc[:, "heat_stress"] = 0
                     ta_heat_stress_list = [dict_crop_heat_stress[lu_id] for lu_id in ds["lu_id"].isel(x=x, y=0).values]

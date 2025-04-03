@@ -443,7 +443,7 @@ def main(soil_compaction_scenario, irrigation_scenario, crop_rotation_scenario, 
             vs.year = update(vs.year, at[1], vs.YEAR[vs.itt])
             vs.z_root = update(vs.z_root, at[2:-2, 2:-2, vs.tau], vs.Z_ROOT[2:-2, 2:-2, vs.itt])
 
-            mask_bare = (vs.z_root[2:-2, 2:-2, vs.tau] > 200)
+            mask_bare = (vs.z_root[2:-2, 2:-2, vs.tau] < 200)
 
             # partition coefficients
             vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], npx.where(mask_bare, 0.0, 1.5))
@@ -451,11 +451,11 @@ def main(soil_compaction_scenario, irrigation_scenario, crop_rotation_scenario, 
 
             # sas parameters
             vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 3], 0.3)
-            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 0.6)
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], npx.where(mask_bare, 2.0, 1.5))
-            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], npx.where(mask_bare, 3.0, 1.5))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], npx.where(mask_bare, 2.0, 1.5))
-            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], npx.where(mask_bare, 3.0, 1.5))
+            vs.sas_params_transp = update(vs.sas_params_transp, at[2:-2, 2:-2, 4], 1.0)
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 3], npx.where(mask_bare, 1.5, 2.0))
+            vs.sas_params_q_rz = update(vs.sas_params_q_rz, at[2:-2, 2:-2, 4], npx.where(mask_bare, 1.5, 3.0))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 3], npx.where(mask_bare, 1.5, 2.0))
+            vs.sas_params_q_ss = update(vs.sas_params_q_ss, at[2:-2, 2:-2, 4], npx.where(mask_bare, 1.5, 3.0))
 
 
         @roger_routine(

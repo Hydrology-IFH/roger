@@ -70,6 +70,7 @@ def main(tmp_dir):
         perc_bs_sim = onp.zeros((nx, 1, len(idx)))
         transp_bs_sim = onp.zeros((nx, 1, len(idx)))
         perc_bs_obs = onp.zeros((nx, 1, len(idx)))
+        precip_bs_obs = onp.zeros((nx, 1, len(idx)))
 
         for nrow in range(nx):
             df_ground_cover = pd.DataFrame(index=idx, columns=['ground_cover'])
@@ -85,19 +86,24 @@ def main(tmp_dir):
                 df_perc_bs['perc_sim'] = ds_sim['q_ss'].isel(x=nrow, y=0).values
                 df_perc_bs['transp_sim'] = ds_sim['transp'].isel(x=nrow, y=0).values
                 df_perc_bs.loc[df_perc_bs.index[1]:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
+                df_perc_bs.loc[df_perc_bs.index[1]:, 'precip_obs'] = ds_obs['PREC'].isel(x=0, y=0).values
                 df_perc_bs = df_perc_bs.join(sample_no)
                 df_perc_bs.loc[:, 'sample_no'] = df_perc_bs.loc[:, 'sample_no'].bfill(limit=14)
                 perc_sim_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'perc_sim']
                 transp_sim_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'transp_sim']
                 perc_obs_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'perc_obs']
+                precip_obs_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'precip_obs']
                 sample_no['perc_sim_sum'] = perc_sim_sum.values
                 sample_no['transp_sim_sum'] = transp_sim_sum.values
                 sample_no['perc_obs_sum'] = perc_obs_sum.values
+                sample_no['precip_obs_sum'] = precip_obs_sum.values
                 df_perc_bs = df_perc_bs.join(sample_no['perc_sim_sum'])
                 df_perc_bs = df_perc_bs.join(sample_no['transp_sim_sum'])
                 df_perc_bs = df_perc_bs.join(sample_no['perc_obs_sum'])
+                df_perc_bs = df_perc_bs.join(sample_no['precip_obs_sum'])
                 # volume of observed bulk samples
                 perc_bs_obs[nrow, 0, :] = df_perc_bs.loc[:, 'perc_obs_sum'].values.astype(float)
+                precip_bs_obs[nrow, 0, :] = df_perc_bs.loc[:, 'precip_obs_sum'].values.astype(float)
                 # volume of simulated bulk samples
                 perc_bs_sim[nrow, 0, :] = df_perc_bs.loc[:, 'perc_sim_sum'].values.astype(float)
                 transp_bs_sim[nrow, 0, :] = df_perc_bs.loc[:, 'transp_sim_sum'].values.astype(float)
@@ -214,6 +220,14 @@ def main(tmp_dir):
             except ValueError:
                 var_obj = f.variables.get("q_ss_bs_obs")
                 var_obj[:, :, :] = perc_bs_obs
+            try:
+                v = f.create_variable("precip_bs_obs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
+                v[:, :, :] = precip_bs_obs
+                v.attrs.update(long_name="Volume of measured bulk samples", units="mm")
+            except ValueError:
+                var_obj = f.variables.get("precip_bs_obs")
+                var_obj[:, :, :] = precip_bs_obs
+
     return
 
 
