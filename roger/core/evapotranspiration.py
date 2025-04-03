@@ -383,7 +383,7 @@ def calc_transp(state):
     vs.transp_coeff = update(
         vs.transp_coeff,
         at[2:-2, 2:-2],
-        npx.where(mask_anoxia[2:-2, 2:-2], npx.where(((vs.S_lp_rz[2:-2, 2:-2]/vs.S_ac_rz[2:-2, 2:-2]) >= 0) & ((vs.S_lp_rz[2:-2, 2:-2]/vs.S_ac_rz[2:-2, 2:-2]) <= 1) , 1 - (vs.S_lp_rz[2:-2, 2:-2]/vs.S_ac_rz[2:-2, 2:-2]), 1), vs.transp_coeff[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
+        npx.where(mask_anoxia[2:-2, 2:-2], npx.where(((vs.S_lp_rz[2:-2, 2:-2]/vs.S_ac_rz[2:-2, 2:-2]) >= 0) & ((vs.S_lp_rz[2:-2, 2:-2]/vs.S_ac_rz[2:-2, 2:-2]) <= 1) , 1 - (vs.S_lp_rz[2:-2, 2:-2]/vs.S_ac_rz[2:-2, 2:-2])**1.5, 1), vs.transp_coeff[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
     transp_fp = allocate(state.dimensions, ("x", "y"))
