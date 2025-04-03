@@ -1,7 +1,7 @@
 irrigation_scenarios:
-- 20-ufc
-- 35-ufc
-- 50-ufc
+# - 20-ufc
+# - 35-ufc
+# - 50-ufc
 - crop-specific
 
 crop_rotation_scenarios:

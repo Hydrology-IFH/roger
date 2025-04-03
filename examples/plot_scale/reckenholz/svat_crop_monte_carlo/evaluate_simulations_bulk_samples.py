@@ -70,15 +70,27 @@ def main(tmp_dir):
         perc_bs_sim = onp.zeros((nx, 1, len(idx)))
         transp_bs_sim = onp.zeros((nx, 1, len(idx)))
         perc_bs_obs = onp.zeros((nx, 1, len(idx)))
-        precip_bs_obs = onp.zeros((nx, 1, len(idx)))
 
         for nrow in range(nx):
             df_ground_cover = pd.DataFrame(index=idx, columns=['ground_cover'])
             df_ground_cover['ground_cover'] = ds_sim['ground_cover'].isel(x=nrow, y=0).values
-            cond = (df_ground_cover.index.month == 7) & (df_ground_cover.index.day == 1)
-            gc_0701 = df_ground_cover.loc[cond, 'ground_cover'].min()
+            cond = (df_ground_cover.index.month == 6) & (df_ground_cover.index.day == 1) & (df_ground_cover.index.year == 2011)
+            gc_2011 = df_ground_cover.loc[cond, 'ground_cover'].values[0]
+            cond = (df_ground_cover.index.month == 5) & (df_ground_cover.index.day == 15) & (df_ground_cover.index.year == 2012)
+            gc_2012 = df_ground_cover.loc[cond, 'ground_cover'].values[0]
+            cond = (df_ground_cover.index.month == 5) & (df_ground_cover.index.day == 15) & (df_ground_cover.index.year == 2013)
+            gc_2013 = df_ground_cover.loc[cond, 'ground_cover'].values[0]
+            cond = (df_ground_cover.index.month == 5) & (df_ground_cover.index.day == 15) & (df_ground_cover.index.year == 2014)
+            gc_2014 = df_ground_cover.loc[cond, 'ground_cover'].values[0]
+            cond = (df_ground_cover.index.month == 6) & (df_ground_cover.index.day == 15) & (df_ground_cover.index.year == 2015)
+            gc_2015 = df_ground_cover.loc[cond, 'ground_cover'].values[0]
+            cond = (df_ground_cover.index.month == 5) & (df_ground_cover.index.day == 15) & (df_ground_cover.index.year == 2016)
+            gc_2016 = df_ground_cover.loc[cond, 'ground_cover'].values[0]
+            cond = (df_ground_cover.index.month == 6) & (df_ground_cover.index.day == 1) & (df_ground_cover.index.year == 2017)
+            gc_2017 = df_ground_cover.loc[cond, 'ground_cover'].values[0]
+            cond_gc = (gc_2011 >= 0.5) & (gc_2012 >= 0.5) & (gc_2013 >= 0.5) & (gc_2014 >= 0.5) & (gc_2015 >= 0.5) & (gc_2016 >= 0.5) & (gc_2017 >= 0.5)
 
-            if gc_0701 > 0.5:
+            if cond_gc:
                 # calculate simulated bulk samples
                 sample_no = pd.DataFrame(index=idx_bs, columns=['sample_no'])
                 sample_no['sample_no'] = range(len(sample_no.index))

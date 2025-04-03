@@ -443,7 +443,7 @@ def main(soil_compaction_scenario, irrigation_scenario, crop_rotation_scenario, 
             vs.year = update(vs.year, at[1], vs.YEAR[vs.itt])
             vs.z_root = update(vs.z_root, at[2:-2, 2:-2, vs.tau], vs.Z_ROOT[2:-2, 2:-2, vs.itt])
 
-            mask_bare = (vs.z_root[2:-2, 2:-2, vs.tau] < 200)
+            mask_bare = (vs.z_root[2:-2, 2:-2, vs.tau] <= 150)
 
             # partition coefficients
             vs.alpha_transp = update(vs.alpha_transp, at[2:-2, 2:-2], npx.where(mask_bare, 0.0, 1.5))
