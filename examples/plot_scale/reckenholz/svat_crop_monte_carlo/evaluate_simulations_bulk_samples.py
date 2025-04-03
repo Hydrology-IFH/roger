@@ -70,8 +70,7 @@ def main(tmp_dir):
         perc_bs_sim = onp.zeros((nx, 1, len(idx)))
         transp_bs_sim = onp.zeros((nx, 1, len(idx)))
         perc_bs_obs = onp.zeros((nx, 1, len(idx)))
-        perc_bs_sim[:, :, :] = onp.nan
-        transp_bs_sim[:, :, :] = onp.nan
+        precip_bs_obs = onp.zeros((nx, 1, len(idx)))
 
         for nrow in range(nx):
             df_ground_cover = pd.DataFrame(index=idx, columns=['ground_cover'])
@@ -87,6 +86,7 @@ def main(tmp_dir):
                 df_perc_bs['perc_sim'] = ds_sim['q_ss'].isel(x=nrow, y=0).values
                 df_perc_bs['transp_sim'] = ds_sim['transp'].isel(x=nrow, y=0).values
                 df_perc_bs.loc[df_perc_bs.index[1]:, 'perc_obs'] = ds_obs['PERC'].isel(x=0, y=0).values
+                df_perc_bs.loc[df_perc_bs.index[1]:, 'precip_obs'] = ds_obs['PREC'].isel(x=0, y=0).values
                 df_perc_bs = df_perc_bs.join(sample_no)
                 df_perc_bs.loc[:, 'sample_no'] = df_perc_bs.loc[:, 'sample_no'].bfill(limit=14)
                 perc_sim_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'perc_sim']
@@ -209,13 +209,6 @@ def main(tmp_dir):
             except ValueError:
                 var_obj = f.variables.get("transp_bs")
                 var_obj[:, :, :] = transp_bs_sim
-            try:
-                v = f.create_variable("q_ss_bs_obs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
-                v[:, :, :] = perc_bs_obs
-                v.attrs.update(long_name="Volume of measured bulk samples", units="mm")
-            except ValueError:
-                var_obj = f.variables.get("q_ss_bs_obs")
-                var_obj[:, :, :] = perc_bs_obs
     return
 
 

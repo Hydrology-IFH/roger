@@ -26,11 +26,15 @@ for lys_experiment in lys_experiments:
     sample_no['sample_no'] = range(len(sample_no.index))
     df_perc_bs = pd.DataFrame(index=idx, columns=['perc'])
     df_perc_bs.loc[:, 'perc'] = ds_obs['PERC'].isel(x=0, y=0).values
+    df_perc_bs.loc[:, 'precip'] = ds_obs['PREC'].isel(x=0, y=0).values
     df_perc_bs = df_perc_bs.join(sample_no)
     df_perc_bs.loc[:, 'sample_no'] = df_perc_bs.loc[:, 'sample_no'].bfill(limit=14)
     perc_obs_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'perc']
+    precip_obs_sum = df_perc_bs.groupby(['sample_no']).sum().loc[:, 'precip']
     sample_no['perc_bs'] = perc_obs_sum.values
+    sample_no['precip_bs'] = precip_obs_sum.values
     df_perc_bs = df_perc_bs.join(sample_no['perc_bs'])
+    df_perc_bs = df_perc_bs.join(sample_no['precip_bs'])
 
     # add simulated bulk samples to the dataset
     ds_obs.close()
@@ -44,3 +48,12 @@ for lys_experiment in lys_experiments:
             var_obj = f[f"{lys_experiment}"].variables.get("PERC_bs")
             var_obj[0, 0, :] = df_perc_bs['perc_bs'].values.astype(float)
             var_obj.attrs.update(long_name="Bulk samples of percolation", units="mm")
+
+        try:
+            v = f[f"{lys_experiment}"].create_variable("PRECIP_bs", ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
+            v[0, 0, :] = df_perc_bs['precip_bs'].values.astype(float)
+            v.attrs.update(long_name="Bulk samples of precipitation", units="mm")
+        except ValueError:
+            var_obj = f[f"{lys_experiment}"].variables.get("PRECIP_bs")
+            var_obj[0, 0, :] = df_perc_bs['precip_bs'].values.astype(float)
+            var_obj.attrs.update(long_name="Bulk samples of precipitation", units="mm")

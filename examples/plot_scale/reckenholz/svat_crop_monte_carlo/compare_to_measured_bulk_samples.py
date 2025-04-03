@@ -597,7 +597,6 @@ def main(tmp_dir):
     fig.savefig(path_fig, dpi=300)
     plt.close("all")
 
-
     lys_experiments = ["lys2", "lys3", "lys8"]
     fig, axs = plt.subplots(6, 1, sharey=True, sharex=True, figsize=(6, 4))
     for i, lys_experiment in enumerate(lys_experiments):
@@ -694,6 +693,113 @@ def main(tmp_dir):
     path_fig = base_path_figs / file_str
     fig.savefig(path_fig, dpi=300)
     plt.close("all")
+
+
+    lys_experiments = ["lys2", "lys3", "lys8"]
+    fig, axs = plt.subplots(6, 1, sharey=False, sharex=True, figsize=(6, 4))
+    for i, lys_experiment in enumerate(lys_experiments):
+        if i == 1:
+            i = 2
+        elif i == 2:
+            i = 4
+        # load parameters and metrics
+        file = Path(__file__).parent / "parameters.csv"
+        df_params_metrics = pd.read_csv(file, sep=";", skiprows=1)
+        file = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz") / "output" / "svat_crop_monte_carlo" / "KGE_bulk_samples.csv"
+        df_metric = pd.read_csv(file, sep=";")
+        df_params_metrics["E_multi"] = df_metric["avg"]
+        df_params_metrics.loc[:, "id"] = range(len(df_params_metrics.index))
+        df_params_metrics = df_params_metrics.sort_values(by=["E_multi"], ascending=False)
+        idx_best100 = df_params_metrics.loc[: df_params_metrics.index[99], "id"].values.tolist()
+        # load simulation
+        sim_hm_file = base_path_output / f"SVATCROP_{lys_experiment}.nc"
+        ds_sim_hm = xr.open_dataset(sim_hm_file, engine="h5netcdf")
+        # assign date
+        days_sim_hm = ds_sim_hm["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_sim_hm = num2date(
+            days_sim_hm,
+            units=f"days since {ds_sim_hm['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_sim_hm = ds_sim_hm.assign_coords(Time=("Time", date_sim_hm))
+
+        # load observations (measured data)
+        path_obs = Path(__file__).parent.parent / "observations" / "reckenholz_lysimeter.nc"
+        ds_obs = xr.open_dataset(path_obs, engine="h5netcdf", group=lys_experiment)
+        # assign date
+        days_obs = ds_obs["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date_obs = num2date(
+            days_obs,
+            units=f"days since {ds_obs['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        if lys_experiment == "lys2":
+            col = "blue"
+        elif lys_experiment == "lys3":
+            col = "blue"
+        elif lys_experiment == "lys8":
+            col = "blue"
+        ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+        obs_vals = ds_obs["PRECIP_bs"].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
+        df_obs.loc[:, "obs"] = obs_vals
+        # join observations on simulations
+        df_obs = df_obs.loc["2011-01-01":"2015-12-31", :].bfill(limit=14)
+        axs[i].set_yticks([])
+        ax2 = axs[i].twinx()
+        ax2.scatter(df_obs.index, df_obs.loc[:, "obs"].values, color=col, zorder=1, s=2)
+        ax2.set_xlim(df_obs.index[0], df_obs.index[-1])
+        ax2.set_ylim(0, )
+        ax2.set_ylabel('[mm/14 Tage]', color=col)
+        ax2.set_xlabel('')
+        ax2.xaxis.label.set_color(col)
+        ax2.tick_params(axis='y', colors=col)
+
+        if lys_experiment == "lys2":
+            col = "#dd1c77"
+        elif lys_experiment == "lys3":
+            col = "#c994c7"
+        elif lys_experiment == "lys8":
+            col = "#e7e1ef"
+        ds_obs = ds_obs.assign_coords(date=("Time", date_obs))
+        obs_vals = ds_obs["PERC_bs"].isel(x=0, y=0).values
+        df_obs = pd.DataFrame(index=date_obs, columns=["obs"])
+        df_obs.loc[:, "obs"] = obs_vals
+        sim_vals = ds_sim_hm["q_ss_bs"].isel(y=0).values[idx_best100, :].T
+        # join observations on simulations
+        df_eval = eval_utils.join_obs_on_sim(date_sim_hm, sim_vals, df_obs)
+        df_eval_ = df_eval.loc["2011-01-01":"2015-12-31", :].copy()
+        df_eval = df_eval.loc["2011-01-01":"2015-12-31", :].bfill(limit=14)
+        if lys_experiment == "lys2":
+            col = "#dd1c77"
+        elif lys_experiment == "lys3":
+            col = "#c994c7"
+        elif lys_experiment == "lys8":
+            col = "#e7e1ef"
+        # plot observed and simulated time series
+        sim_vals_min = onp.nanmin(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_max = onp.nanmax(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_median = onp.nanmedian(df_eval.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        sim_vals_median_ = onp.nanmedian(df_eval_.loc[:, "sim0":"sim99"].values.astype(onp.float64), axis=1)
+        axs[i+1].fill_between(df_eval.index, sim_vals_min, sim_vals_max, color=col, alpha=0.5, zorder=0)
+        axs[i+1].plot(df_eval.index, sim_vals_median, color=col, zorder=1)
+        axs[i+1].plot(df_eval.index, df_eval["obs"], color="blue")
+        axs[i+1].scatter(df_eval_.index, sim_vals_median_, color=col, zorder=1, s=2)
+        axs[i+1].scatter(df_eval_.index, df_eval["obs"], color="blue", s=2)
+        axs[i+1].set_xlim(df_eval.index[0], df_eval.index[-1])
+        axs[i+1].set_ylim(0, 150)
+        axs[i+1].set_ylabel('[mm/14 Tage]')
+        axs[i+1].set_xlabel('')
+    axs[-1].xaxis.set_major_formatter(mpl.dates.DateFormatter('%b-%y'))
+    axs[-1].set_xlabel('[Monat-Jahr]')
+    fig.tight_layout()
+    file_str = "comparison_percolation_bulk_samples_and_precipitation_bulk_samples.png"
+    path_fig = base_path_figs / file_str
+    fig.savefig(path_fig, dpi=300)
+    plt.close("all")
+
     return
 
 

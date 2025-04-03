@@ -12,8 +12,8 @@ import roger
 
 @click.command("main")
 def main():
-    # base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
-    base_path = Path(__file__).parent.parent
+    base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
+    # base_path = Path(__file__).parent.parent
     # identifiers for simulations
     lys_experiments = ["lys2", "lys3", "lys8"]
 
