@@ -73,9 +73,10 @@ def main():
                             os.makedirs(dir_csv_files)
                         # write simulation to csv
                         df_simulation = pd.DataFrame(
-                            index=date, columns=["precip", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "perc", "lu_id", "crop_type"]
+                            index=date, columns=["precip", "pet", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]
                         )
                         df_simulation.loc[:, "precip"] = onp.where(ds["irrig"].isel(x=x, y=0).values > 0, 0, ds["prec"].isel(x=x, y=0).values)
+                        df_simulation.loc[:, "pet"] = ds["pet"].isel(x=x, y=0).values
                         df_simulation.loc[:, "irrig"] = ds["irrig"].isel(x=x, y=0).values
                         df_simulation.loc[:, "canopy_cover"] = ds["ground_cover"].isel(x=x, y=0).values
                         df_simulation.loc[:, "z_root"] = ds["z_root"].isel(x=x, y=0).values
@@ -83,6 +84,7 @@ def main():
                         df_simulation.loc[:, "theta_rz"] = ds["theta_rz"].isel(x=x, y=0).values
                         df_simulation.loc[:, "theta_fc"] = df_parameters.loc[f"{soil_type}", "theta_pwp"] + df_parameters.loc[f"{soil_type}", "theta_ufc"]
                         df_simulation.loc[:, "transp"] = ds["transp"].isel(x=x, y=0).values
+                        df_simulation.loc[:, "evap_soil"] = ds["evap_soil"].isel(x=x, y=0).values
                         df_simulation.loc[:, "perc"] = ds["q_ss"].isel(x=x, y=0).values
                         df_simulation.loc[:, "ta_max"] = ds["ta_max"].isel(x=x, y=0).values
                         # calculate heat stress of crops
@@ -106,8 +108,8 @@ def main():
                             c_irr = onp.array(c_irr_list)
                             theta_irr = df_parameters.loc[f"{soil_type}", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}", "theta_ufc"])
                             df_simulation.loc[:, "theta_irrig"] = theta_irr
-                        df_simulation.columns =[["[mm/day]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "", ""],
-                                                ["precip", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "perc", "lu_id", "crop_type"]]
+                        df_simulation.columns =[["[mm/day]", "[mm/day]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
+                                                ["precip", "pet", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]]
                         df_simulation = df_simulation.iloc[1:, :] # remove initial values
                         df_simulation.to_csv(
                             dir_csv_files / "simulation.csv", sep=";"

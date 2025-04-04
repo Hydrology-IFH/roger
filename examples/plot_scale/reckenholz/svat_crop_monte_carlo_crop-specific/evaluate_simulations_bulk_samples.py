@@ -86,11 +86,9 @@ def main(tmp_dir):
             gc_2015 = df_ground_cover.loc[cond, 'ground_cover'].values[0]
             cond = (df_ground_cover.index.month == 5) & (df_ground_cover.index.day == 15) & (df_ground_cover.index.year == 2016)
             gc_2016 = df_ground_cover.loc[cond, 'ground_cover'].values[0]
-            cond = (df_ground_cover.index.month == 6) & (df_ground_cover.index.day == 1) & (df_ground_cover.index.year == 2017)
+            cond = (df_ground_cover.index.month == 6) & (df_ground_cover.index.day == 15) & (df_ground_cover.index.year == 2017)
             gc_2017 = df_ground_cover.loc[cond, 'ground_cover'].values[0]
             cond_gc = (gc_2011 >= 0.3) & (gc_2012 >= 0.3) & (gc_2013 >= 0.3) & (gc_2014 >= 0.3) & (gc_2015 >= 0.3) & (gc_2016 >= 0.3) & (gc_2017 >= 0.3)
-            print(f"Ground cover: {gc_2011}, {gc_2012}, {gc_2013}, {gc_2014}, {gc_2015}, {gc_2016}, {gc_2017}")
-            print(f"Ground cover condition: {cond_gc}")
 
             if cond_gc:
                 # calculate simulated bulk samples
