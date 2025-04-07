@@ -195,6 +195,9 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
             vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
             vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
 
+            mask = npx.isin(vs.lut_crops[:, 0], lut.WINTER_CROPS)
+            vs.lut_crops = update(vs.lut_crops, at[:, 5], npx.where(mask, vs.lut_crops[:, 5] * 2, vs.lut_crops[:, 5]))
+
         @roger_routine
         def set_topography(self, state):
             pass
@@ -323,8 +326,6 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 at[2:-2, 2:-2, : vs.taup1],
                 vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis],
             )
-
-            vs.update(set_initial_conditions_crops_kernel(state))
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):
@@ -485,38 +486,6 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
 
             vs.update(after_timestep_kernel(state))
             vs.update(after_timestep_crops_kernel(state))
-
-    @roger_kernel
-    def set_initial_conditions_crops_kernel(state):
-        vs = state.variables
-
-        # calculate time since growing
-        t_grow = allocate(state.dimensions, ("x", "y", "crops"))
-        t_grow = update(
-            t_grow,
-            at[2:-2, 2:-2, :],
-            npx.where(
-                vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] > 0,
-                (-1 / vs.root_growth_rate[2:-2, 2:-2, :])
-                * npx.log(
-                    1
-                    / (
-                        (vs.z_root_crop[2:-2, 2:-2, vs.taum1, :] / 1000 - vs.z_root_crop_max[2:-2, 2:-2, :] / 1000)
-                        * (-1 / (vs.z_root_crop_max[2:-2, 2:-2, :] / 1000 - vs.z_evap[2:-2, 2:-2, npx.newaxis] / 1000))
-                    )
-                ),
-                0,
-            ),
-        )
-
-        vs.t_grow_cc = update(vs.t_grow_cc, at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :])
-
-        vs.t_grow_root = update(vs.t_grow_root, at[2:-2, 2:-2, :2, :], t_grow[2:-2, 2:-2, npx.newaxis, :])
-
-        return KernelOutput(
-            t_grow_cc=vs.t_grow_cc,
-            t_grow_root=vs.t_grow_root,
-        )
 
     @roger_kernel
     def after_timestep_kernel(state):
