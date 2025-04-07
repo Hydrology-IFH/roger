@@ -75,8 +75,11 @@ def main():
                     df_simulation = pd.DataFrame(
                         index=date, columns=["precip", "pet", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]
                     )
+                    cond_bare = (ds["lu_id"].isel(x=x, y=0).values == 599)
                     df_simulation.loc[:, "precip"] = ds["prec"].isel(x=x, y=0).values
                     df_simulation.loc[:, "pet"] = ds["pet"].isel(x=x, y=0).values
+                    canopy_cover = ds["ground_cover"].isel(x=x, y=0).values
+                    canopy_cover[canopy_cover <= 0.03] = 0
                     df_simulation.loc[:, "canopy_cover"] = ds["ground_cover"].isel(x=x, y=0).values
                     df_simulation.loc[:, "z_root"] = ds["z_root"].isel(x=x, y=0).values
                     df_simulation.loc[:, "theta_rz"] = ds["theta_rz"].isel(x=x, y=0).values
@@ -99,20 +102,27 @@ def main():
                     root_ventilation[root_ventilation < 0] = 0
                     root_ventilation[root_ventilation > 1] = 1
                     root_ventilation = (1 - root_ventilation) * 100
+                    root_ventilation[cond_bare] = onp.nan
                     df_simulation.loc[:, "root_ventilation"] = root_ventilation
                     if irrigation_demand_scenario in ["15-ufc", "30-ufc", "50-ufc"]:
                         theta_irr = df_parameters.loc[f"{soil_type}", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}", "theta_ufc"])
+                        cond = (ds["lu_id"].isel(x=x, y=0).values == 599)
+                        theta_irr[cond] = onp.nan
                         df_simulation.loc[:, "theta_irrig"] = theta_irr
                         irr_demand = (theta_irr - ds["theta_rz"].isel(x=x, y=0).values) * ds["z_root"].isel(x=x, y=0).values
                         irr_demand[irr_demand < 0] = 0
+                        irr_demand[cond] = 0
                         df_simulation.loc[:, "irrigation_demand"] = irr_demand
                     else:
                         c_irr_list = [dict_crop_water_stress[lu_id] for lu_id in ds["lu_id"].isel(x=x, y=0).values]
                         c_irr = onp.array(c_irr_list)
                         theta_irr = df_parameters.loc[f"{soil_type}", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}", "theta_ufc"])
+                        cond = (ds["lu_id"].isel(x=x, y=0).values == 599)
+                        theta_irr[cond] = onp.nan
                         df_simulation.loc[:, "theta_irrig"] = theta_irr
                         irr_demand = (theta_irr - ds["theta_rz"].isel(x=x, y=0).values) * ds["z_root"].isel(x=x, y=0).values
                         irr_demand[irr_demand < 0] = 0
+                        irr_demand[cond] = 0
                         df_simulation.loc[:, "irrigation_demand"] = irr_demand
                     df_simulation.columns =[["[mm/day]", "[mm/day]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm]", "[%]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
                                             ["precip", "pet", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]]
