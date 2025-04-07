@@ -38,34 +38,42 @@ def calc_gdd(state):
         at[2:-2, 2:-2, vs.tau, :],
         npx.where(mask2[2:-2, 2:-2, :], vs.gdd[2:-2, 2:-2, :], 0),
     )
-    mask7 = mask_winter & (
-        (vs.doy[vs.tau] >= vs.doy_start)
-        | ((vs.doy[vs.tau] <= vs.doy_end) & (vs.doy[vs.tau] > arr0))
-    )
-    mask7 = mask_winter & (vs.doy[vs.tau] >= vs.doy_start)
-    vs.gdd_sum = update_add(
-        vs.gdd_sum,
-        at[2:-2, 2:-2, vs.tau, 2],
-        npx.where(mask7[2:-2, 2:-2, 2], vs.gdd[2:-2, 2:-2, 2], 0),
-    )
-    mask8 = mask_winter & (vs.doy[vs.tau] <= vs.doy_end) & (vs.doy[vs.tau] > arr0)
+    mask71 = mask_winter & (vs.gdd_sum[:, :, vs.tau, :] > 0) & (vs.doy[vs.tau] <= vs.doy_end) & (vs.doy[vs.tau] > arr0)
     vs.gdd_sum = update_add(
         vs.gdd_sum,
         at[2:-2, 2:-2, vs.tau, 0],
-        npx.where(mask8[2:-2, 2:-2, 0], vs.gdd[2:-2, 2:-2, 0], 0),
+        npx.where(mask71[2:-2, 2:-2, 0], vs.gdd[2:-2, 2:-2, 0], 0),
+    )
+    mask72 = mask_winter & (vs.doy[vs.tau] >= vs.doy_start)
+    vs.gdd_sum = update_add(
+        vs.gdd_sum,
+        at[2:-2, 2:-2, vs.tau, 2],
+        npx.where(mask72[2:-2, 2:-2, 2], vs.gdd[2:-2, 2:-2, 2], 0),
+    )
+    mask73 = mask_winter & (vs.doy[vs.tau] > vs.doy_end)
+    vs.gdd_sum = update(
+        vs.gdd_sum,
+        at[2:-2, 2:-2, vs.tau, 0],
+        npx.where(mask73[2:-2, 2:-2, 0], 0, vs.gdd_sum[2:-2, 2:-2, vs.tau, 0]),
     )
 
-    mask9 = mask_winter_catch & (vs.doy[vs.tau] >= vs.doy_start)
-    vs.gdd_sum = update_add(
-        vs.gdd_sum,
-        at[2:-2, 2:-2, vs.tau, 2],
-        npx.where(mask9[2:-2, 2:-2, 2], vs.gdd[2:-2, 2:-2, 2], 0),
-    )
-    mask10 = mask_winter_catch & (vs.doy[vs.tau] <= vs.doy_end) & (vs.doy[vs.tau] > arr0)
+    mask81 = mask_winter_catch & (vs.doy[vs.tau] >= vs.doy_start)
     vs.gdd_sum = update_add(
         vs.gdd_sum,
         at[2:-2, 2:-2, vs.tau, 0],
-        npx.where(mask10[2:-2, 2:-2, 0], vs.gdd[2:-2, 2:-2, 0], 0),
+        npx.where(mask81[2:-2, 2:-2, 0], vs.gdd[2:-2, 2:-2, 0], 0),
+    )
+    mask82 = mask_winter_catch & (vs.gdd_sum[:, :, vs.tau, :] > 0) & (vs.doy[vs.tau] <= vs.doy_end) & (vs.doy[vs.tau] > arr0)
+    vs.gdd_sum = update_add(
+        vs.gdd_sum,
+        at[2:-2, 2:-2, vs.tau, 0],
+        npx.where(mask82[2:-2, 2:-2, 0], vs.gdd[2:-2, 2:-2, 0], 0),
+    )
+    mask83 = mask_winter_catch & (vs.doy[vs.tau] > vs.doy_end)
+    vs.gdd_sum = update(
+        vs.gdd_sum,
+        at[2:-2, 2:-2, vs.tau, 0],
+        npx.where(mask83[2:-2, 2:-2, 0], 0, vs.gdd_sum[2:-2, 2:-2, vs.tau, 0]),
     )
 
     mask11 = mask_my_init_winter & (vs.doy[vs.tau] >= vs.doy_start)
@@ -106,7 +114,7 @@ def calc_gdd(state):
         npx.where(mask23[2:-2, 2:-2], vs.gdd[2:-2, 2:-2, 1], 0),
     )
 
-    mask24 = vs.gdd_sum[:, :, vs.tau, :] >= vs.gdd_start
+    mask24 = (vs.gdd_sum[:, :, vs.tau, :] >= vs.gdd_start)
     vs.gdd = update(
         vs.gdd,
         at[2:-2, 2:-2, :],
@@ -2156,7 +2164,6 @@ def calculate_crop_phenology(state):
                     at[2:-2, 2:-2, 1],
                     0,
                 )
-
             else:
                 vs.gdd_sum = update(
                     vs.gdd_sum,
