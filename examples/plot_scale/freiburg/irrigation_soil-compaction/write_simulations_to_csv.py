@@ -78,7 +78,9 @@ def main():
                         df_simulation.loc[:, "precip"] = onp.where(ds["irrig"].isel(x=x, y=0).values > 0, 0, ds["prec"].isel(x=x, y=0).values)
                         df_simulation.loc[:, "pet"] = ds["pet"].isel(x=x, y=0).values
                         df_simulation.loc[:, "irrig"] = ds["irrig"].isel(x=x, y=0).values
-                        df_simulation.loc[:, "canopy_cover"] = ds["ground_cover"].isel(x=x, y=0).values
+                        canopy_cover = ds["ground_cover"].isel(x=x, y=0).values
+                        canopy_cover[canopy_cover <= 0.03] = 0
+                        df_simulation.loc[:, "canopy_cover"] = canopy_cover
                         df_simulation.loc[:, "z_root"] = ds["z_root"].isel(x=x, y=0).values
                         df_simulation.loc[:, "irrigation_demand"] = ds["irr_demand"].isel(x=x, y=0).values
                         df_simulation.loc[:, "theta_rz"] = ds["theta_rz"].isel(x=x, y=0).values
@@ -99,6 +101,7 @@ def main():
                         root_ventilation[root_ventilation < 0] = 0
                         root_ventilation[root_ventilation > 1] = 1
                         root_ventilation = (1 - root_ventilation) * 100
+                        root_ventilation[cond_bare] = onp.nan
                         df_simulation.loc[:, "root_ventilation"] = root_ventilation
                         if irrigation_scenario in ["35-ufc", "45-ufc", "50-ufc", "80-ufc"]:
                             theta_irr = df_parameters.loc[f"{soil_type}", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}", "theta_ufc"])
