@@ -75,6 +75,7 @@ def main():
                         df_simulation = pd.DataFrame(
                             index=date, columns=["precip", "pet", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]
                         )
+                        cond_bare = (ds["lu_id"].isel(x=x, y=0).values == 599)
                         df_simulation.loc[:, "precip"] = onp.where(ds["irrig"].isel(x=x, y=0).values > 0, 0, ds["prec"].isel(x=x, y=0).values)
                         df_simulation.loc[:, "pet"] = ds["pet"].isel(x=x, y=0).values
                         df_simulation.loc[:, "irrig"] = ds["irrig"].isel(x=x, y=0).values
