@@ -293,6 +293,7 @@ def main():
                         fig.savefig(path_fig, dpi=300)
 
                         fig, axs = plt.subplots(4, 1, sharex=True, figsize=(6, 4))
+                        cond_bare = (data["canopy_cover"] <= 0.03)
                         data = dict_data[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-09-15" , :]
                         axs[0].plot(data.index, data["canopy_cover"], color="green", lw=2)
                         axs[0].set_ylabel('[-]')
@@ -302,14 +303,16 @@ def main():
                         axs[1].set_ylabel('[mm]')
                         axs[1].set_xlabel('')
                         axs[1].set_ylim(0, 100)
+                        data["root_ventilation"][cond_bare] = onp.nan
                         axs[2].plot(data.index, data["root_ventilation"], color="black", lw=2)
                         axs[2].set_ylabel('[%]')
                         axs[2].set_xlabel('')
                         axs[2].set_ylim(0, 100)
+                        data["heat_stress"][cond_bare] = 0
                         axs[3].plot(data.index, data["heat_stress"].cumsum(), color="magenta", lw=2)
                         axs[3].set_ylabel('[days]')
                         axs[3].set_xlabel('')
-                        axs[3].set_ylim(0, 50)
+                        axs[3].set_ylim(0, 100)
                         axs[3].set_xlabel('[Year-Month]')
                         fig.tight_layout()
                         file_str = f"canopy_cover_irrig_demand_root_ventilation_heat_stress_{scenario}_{irrigation_scenario}_{crop_rotation_scenario}_{soil_type}_{year}.png"
