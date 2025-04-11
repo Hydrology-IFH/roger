@@ -20,6 +20,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-rape",
                                                              "faba-bean",
                                                              "potato-early",
+                                                             "potato",
                                                              "sugar-beet",
                                                              "sugar-beet_yellow-mustard",
                                                              "vegetables",
@@ -52,7 +53,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat",
                                                              "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="grain-corn")
+                                                             "bare-grass"]), default="summer-barley")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no-irrigation_soil-compaction")
 @roger_base_cli
 def main(crop_rotation_scenario, tmp_dir):
@@ -388,6 +389,7 @@ def main(crop_rotation_scenario, tmp_dir):
             diagnostics["rate"].output_variables = [
                 "prec",
                 "pet",
+                "pt",
                 "aet",
                 "transp",
                 "evap_soil",

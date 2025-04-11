@@ -389,7 +389,13 @@ def calc_transp(state):
     transp_fp = allocate(state.dimensions, ("x", "y"))
     transp_lp = allocate(state.dimensions, ("x", "y"))
 
-    # potential transpiration
+    # potential transpiration (energy limited)
+    vs.pt = update(
+        vs.pt,
+        at[2:-2, 2:-2],
+        vs.pet_res[2:-2, 2:-2] * vs.basal_transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    # potential transpiration (water limited)
     vs.ptransp = update(
         vs.ptransp,
         at[2:-2, 2:-2],

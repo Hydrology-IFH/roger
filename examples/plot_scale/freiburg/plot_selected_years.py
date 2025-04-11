@@ -46,13 +46,13 @@ def main():
 
     # identifiers of simulations
     scenarios = ["irrigation", "no-irrigation", "irrigation_soil-compaction", "no-irrigation_soil-compaction"]
+    scenarios = ["no-irrigation", "no-irrigation_soil-compaction"]
     irrigation_scenarios = ["crop-specific",
                             ]
     crop_rotation_scenarios = ["grain-corn",
-                               "grain-corn_yellow-mustard",
-                               "grain-corn_winter-wheat_winter-rape",
-                               "grain-corn_winter-wheat_winter-rape_yellow-mustard",
-                               "winter-wheat"
+                               "winter-wheat",
+                               "summer-barley",
+                               "potato"
                                ]
     soil_types = ["sandy_soil_type", "silty_soil_type", "clayey_soil_type"]
     for irrigation_scenario in irrigation_scenarios:
@@ -75,25 +75,25 @@ def main():
                 df_simulation.index = pd.to_datetime(df_simulation.index)
                 dict_data["no-irrigation_soil-compaction"][irrigation_scenario][crop_rotation_scenario][soil_type] = df_simulation
 
-    for irrigation_scenario in irrigation_scenarios:
-        dict_data["irrigation"][irrigation_scenario] = {}
-        for crop_rotation_scenario in crop_rotation_scenarios:
-            dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario] = {}
-            for soil_type in soil_types:
-                dir_csv_file = base_path / "output" / "irrigation" / irrigation_scenario / crop_rotation_scenario / soil_type
-                df_simulation = pd.read_csv(dir_csv_file / "simulation.csv", sep=";", skiprows=1, index_col=0)
-                df_simulation.index = pd.to_datetime(df_simulation.index)
-                dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type] = df_simulation
+    # for irrigation_scenario in irrigation_scenarios:
+    #     dict_data["irrigation"][irrigation_scenario] = {}
+    #     for crop_rotation_scenario in crop_rotation_scenarios:
+    #         dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario] = {}
+    #         for soil_type in soil_types:
+    #             dir_csv_file = base_path / "output" / "irrigation" / irrigation_scenario / crop_rotation_scenario / soil_type
+    #             df_simulation = pd.read_csv(dir_csv_file / "simulation.csv", sep=";", skiprows=1, index_col=0)
+    #             df_simulation.index = pd.to_datetime(df_simulation.index)
+    #             dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type] = df_simulation
 
-    for irrigation_scenario in irrigation_scenarios:
-        dict_data["irrigation_soil-compaction"][irrigation_scenario] = {}
-        for crop_rotation_scenario in crop_rotation_scenarios:
-            dict_data["irrigation_soil-compaction"][irrigation_scenario][crop_rotation_scenario] = {}
-            for soil_type in soil_types:
-                dir_csv_file = base_path / "output" / "irrigation_soil-compaction" / irrigation_scenario / crop_rotation_scenario / soil_type
-                df_simulation = pd.read_csv(dir_csv_file / "simulation.csv", sep=";", skiprows=1, index_col=0)
-                df_simulation.index = pd.to_datetime(df_simulation.index)
-                dict_data["irrigation_soil-compaction"][irrigation_scenario][crop_rotation_scenario][soil_type] = df_simulation
+    # for irrigation_scenario in irrigation_scenarios:
+    #     dict_data["irrigation_soil-compaction"][irrigation_scenario] = {}
+    #     for crop_rotation_scenario in crop_rotation_scenarios:
+    #         dict_data["irrigation_soil-compaction"][irrigation_scenario][crop_rotation_scenario] = {}
+    #         for soil_type in soil_types:
+    #             dir_csv_file = base_path / "output" / "irrigation_soil-compaction" / irrigation_scenario / crop_rotation_scenario / soil_type
+    #             df_simulation = pd.read_csv(dir_csv_file / "simulation.csv", sep=";", skiprows=1, index_col=0)
+    #             df_simulation.index = pd.to_datetime(df_simulation.index)
+    #             dict_data["irrigation_soil-compaction"][irrigation_scenario][crop_rotation_scenario][soil_type] = df_simulation
 
     for irrigation_scenario in irrigation_scenarios:
         for crop_rotation_scenario in crop_rotation_scenarios:
@@ -134,9 +134,9 @@ def main():
                     # fig.savefig(file, dpi=300)
 
                     # fig, axs = plt.subplots(1, 1, figsize=(6, 2.5))
-                    # data = dict_data["no-irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-09-15" , :]
+                    # data = dict_data["no-irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-10-15" , :]
                     # axs.plot(data.index, data["canopy_cover"], color="orange")
-                    # data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-04-01":f"{year}-09-15" , :]
+                    # data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-04-01":f"{year}-10-15" , :]
                     # axs.plot(data.index, data["canopy_cover"], color="blue")
                     # axs.set_ylim(0, )
                     # axs.set_xlim(data.index[0], data.index[-1])
@@ -149,9 +149,9 @@ def main():
                     # fig.savefig(file, dpi=300)
 
                     # fig, axs = plt.subplots(1, 1, figsize=(6, 2.5))
-                    # data = dict_data["no-irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-09-15" , :]
+                    # data = dict_data["no-irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-10-15" , :]
                     # axs.plot(data.index, (data["z_root"]/1000), color="orange")
-                    # data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-04-01":f"{year}-09-15" , :]
+                    # data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-04-01":f"{year}-10-15" , :]
                     # axs.plot(data.index, data["z_root"]/1000, color="blue")
                     # axs.set_ylim(0, )
                     # # reverse y-axis
@@ -166,7 +166,7 @@ def main():
                     # fig.savefig(file, dpi=300)
 
                     # fig, axs = plt.subplots(1, 1, figsize=(6, 2.5))
-                    # data = dict_data["no-irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-09-15" , :]
+                    # data = dict_data["no-irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-10-15" , :]
                     # axs.plot(data.index, data["irrigation_demand"], color="orange")
                     # axs.set_ylim(0, )
                     # axs.set_xlim(data.index[0], data.index[-1])
@@ -179,7 +179,7 @@ def main():
                     # fig.savefig(file, dpi=300)
 
                     # fig, axs = plt.subplots(1, 1, figsize=(6, 2.5))
-                    # data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-09-15" , :]
+                    # data = dict_data["irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-10-15" , :]
                     # axs.plot(data.index, data["irrig"], color="blue")
                     # axs.set_ylim(0, )
                     # axs.set_xlim(data.index[0], data.index[-1])
@@ -193,7 +193,7 @@ def main():
 
 
                     # fig, ax = plt.subplots(1, 1, sharex=True, figsize=(6, 4))
-                    # data = dict_data["no-irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-09-15" , :]
+                    # data = dict_data["no-irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-10-15" , :]
                     # ax1 = ax.twinx()
                     # ax1.bar(data.index, data["precip"], color="blue", width=1)
                     # ax1.set_ylabel('[mm/day]')
@@ -214,7 +214,7 @@ def main():
 
 
                     # fig, ax = plt.subplots(1, 1, sharex=True, figsize=(6, 4))
-                    # data = dict_data["no-irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-09-15" , :]
+                    # data = dict_data["no-irrigation"][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-10-15" , :]
                     # ax1 = ax.twinx()
                     # ax1.bar(data.index, data["precip"], color="blue", width=1)
                     # ax1.set_ylabel('[mm/day]')
@@ -236,7 +236,7 @@ def main():
 
                     for scenario in scenarios:
                         fig, axs = plt.subplots(4, 1, sharex=True, figsize=(6, 4))
-                        data = dict_data[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-09-15" , :]
+                        data = dict_data[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-10-15" , :]
                         axs[0].bar(data.index, data["precip"], color="blue", width=1)
                         if scenario in ["irrigation", "irrigation_soil-compaction"]:
                             axs[0].bar(data.index, data["irrig"], color="cyan", width=1)
@@ -266,7 +266,7 @@ def main():
                         plt.close("all")
 
                         fig, axs = plt.subplots(4, 1, sharex=True, figsize=(6, 4))
-                        data = dict_data[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-09-15" , :]
+                        data = dict_data[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-10-15" , :]
                         if scenario in ["irrigation", "irrigation_soil-compaction"]:
                             axs[0].bar(data.index, data["irrig"], color="cyan", width=1)
                             axs[0].set_ylabel('[mm/day]')
@@ -294,7 +294,7 @@ def main():
 
                         fig, axs = plt.subplots(4, 1, sharex=True, figsize=(6, 4))
                         cond_bare = (data["canopy_cover"] <= 0.03)
-                        data = dict_data[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-09-15" , :]
+                        data = dict_data[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-10-15" , :]
                         axs[0].plot(data.index, data["canopy_cover"], color="green", lw=2)
                         axs[0].set_ylabel('[-]')
                         axs[0].set_xlabel('')
@@ -318,6 +318,33 @@ def main():
                         file_str = f"canopy_cover_irrig_demand_root_ventilation_heat_stress_{scenario}_{irrigation_scenario}_{crop_rotation_scenario}_{soil_type}_{year}.png"
                         path_fig = base_path / "figures" / file_str
                         fig.savefig(path_fig, dpi=300)
+
+                        fig, axs = plt.subplots(4, 1, sharex=True, figsize=(6, 4))
+                        cond_bare = (data["canopy_cover"] <= 0.03)
+                        data = dict_data[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-03-01":f"{year}-10-15" , :]
+                        axs[0].plot(data.index, data["photosynthesis_index"], color="green", lw=2)
+                        axs[0].set_ylabel('PI [-]')
+                        axs[0].set_xlabel('')
+                        axs[0].set_ylim(0, 1)
+                        axs[1].plot(data.index, data["canopy_cover"], color="green", lw=2)
+                        axs[1].set_ylabel('CC [-]')
+                        axs[1].set_xlabel('')
+                        axs[1].set_ylim(0, 1)
+                        axs[2].plot(data.index, data["z_root"] / 1000, color="brown", lw=2)
+                        axs[2].set_ylabel('root depht\n[m]')
+                        axs[2].set_xlabel('')
+                        axs[2].set_ylim(0, 1.5)
+                        axs[2].invert_yaxis()
+                        axs[3].plot(data.index, data["irrigation_demand"], color="orange", lw=2)
+                        axs[3].set_ylabel('Irrig. dem.\n[mm]')
+                        axs[3].set_xlabel('')
+                        axs[3].set_ylim(0, 100)
+                        axs[3].set_xlabel('[Year-Month]')
+                        fig.tight_layout()
+                        file_str = f"photosynthesis-index_canopy-cover_root-depth_irrig-demand_root_ventilation_{scenario}_{irrigation_scenario}_{crop_rotation_scenario}_{soil_type}_{year}.png"
+                        path_fig = base_path / "figures" / file_str
+                        fig.savefig(path_fig, dpi=300)
+
 
                         plt.close("all")
 
