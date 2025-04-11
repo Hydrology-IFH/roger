@@ -65,7 +65,7 @@ Short description of land use (lu_id)
 - `521`: legumes
 - `522`: intensive fruit-growing
 - `523`: potato
-- `524`: clover
+- `524`: to be determined
 - `525`: grain corn
 - `526`: herbs
 - `527`: false flax

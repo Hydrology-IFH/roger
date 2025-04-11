@@ -73,11 +73,14 @@ def main():
                             os.makedirs(dir_csv_files)
                         # write simulation to csv
                         df_simulation = pd.DataFrame(
-                            index=date, columns=["precip", "pet", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]
+                            index=date, columns=["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]
                         )
                         cond_bare = (ds["lu_id"].isel(x=x, y=0).values == 599)
                         df_simulation.loc[:, "precip"] = onp.where(ds["irrig"].isel(x=x, y=0).values > 0, 0, ds["prec"].isel(x=x, y=0).values)
                         df_simulation.loc[:, "pet"] = ds["pet"].isel(x=x, y=0).values
+                        df_simulation.loc[:, "pt"] = ds["pt"].isel(x=x, y=0).values
+                        df_simulation.loc[:, "photosynthesis_index"] = ds["transp"].isel(x=x, y=0).values / ds["pt"].isel(x=x, y=0).values
+                        df_simulation.loc[cond_bare, "photosynthesis_index"] = onp.nan
                         df_simulation.loc[:, "irrig"] = ds["irrig"].isel(x=x, y=0).values
                         canopy_cover = ds["ground_cover"].isel(x=x, y=0).values
                         canopy_cover[canopy_cover <= 0.03] = 0
@@ -107,13 +110,15 @@ def main():
                         if irrigation_scenario in ["35-ufc", "45-ufc", "50-ufc", "80-ufc"]:
                             theta_irr = df_parameters.loc[f"{soil_type}", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}", "theta_ufc"])
                             df_simulation.loc[:, "theta_irrig"] = theta_irr
+                            df_simulation.loc[cond_bare, "theta_irrig"] = onp.nan
                         else:
                             c_irr_list = [dict_crop_water_stress[lu_id] for lu_id in ds["lu_id"].isel(x=x, y=0).values]
                             c_irr = onp.array(c_irr_list)
                             theta_irr = df_parameters.loc[f"{soil_type}", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}", "theta_ufc"])
                             df_simulation.loc[:, "theta_irrig"] = theta_irr
-                        df_simulation.columns =[["[mm/day]", "[mm/day]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
-                                                ["precip", "pet", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]]
+                            df_simulation.loc[cond_bare, "theta_irrig"] = onp.nan
+                        df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
+                                                ["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]]
                         df_simulation = df_simulation.iloc[1:, :] # remove initial values
                         df_simulation.to_csv(
                             dir_csv_files / "simulation.csv", sep=";"

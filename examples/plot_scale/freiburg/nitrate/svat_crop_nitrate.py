@@ -19,6 +19,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-rape",
                                                              "faba-bean",
                                                              "potato-early",
+                                                             "potato",
                                                              "sugar-beet",
                                                              "sugar-beet_yellow-mustard",
                                                              "vegetables",
