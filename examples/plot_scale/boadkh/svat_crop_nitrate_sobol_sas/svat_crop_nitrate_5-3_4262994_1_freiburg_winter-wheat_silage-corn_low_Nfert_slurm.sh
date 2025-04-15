@@ -23,9 +23,9 @@ cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/svat_crop_nitrate_s
 # Copy fluxes and states from global workspace to local SSD
 echo "Copy fluxes and states from global workspace to local SSD"
 # Compares hashes
-checksum_gws=$(shasum -a 256 /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop/SVATCROP_freiburg_winter-wheat_silage-corn.nc | cut -f 1 -d " ")
+checksum_gws=$(shasum -a 256 /pfs/work9/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop/SVATCROP_freiburg_winter-wheat_silage-corn.nc | cut -f 1 -d " ")
 checksum_ssd=0a
-cp /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop/SVATCROP_freiburg_winter-wheat_silage-corn.nc "${TMPDIR}"
+cp /pfs/work9/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop/SVATCROP_freiburg_winter-wheat_silage-corn.nc "${TMPDIR}"
 # Wait for termination of moving files
 while [ "${checksum_gws}" != "${checksum_ssd}" ]; do
 sleep 10
@@ -35,6 +35,6 @@ echo "Copying was successful"
  
 mpirun --bind-to core --map-by core -report-bindings python svat_crop_nitrate.py -b jax -d cpu -n 8 1 --float-type float64 --row 36 --id 5-3_4262994_1 --location freiburg --crop-rotation-scenario winter-wheat_silage-corn --fertilization-intensity low -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol_sas"
-mkdir -p /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol_sas
-mv "${TMPDIR}"/SVATCROPNITRATE_*.nc /pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol_sas
+echo "Move output to /pfs/work9/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol_sas"
+mkdir -p /pfs/work9/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol_sas
+mv "${TMPDIR}"/SVATCROPNITRATE_*.nc /pfs/work9/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh/svat_crop_nitrate_sobol_sas
