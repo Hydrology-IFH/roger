@@ -11,11 +11,11 @@ import roger.tools.evaluation as eval_utils
 base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
 lys_experiments = ["lys2", "lys3", "lys8"]
-tm_structures = ["advection-dispersion-power"]
+tm_structures = ["advection-dispersion-power", "time-variant_advection-dispersion-power"]
 
 for lys_experiment in lys_experiments:
     # load hydrologic simulation
-    states_hm_file = base_path / "output" / "svat_crop_monte_carlo_bare-crops" / f"SVATCROP_{lys_experiment}_bootstrap.nc"
+    states_hm_file = base_path / "output" / "svat_crop_monte_carlo" / f"SVATCROP_{lys_experiment}_bootstrap.nc"
     ds_sim_hm = xr.open_dataset(states_hm_file, engine="h5netcdf")
 
     # assign date

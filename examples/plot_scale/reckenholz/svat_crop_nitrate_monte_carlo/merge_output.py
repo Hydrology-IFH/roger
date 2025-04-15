@@ -15,7 +15,7 @@ def main():
 
     # merge model output into single file
     lys_experiments = ["lys2", "lys3", "lys8"]
-    tm_structures = ["advection-dispersion-power"]
+    tm_structures = ["advection-dispersion-power", "time-variant_advection-dispersion-power"]
     for lys_experiment in lys_experiments:
         for tm_structure in tm_structures:
             path = str(

@@ -1,9 +1,20 @@
 #!/bin/bash
+conda activate roger
 
-python no_irrigation/svat_crop.py -b numpy -d cpu --crop-rotation-scenario grain-corn_winter-wheat_winter-rape
-python no_irrigation/svat_crop.py -b numpy -d cpu --crop-rotation-scenario grain-corn_winter-wheat_winter-rape_yellow-mustard
+cd no-irrigation
+nohup ./run_roger.sh &
 
-python irrigation/svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-rape
-python irrigation/svat_crop.py -b numpy -d cpu --irrigation-scenario 35-ufc --crop-rotation-scenario grain-corn_winter-wheat_winter-rape_yellow-mustard
-python irrigation/svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario grain-corn_winter-wheat_winter-rape
-python irrigation/svat_crop.py -b numpy -d cpu --irrigation-scenario crop-specific --crop-rotation-scenario grain-corn_winter-wheat_winter-rape_yellow-mustard
+cd ../no-irrigation_soil-compaction
+nohup ./run_roger.sh &
+
+cd ../irrigation
+nohup ./run_roger_crop-specific.sh &
+nohup ./run_roger_20-ufc.sh &
+nohup ./run_roger_35-ufc.sh &
+nohup ./run_roger_50-ufc.sh &
+
+cd ../irrigation_soil-compaction
+nohup ./run_roger_crop-specific.sh &
+nohup ./run_roger_20-ufc.sh &
+nohup ./run_roger_35-ufc.sh &
+nohup ./run_roger_50-ufc.sh &
