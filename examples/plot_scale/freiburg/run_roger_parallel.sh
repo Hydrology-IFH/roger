@@ -1,5 +1,4 @@
 #!/bin/bash
-conda activate roger
 
 cd no-irrigation
 nohup ./run_roger.sh &
