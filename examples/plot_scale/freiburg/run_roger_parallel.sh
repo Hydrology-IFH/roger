@@ -1,4 +1,6 @@
 #!/bin/bash
+eval "$(conda shell.bash hook)"
+conda activate roger
 
 cd no-irrigation
 nohup ./run_roger.sh &
