@@ -8,8 +8,7 @@ import click
 def main():
     base_path = Path(__file__).parent
     base_path_bwuc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh"
-    # base_path_ws = Path("/pfs/work9/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh")
-    base_path_ws = Path("/pfs/work7/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh")
+    base_path_ws = Path("/pfs/work9/workspace/scratch/fr_rs1092-workspace1/roger/examples/plot_scale/boadkh")
 
     locations = ["freiburg", "lahr", "muellheim", 
                  "stockach", "gottmadingen", "weingarten",
@@ -130,7 +129,7 @@ def main():
                 output_path_ws = base_path_ws / "output" / "svat_crop_nitrate"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=14:00:00\n")
+                lines.append("#SBATCH --time=7:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
@@ -142,7 +141,7 @@ def main():
                 lines.append(f"#SBATCH --error={script_name}_err.out\n")
                 lines.append("#SBATCH --export=ALL\n")
                 lines.append(" \n")
-                # lines.append('module load devel/miniforge\n')
+                lines.append('module load devel/miniforge\n')
                 lines.append('eval "$(conda shell.bash hook)"\n')
                 lines.append("conda activate roger\n")
                 lines.append(f"cd {base_path_bwuc}/svat_crop_nitrate\n")
