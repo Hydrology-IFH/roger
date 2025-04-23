@@ -1,5 +1,4 @@
 #!/bin/bash
-conda activate roger
 
 nohup ./nitrate/run_roger_no_irrigation.sh &
 nohup ./nitrate/run_roger_no_irrigation_compaction.sh &
