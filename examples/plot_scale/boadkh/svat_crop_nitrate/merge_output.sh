@@ -10,7 +10,8 @@
 #SBATCH --output=merge_output.out
 #SBATCH --error=merge_output_err.out
 #SBATCH --export=ALL
- 
+
+module load devel/miniforge
 eval "$(conda shell.bash hook)"
 conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/boadkh/svat_crop_nitrate

@@ -210,10 +210,10 @@ for lys_experiment in lys_experiments:
                 df_params_metrics = df_params_metrics.copy()
 
         # write to .txt
-        file = base_path / "output" / "svat_crop_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_{tm_structure}.txt"
+        file = base_path / "output" / "svat_crop_nitrate_monte_carlo_bare-crops" / f"params_metrics_{lys_experiment}_{tm_structure}.txt"
         df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
 
-        file = base_path / "output" / "svat_crop_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_{tm_structure}.csv"
+        file = base_path / "output" / "svat_crop_nitrate_monte_carlo_bare-crops" / f"params_metrics_{lys_experiment}_{tm_structure}.csv"
         df_params_metrics.to_csv(file, header=True, index=False, sep=";")
 
         # add simulated bulk samples to the dataset

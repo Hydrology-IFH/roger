@@ -27,9 +27,9 @@ def main(job_type):
                 output_path_ws = base_path_ws / 'reckenholz' / 'svat_crop_nitrate_monte_carlo_crop-specific'
                 lines = []
                 lines.append('#!/bin/bash\n')
-                lines.append('#PBS -l nodes=1:ppn=40\n')
-                lines.append('#PBS -l walltime=72:00:00\n')
-                lines.append('#PBS -l pmem=12000mb\n')
+                lines.append('#PBS -l nodes=1:ppn=25\n')
+                lines.append('#PBS -l walltime=24:00:00\n')
+                lines.append('#PBS -l pmem=4000mb\n')
                 lines.append(f'#PBS -N {script_name}\n')
                 lines.append('#PBS -m bea\n')
                 lines.append('#PBS -M robin.schwemmle@hydrology.uni-freiburg.de\n')
