@@ -26,17 +26,18 @@ def main():
     for scenario in scenarios:
         if os.path.exists(str(base_path / "output" / dir_name / scenario)):
             for crop_rotation_scenario in crop_rotation_scenarios:
+                print(f"Processing {scenario} with crop rotation {crop_rotation_scenario}")
                 crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
                 if scenario in ["no_irrigation", "no-irrigation_soil-compaction"]:
                     path = str(base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}.*.nc")
-                    output_hm_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}.nc"
+                    output_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}.nc"
                 else:
                     path = str(base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}.*.nc")
-                    output_hm_file = base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}.nc"
-                if not os.path.exists(output_hm_file):
+                    output_file = base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}.nc"
+                if not os.path.exists(output_file):
                     diag_files = glob.glob(path)
                     if diag_files:
-                        with h5netcdf.File(output_hm_file, "w", decode_vlen_strings=False) as f:
+                        with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                             f.attrs.update(
                                 date_created=datetime.datetime.today().isoformat(),
                                 title=f"RoGeR-SAS-Nitrate simulations with {crop_rotation_scenario1} as crop rotation",
