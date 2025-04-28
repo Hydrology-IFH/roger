@@ -21,7 +21,6 @@ def main():
 
     # identifiers of the simulations
     scenarios = ["no-irrigation", "no-irrigation_soil-compaction", "irrigation", "irrigation_soil-compaction"]
-    scenarios = ["no-irrigation_soil-compaction"]
     crop_rotation_scenarios = config["crop_rotation_scenarios"]
     # merge model output into single file
     for scenario in scenarios:
@@ -29,12 +28,27 @@ def main():
             for crop_rotation_scenario in crop_rotation_scenarios:
                 print(f"Processing {scenario} with crop rotation {crop_rotation_scenario}")
                 crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
-                if scenario in ["no-irrigation", "no-irrigation_soil-compaction"]:
+                if scenario == "no-irrigation":
                     path = str(base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}.*.nc")
-                    output_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}.nc"
-                else:
+                    output_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_{crop_rotation_scenario}.nc"
+                    old_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}.nc"
+                elif scenario == "no-irrigation_soil-compaction":
+                    path = str(base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}_soil-compaction.*.nc")
+                    output_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_{crop_rotation_scenario}.nc"
+                    old_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}_soil-compaction.nc"
+                elif scenario == "irrigation_soil-compaction":
+                    path = str(base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_irrigation_{crop_rotation_scenario}_soil-compaction.*.nc")
+                    output_file = base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_{crop_rotation_scenario}.nc"
+                    old_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}_soil-copmaction.nc"
+                elif scenario == "irrigation":
                     path = str(base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}.*.nc")
-                    output_file = base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}.nc"
+                    output_file = base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_{crop_rotation_scenario}.nc"
+                    old_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}.nc"
+
+                old_file = str(base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_{crop_rotation_scenario}.nc")
+                if os.path.exists(old_file):
+                    os.rename(old_file, output_file)
+
                 if not os.path.exists(output_file):
                     diag_files = glob.glob(path)
                     print(path)
