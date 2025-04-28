@@ -38,6 +38,7 @@ def main():
                 if not os.path.exists(output_file):
                     diag_files = glob.glob(path)
                     print(path)
+                    print(diag_files)
                     if diag_files:
                         with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                             f.attrs.update(
