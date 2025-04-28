@@ -37,7 +37,7 @@ def main():
                     output_file = base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}.nc"
                 if not os.path.exists(output_file):
                     diag_files = glob.glob(path)
-                    print(diag_files)
+                    print(path)
                     if diag_files:
                         with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                             f.attrs.update(
