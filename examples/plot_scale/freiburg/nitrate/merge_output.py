@@ -78,6 +78,7 @@ def main():
                                     for var_sim in list(df.variables.keys()):
                                         var_obj = df.variables.get(var_sim)
                                         if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] > 2:
+                                            print(var_sim)
                                             v = f.create_variable(
                                                 var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
                                             )
@@ -87,10 +88,10 @@ def main():
                                         elif (
                                             var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] <= 2
                                         ):
+                                            print(var_sim)
                                             v = f.create_variable(
                                                 var_sim, ("x", "y"), float, compression="gzip", compression_opts=1
                                             )
-                                            print(var_sim)
                                             vals = onp.array(var_obj, dtype=float)
                                             v[:, :] = vals.swapaxes(0, 2)[:, :, 0]
                                             v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
