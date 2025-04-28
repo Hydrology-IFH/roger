@@ -29,7 +29,7 @@ def main():
             for crop_rotation_scenario in crop_rotation_scenarios:
                 print(f"Processing {scenario} with crop rotation {crop_rotation_scenario}")
                 crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
-                if scenario in ["no_irrigation", "no-irrigation_soil-compaction"]:
+                if scenario in ["no-irrigation", "no-irrigation_soil-compaction"]:
                     path = str(base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}.*.nc")
                     output_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}.nc"
                 else:
