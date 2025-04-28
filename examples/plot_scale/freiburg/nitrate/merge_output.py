@@ -20,16 +20,19 @@ def main():
         config = yaml.safe_load(file)
 
     # identifiers of the simulations
-    irrigation_scenarios = config["irrigation_scenarios"]
-    irrigation_scenarios.append("no_irrigation")
+    scenarios = ["irrigation", "no-irrigation", "no-irrigation_soil-compaction", "irrigation_soil-compaction"]
     crop_rotation_scenarios = config["crop_rotation_scenarios"]
     # merge model output into single file
-    for irrigation_scenario in irrigation_scenarios:
-        if os.path.exists(str(base_path / "output" / dir_name / irrigation_scenario)):
+    for scenario in scenarios:
+        if os.path.exists(str(base_path / "output" / dir_name / scenario)):
             for crop_rotation_scenario in crop_rotation_scenarios:
                 crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
-                path = str(base_path / "output" / dir_name/ irrigation_scenario / f"SVATCROPNITRATE_{irrigation_scenario}_{crop_rotation_scenario}.*.nc")
-                output_hm_file = base_path / "output" / dir_name/ irrigation_scenario / f"SVATCROPNITRATE_{irrigation_scenario}_{crop_rotation_scenario}.nc"
+                if scenario in ["no_irrigation", "no-irrigation_soil-compaction"]:
+                    path = str(base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}.*.nc")
+                    output_hm_file = base_path / "output" / dir_name / scenario / f"SVATCROPNITRATE_no_irrigation_{crop_rotation_scenario}.nc"
+                else:
+                    path = str(base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}.*.nc")
+                    output_hm_file = base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}.nc"
                 if not os.path.exists(output_hm_file):
                     diag_files = glob.glob(path)
                     if diag_files:
