@@ -21,7 +21,7 @@ def main():
 
     # identifiers of the simulations
     scenarios = ["no-irrigation", "no-irrigation_soil-compaction", "irrigation", "irrigation_soil-compaction"]
-    scenarios = ["no-irrigation"]
+    scenarios = ["no-irrigation_soil-compaction"]
     crop_rotation_scenarios = config["crop_rotation_scenarios"]
     # merge model output into single file
     for scenario in scenarios:
