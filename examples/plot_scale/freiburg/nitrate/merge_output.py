@@ -21,6 +21,7 @@ def main():
 
     # identifiers of the simulations
     scenarios = ["no-irrigation", "no-irrigation_soil-compaction", "irrigation", "irrigation_soil-compaction"]
+    scenarios = ["no-irrigation"]
     crop_rotation_scenarios = config["crop_rotation_scenarios"]
     # merge model output into single file
     for scenario in scenarios:
@@ -36,6 +37,7 @@ def main():
                     output_file = base_path / "output" / dir_name / scenario / "crop-specific" / f"SVATCROPNITRATE_crop-specific_{crop_rotation_scenario}.nc"
                 if not os.path.exists(output_file):
                     diag_files = glob.glob(path)
+                    print(diag_files)
                     if diag_files:
                         with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                             f.attrs.update(
