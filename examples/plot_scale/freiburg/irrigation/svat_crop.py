@@ -381,7 +381,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                         vs.prec_day = update(
                             vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 20 / (6 * 4), 0)[:, :, npx.newaxis]
                         )
-                        mask_crops = npx.isin(vs.lu_id[2:-2, 2:-2], [515, 550])
+                        mask_crops = npx.isin(vs.lu_id, [515, 550])
                         vs.irrig = update(
                             vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, 0)
                         )
@@ -390,7 +390,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                         vs.prec_day = update(
                             vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 20 / (6 * 4), 0)[:, :, npx.newaxis]
                         )
-                        mask_crops = npx.isin(vs.lu_id[2:-2, 2:-2], [541, 542, 543, 544, 546, 556, 557, 558, 559, 560, 579])
+                        mask_crops = npx.isin(vs.lu_id, [541, 542, 543, 544, 546, 556, 557, 558, 559, 560, 579])
                         vs.irrig = update(
                             vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, 0)
                         )
@@ -399,7 +399,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                         vs.prec_day = update(
                             vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 20 / (6 * 4), 0)[:, :, npx.newaxis]
                         )
-                        mask_crops = npx.isin(vs.lu_id[2:-2, 2:-2], [525, 539, 563, 575, 259, 510])
+                        mask_crops = npx.isin(vs.lu_id, [525, 539, 563, 575, 259, 510])
                         vs.irrig = update(
                             vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, 0)
                         )
@@ -408,7 +408,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                         vs.prec_day = update(
                             vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 20 / (6 * 4), 0)[:, :, npx.newaxis]
                         )
-                        mask_crops = npx.isin(vs.lu_id[2:-2, 2:-2], [513, 567])
+                        mask_crops = npx.isin(vs.lu_id, [513, 567])
                         vs.irrig = update(
                             vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, 0)
                         )
