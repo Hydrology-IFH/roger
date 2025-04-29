@@ -1,6 +1,4 @@
 #!/bin/bash
-eval "$(conda shell.bash hook)"
-conda activate roger
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario grain-corn
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario summer-barley
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario winter-wheat
@@ -42,6 +40,3 @@ python svat_crop.py -b numpy -d cpu --crop-rotation-scenario summer-wheat_winter
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario summer-wheat_winter-wheat_winter-rape_yellow-mustard
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario sugar-beet_winter-wheat_winter-barley_yellow-mustard
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario grain-corn_winter-wheat_winter-barley_yellow-mustard
-python svat_crop.py -b numpy -d cpu --crop-rotation-scenario asparagus
-python merge_output.py
-python write_simulations_to_csv.py

@@ -253,7 +253,7 @@ def main(crop_rotation_scenario, tmp_dir):
             )
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path.parent, "parameters.nc"))
             # represent soil compaction by reducing ks and air capacity of subsoil
-            vs.ks_ss = update(vs.ks_ss, at[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * 0.1)  # reduce ks by an order of magnitude
+            vs.ks_ss = update(vs.ks_ss, at[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * 0.2)  # reduce ks by an order of magnitude
             # reduce air capacity of subsoil to represent soil compaction
             # Mossadeghi-Björklund et al. (2019) Equation in Figure 3
             vs.theta_ac_ss = update(

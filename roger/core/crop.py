@@ -1005,6 +1005,7 @@ def calc_k_stress_root_growth(state):
     Calculates water stress coeffcient of crop root growth
     """
     vs = state.variables
+    settings = state.settings
 
     mask = vs.lu_id[:, :, npx.newaxis] == vs.crop_type
     vs.k_stress_root_growth = update(
@@ -1032,6 +1033,7 @@ def calc_root_growth(state):
     Calculates root growth of crops
     """
     vs = state.variables
+    settings = state.settings
 
     arr0 = allocate(state.dimensions, ("x", "y", "crops"))
     mask_summer = npx.isin(vs.crop_type, lut.SUMMER_CROPS)
@@ -1286,6 +1288,13 @@ def calc_root_growth(state):
         vs.z_root_crop,
         at[2:-2, 2:-2, vs.tau, :],
         npx.where(mask_bare[2:-2, 2:-2, :], vs.z_evap[2:-2, 2:-2, npx.newaxis], vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
+    )
+
+    if settings.enable_soil_compaction:
+        vs.z_root_crop = update(
+        vs.z_root_crop,
+        at[2:-2, 2:-2, vs.tau, :],
+        npx.where(vs.z_root_crop[2:-2, 2:-2, vs.tau, :] > 500, 500, vs.z_root_crop[2:-2, 2:-2, vs.tau, :]),
     )
 
     return KernelOutput(z_root_crop=vs.z_root_crop)
@@ -1619,6 +1628,8 @@ def redistribution(state):
 
     mask_root_growth = vs.z_root[:, :, vs.tau] > vs.z_root[:, :, vs.taum1]
     mask_root_loss = vs.z_root[:, :, vs.tau] < vs.z_root[:, :, vs.taum1]
+    mask_fine_pore_excess = vs.S_fp_ss > vs.S_ufc_ss
+    mask_large_pore_excess = vs.S_lp_ss > vs.S_ac_ss
 
     uplift_root_growth_lp = update(
         uplift_root_growth_lp,
@@ -1633,6 +1644,16 @@ def redistribution(state):
             0,
         ),
     )
+    uplift_root_growth_lp = update_add(
+        uplift_root_growth_lp,
+        at[2:-2, 2:-2],
+        npx.where(
+            mask_large_pore_excess[2:-2, 2:-2],
+            vs.S_lp_ss[2:-2, 2:-2] - vs.S_ac_ss[2:-2, 2:-2],
+            0,
+        ),
+    )
+
     uplift_root_growth_fp = update(
         uplift_root_growth_fp,
         at[2:-2, 2:-2],
@@ -1643,6 +1664,15 @@ def redistribution(state):
                 / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.taum1])
             )
             * vs.S_fp_ss[2:-2, 2:-2],
+            0,
+        ),
+    )
+    uplift_root_growth_fp = update_add(
+        uplift_root_growth_fp,
+        at[2:-2, 2:-2],
+        npx.where(
+            mask_fine_pore_excess[2:-2, 2:-2],
+            vs.S_fp_ss[2:-2, 2:-2] - vs.S_ufc_ss[2:-2, 2:-2],
             0,
         ),
     )
@@ -1831,7 +1861,7 @@ def recalc_soil_params(state):
         c_compact = update(
             c_compact,
             at[2:-2, 2:-2],
-            npx.where(mask1[2:-2, 2:-2], (500 - vs.z_root[2:-2, 2:-2, vs.tau]) / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]), (500 - vs.z_root[2:-2, 2:-2, vs.tau]) / (500 - vs.z_root[2:-2, 2:-2, vs.tau])) * vs.maskCatch[2:-2, 2:-2],
+            npx.where(mask1[2:-2, 2:-2], (vs.z_soil[2:-2, 2:-2] - 500) / (vs.z_soil[2:-2, 2:-2] - vs.z_root[2:-2, 2:-2, vs.tau]), 0) * vs.maskCatch[2:-2, 2:-2],
         )
         c_compact = update(
             c_compact,
