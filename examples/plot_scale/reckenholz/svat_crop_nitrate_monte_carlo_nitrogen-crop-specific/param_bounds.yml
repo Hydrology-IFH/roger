@@ -1,0 +1,415 @@
+complete-mixing:
+  # sugarbeet
+  alpha_transp_crop:
+  - 0.2
+  - 1.5
+  alpha_q_crop:
+  - 0.2
+  - 1
+  km_denit_sugarbeet:
+  - 1
+  - 20
+  dmax_denit_sugarbeet:
+  - 1
+  - 100
+  km_nit_sugarbeet:
+  - 1
+  - 20
+  dmax_nit_sugarbeet:
+  - 1
+  - 100
+  # winter-wheat
+  km_denit_winter-wheat:
+  - 1
+  - 20
+  dmax_denit_winter-wheat:
+  - 1
+  - 100
+  km_nit_winter-wheat:
+  - 1
+  - 20
+  dmax_nit_winter-wheat:
+  - 1
+  - 100
+  # winter-rape
+  km_denit_winter-rape:
+  - 1
+  - 20
+  dmax_denit_winter-rape:
+  - 1
+  - 100
+  km_nit_winter-rape:
+  - 1
+  - 20
+  dmax_nit_winter-rape:
+  - 1
+  - 100
+  # winter-triticale
+  km_denit_winter-triticale:
+  - 1
+  - 20
+  dmax_denit_winter-triticale:
+  - 1
+  - 100
+  km_nit_winter-triticale:
+  - 1
+  - 20
+  dmax_nit_winter-triticale:
+  - 1
+  - 100
+  # silage-corn
+  alpha_transp_silage-corn:
+  - 0.2
+  - 1.5
+  alpha_q_silage-corn:
+  - 0.2
+  - 1
+  km_denit_silage-corn:
+  - 1
+  - 20
+  dmax_denit_silage-corn:
+  - 1
+  - 100
+  km_nit_silage-corn:
+  - 1
+  - 20
+  dmax_nit_silage-corn:
+  - 1
+  - 100
+  # winter-barley
+  km_denit_winter-barley:
+  - 1
+  - 20
+  dmax_denit_winter-barley:
+  - 1
+  - 100
+  km_nit_winter-barley:
+  - 1
+  - 20
+  dmax_nit_winter-barley:
+  - 1
+  - 100
+  # green-manure
+  km_denit_green-manure:
+  - 1
+  - 20
+  dmax_denit_green-manure:
+  - 1
+  - 100
+  km_nit_green-manure:
+  - 1
+  - 20
+  dmax_nit_green-manure:
+  - 1
+  - 100
+  # bare
+  alpha_transp_bare:
+  - 0.2
+  - 1.5
+  alpha_q_bare:
+  - 0.2
+  - 1
+  km_denit_bare:
+  - 1
+  - 20
+  dmax_denit_bare:
+  - 1
+  - 100
+  km_nit_bare:
+  - 1
+  - 20
+  dmax_nit_bare:
+  - 1
+  - 100
+  kmin:
+  - 1
+  - 100
+
+
+advection-dispersion-power:
+  # SAS parameter of transpiration
+  k_transp_crop:
+  - 0.2
+  - 1
+  # SAS parameter of percolation from root zone
+  k_q_crop:
+  - 0.5
+  - 5
+  alpha_transp_crop:
+  - 0.2
+  - 1.5
+  alpha_q_crop:
+  - 0.2
+  - 1
+  # sugarbeet
+  km_denit_sugarbeet:
+  - 1
+  - 20
+  dmax_denit_sugarbeet:
+  - 1
+  - 100
+  km_nit_sugarbeet:
+  - 1
+  - 20
+  dmax_nit_sugarbeet:
+  - 1
+  - 100
+  # winter-wheat
+  km_denit_winter-wheat:
+  - 1
+  - 20
+  dmax_denit_winter-wheat:
+  - 1
+  - 100
+  km_nit_winter-wheat:
+  - 1
+  - 20
+  dmax_nit_winter-wheat:
+  - 1
+  - 100
+  # winter-rape
+  km_denit_winter-rape:
+  - 1
+  - 20
+  dmax_denit_winter-rape:
+  - 1
+  - 100
+  km_nit_winter-rape:
+  - 1
+  - 20
+  dmax_nit_winter-rape:
+  - 1
+  - 100
+  # winter-triticale
+  km_denit_winter-triticale:
+  - 1
+  - 20
+  dmax_denit_winter-triticale:
+  - 1
+  - 100
+  km_nit_winter-triticale:
+  - 1
+  - 20
+  dmax_nit_winter-triticale:
+  - 1
+  - 100
+  # silage-corn
+  km_denit_silage-corn:
+  - 1
+  - 20
+  dmax_denit_silage-corn:
+  - 1
+  - 100
+  km_nit_silage-corn:
+  - 1
+  - 20
+  dmax_nit_silage-corn:
+  - 1
+  - 100
+  # winter-barley
+  km_denit_winter-barley:
+  - 1
+  - 20
+  dmax_denit_winter-barley:
+  - 1
+  - 100
+  km_nit_winter-barley:
+  - 1
+  - 20
+  dmax_nit_winter-barley:
+  - 1
+  - 100
+  # green-manure
+  km_denit_green-manure:
+  - 1
+  - 20
+  dmax_denit_green-manure:
+  - 1
+  - 100
+  km_nit_green-manure:
+  - 1
+  - 20
+  dmax_nit_green-manure:
+  - 1
+  - 100
+  # bare
+  # SAS parameter of transpiration
+  k_transp_bare:
+  - 0.2
+  - 1
+  # SAS parameter of percolation from root zone
+  k_q_bare:
+  - 0.5
+  - 5
+  alpha_transp_bare:
+  - 0.2
+  - 1.5
+  alpha_q_bare:
+  - 0.2
+  - 1
+  km_denit_bare:
+  - 1
+  - 20
+  dmax_denit_bare:
+  - 1
+  - 100
+  km_nit_bare:
+  - 1
+  - 20
+  dmax_nit_bare:
+  - 1
+  - 100
+  kmin:
+  - 1
+  - 100
+
+
+time-variant_advection-dispersion-power:
+  # sugarbeet
+  # SAS parameter of transpiration
+  c1_transp_crop:
+  - 0.1
+  - 0.5
+  c2_transp_crop:
+  - 0.1
+  - 2
+  # SAS parameter of percolation from root zone
+  c1_q_crop:
+  - 1
+  - 2
+  c2_q_crop:
+  - 0.1
+  - 3
+  alpha_transp_crop:
+  - 0.2
+  - 1.5
+  alpha_q_crop:
+  - 0.2
+  - 1
+  km_denit_sugarbeet:
+  - 1
+  - 20
+  dmax_denit_sugarbeet:
+  - 1
+  - 100
+  km_nit_sugarbeet:
+  - 1
+  - 20
+  dmax_nit_sugarbeet:
+  - 1
+  - 100
+  # winter-wheat
+  km_denit_winter-wheat:
+  - 1
+  - 20
+  dmax_denit_winter-wheat:
+  - 1
+  - 100
+  km_nit_winter-wheat:
+  - 1
+  - 20
+  dmax_nit_winter-wheat:
+  - 1
+  - 100
+  # winter-rape
+  km_denit_winter-rape:
+  - 1
+  - 20
+  dmax_denit_winter-rape:
+  - 1
+  - 100
+  km_nit_winter-rape:
+  - 1
+  - 20
+  dmax_nit_winter-rape:
+  - 1
+  - 100
+  # winter-triticale
+  km_denit_winter-triticale:
+  - 1
+  - 20
+  dmax_denit_winter-triticale:
+  - 1
+  - 100
+  km_nit_winter-triticale:
+  - 1
+  - 20
+  dmax_nit_winter-triticale:
+  - 1
+  - 100
+  # silage-corn
+  km_denit_silage-corn:
+  - 1
+  - 20
+  dmax_denit_silage-corn:
+  - 1
+  - 100
+  km_nit_silage-corn:
+  - 1
+  - 20
+  dmax_nit_silage-corn:
+  - 1
+  - 100
+  # winter-barley
+  km_denit_winter-barley:
+  - 1
+  - 20
+  dmax_denit_winter-barley:
+  - 1
+  - 100
+  km_nit_winter-barley:
+  - 1
+  - 20
+  dmax_nit_winter-barley:
+  - 1
+  - 100
+  # green-manure
+  km_denit_green-manure:
+  - 1
+  - 20
+  dmax_denit_green-manure:
+  - 1
+  - 100
+  km_nit_green-manure:
+  - 1
+  - 20
+  dmax_nit_green-manure:
+  - 1
+  - 100
+  # bare
+  # SAS parameter of transpiration
+  c1_transp_bare:
+  - 0.1
+  - 0.5
+  c2_transp_bare:
+  - 0.1
+  - 2
+  # SAS parameter of percolation from root zone
+  c1_q_bare:
+  - 1
+  - 2
+  c2_q_bare:
+  - 0.1
+  - 3
+  alpha_transp_bare:
+  - 0.2
+  - 1.5
+  alpha_q_bare:
+  - 0.2
+  - 1
+  km_denit_bare:
+  - 1
+  - 20
+  dmax_denit_bare:
+  - 1
+  - 100
+  km_nit_bare:
+  - 1
+  - 20
+  dmax_nit_bare:
+  - 1
+  - 100
+  kmin:
+  - 1
+  - 100
+
