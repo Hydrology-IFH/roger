@@ -11,7 +11,7 @@ import roger.tools.evaluation as eval_utils
 base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
 lys_experiments = ["lys2", "lys3", "lys8"]
-tm_structures = ["advection-dispersion-power"]
+tm_structures = ["time-variant_advection-dispersion-power"]
 
 for lys_experiment in lys_experiments:
     # load hydrologic simulation
@@ -210,10 +210,10 @@ for lys_experiment in lys_experiments:
                 df_params_metrics = df_params_metrics.copy()
 
         # write to .txt
-        file = base_path / "output" / "svat_crop_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_{tm_structure}.txt"
+        file = base_path / "output" / "svat_crop_nitrate_monte_carlo_crop-specific" / f"params_metrics_{lys_experiment}_{tm_structure}.txt"
         df_params_metrics.to_csv(file, header=True, index=False, sep="\t")
 
-        file = base_path / "output" / "svat_crop_nitrate_monte_carlo" / f"params_metrics_{lys_experiment}_{tm_structure}.csv"
+        file = base_path / "output" / "svat_crop_nitrate_monte_carlo_crop-specific" / f"params_metrics_{lys_experiment}_{tm_structure}.csv"
         df_params_metrics.to_csv(file, header=True, index=False, sep=";")
 
         # add simulated bulk samples to the dataset

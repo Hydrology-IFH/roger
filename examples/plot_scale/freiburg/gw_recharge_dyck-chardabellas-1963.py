@@ -100,10 +100,8 @@ def calculate_recharge_6lines(precip):
     return recharge
 
 
-@click.option("--line", type=click.Choice([1, 2, 3, 4, 5, 6]), default=1)
 @click.command("main")
-def main(line):
-
+def main():
     base_path = Path(__file__).parent
     precip_path = base_path / "input" / "PREC.txt"
     df_precip_10mins = load_precpitation_data(precip_path)
@@ -131,7 +129,6 @@ def main(line):
     df_recharge.to_csv(output_path, sep=";", index=True)
     output_path_avg = base_path / "output" / f"gw_recharge_avg_dyck-chardabellas.csv"
     df_recharge_avg.to_csv(output_path_avg, sep=";", index=True)
-
     return
 
 
