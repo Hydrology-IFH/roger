@@ -100,7 +100,7 @@ _dict_fert = {"low": 1,
 }
 
 _dict_crop_id = {"winter-wheat": 115,
-                 "clover": 425,
+                 "clover": 422,
                  "silage-corn": 411,
                  "summer-wheat": 116,
                  "sugar-beet": 603,
