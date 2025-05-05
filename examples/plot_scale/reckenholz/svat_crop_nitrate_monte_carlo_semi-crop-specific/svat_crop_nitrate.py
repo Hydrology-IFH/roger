@@ -364,7 +364,7 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             vs.z_root = update(vs.z_root, at[2:-2, 2:-2, vs.tau], vs.Z_ROOT[2:-2, 2:-2, vs.itt])
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.LU_ID[2:-2, 2:-2, vs.itt])
                 
-            mask00 = (vs.z_root[:, :, vs.tau] > 200) & npx.isin(vs.lu_id, [563, 557, 559, 560, 539, 556, 564])
+            mask00 = (vs.z_root[:, :, vs.tau] > 200) & npx.isin(vs.lu_id, npx.array([563, 557, 559, 560, 539, 556, 564]))
             mask0 = (vs.z_root[:, :, vs.tau] > 200) & (vs.lu_id == 563)
             mask1 = (vs.z_root[:, :, vs.tau] > 200) & (vs.lu_id == 557)
             mask2 = (vs.z_root[:, :, vs.tau] > 200) & (vs.lu_id == 559)
