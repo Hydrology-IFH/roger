@@ -25,7 +25,7 @@ def main():
     for irrigation_scenario in irrigation_scenarios:
         for crop_rotation_scenario in crop_rotation_scenarios:
             lines.append(
-                'python svat_crop.py -b numpy -d cpu --irrigation-scenario %s --crop-rotation-scenario %s\n' % (irrigation_scenario, crop_rotation_scenario)
+                'python svat_crop.py -b jax -d cpu --irrigation-scenario %s --crop-rotation-scenario %s\n' % (irrigation_scenario, crop_rotation_scenario)
             )
     # lines.append('python merge_output.py\n')
     # lines.append('python write_simulations_to_csv.py')
@@ -39,7 +39,7 @@ def main():
         lines.append('#!/bin/bash\n')
         for crop_rotation_scenario in crop_rotation_scenarios:
             lines.append(
-                'python svat_crop.py -b numpy -d cpu --irrigation-scenario %s --crop-rotation-scenario %s\n' % (irrigation_scenario, crop_rotation_scenario)
+                'python svat_crop.py -b jax -d cpu --irrigation-scenario %s --crop-rotation-scenario %s\n' % (irrigation_scenario, crop_rotation_scenario)
             )
         file_path = base_path / f"run_roger_{irrigation_scenario}.sh"
         file = open(file_path, "w")

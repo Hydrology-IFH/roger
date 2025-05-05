@@ -22,7 +22,7 @@ def main():
     # lines.append("conda activate roger\n")
     for crop_rotation_scenario in crop_rotation_scenarios:
         lines.append(
-            'python svat_crop.py -b numpy -d cpu --crop-rotation-scenario %s\n' % (crop_rotation_scenario)
+            'python svat_crop.py -b jax -d cpu --crop-rotation-scenario %s\n' % (crop_rotation_scenario)
         )
     # lines.append('python merge_output.py\n')
     # lines.append('python write_simulations_to_csv.py')
