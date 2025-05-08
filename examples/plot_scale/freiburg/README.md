@@ -9,6 +9,10 @@ This modelling experiment investigates the impact of crop irrigation on groundwa
 - `crop_water_stress.csv`: contains fraction of usable field capacity when crop water stress starts. IMPORTANT: Do not modify the file.
 - `parameters.csv`: contains the soil hydraulic parameters of RoGeR for three different soil types (z_soil: soil depth in mm; dmpv: density of vertical macropores in 1/$m^2$; lmpv: length of vertical macropores in mm; theta_ac: air capacity in -; theta_ufc: usable field capacity in -; theta_pwp: permanent wilting point in -; ks: saturated hydraulic conductivity in mm/h; kf: hydraulic conductivity of bedrock in mm/h; soil_fertility: soil fertility; clay: clay content in -)
 - `config.yml`: configuration file. Irrigation rules and crop rotation scenarios should be defined from the list below.
+- `calculate_gw_recharge_dyck-chardabellas-1963.py`: Calculates the annual groundwater recharge and average groundwater recharge using the method of Dyck & Chardbellas (1963) as presented in Hoelting (2013) p.244f. The script requires a precipitation time series with 10-minutes time step. Precipiation data can be downloaded at [WaetherDB](https://apps.hydro.uni-freiburg.de/de/weatherdb/get_ts/).
+- `output/no-irrigation/`: contains the calculations of `calculate_gw_recharge_dyck-chardabellas-1963.py`
+- `calculate_nitrate_leaching_thuenen.py`: Calculates the load of annual nitrate leaching and average nitrate for a given crop rotation using the Thuenen method i.e. 30% of the applied nitrogen fertiliser. The nitrate leaching is calculated for three different fertilisation intensities (low, medium and high). The script requires an annual time series of the summer and winter crops (see `/input/crop_rotation_scenarios/` for more examples).
+- `output/nitrate/thuenen/`: contains the calculations of `calculate_nitrate_leaching_thuenen.py`
 
 Available soil types:
 - sandy soil type
