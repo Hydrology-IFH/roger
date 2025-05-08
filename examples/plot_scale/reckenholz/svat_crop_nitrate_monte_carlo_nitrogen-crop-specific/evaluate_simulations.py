@@ -11,7 +11,7 @@ import roger.tools.evaluation as eval_utils
 base_path = Path("/Volumes/LaCie/roger/examples/plot_scale/reckenholz")
 
 lys_experiments = ["lys2", "lys3", "lys8"]
-tm_structures = ["time-variant_advection-dispersion-power"]
+tm_structures = ["advection-dispersion-power", "time-variant_advection-dispersion-power"]
 
 for lys_experiment in lys_experiments:
     # load hydrologic simulation

@@ -61,6 +61,8 @@ _dict_ffid = {"winter-wheat_clover": "1_0",
               "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
 }
 
+_dict_ffid_rev = {v: k for k, v in _dict_ffid.items()}
+
 _dict_ffid1 = {"winter-wheat_clover": 310,
               "winter-wheat_silage-corn": 311,
               "summer-wheat_winter-wheat": 312,
@@ -100,7 +102,7 @@ _dict_fert = {"low": 1,
 }
 
 _dict_crop_id = {"winter-wheat": 115,
-                 "clover": 425,
+                 "clover": 422,
                  "silage-corn": 411,
                  "summer-wheat": 116,
                  "sugar-beet": 603,
@@ -226,21 +228,9 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "grain-corn_winter-wheat_winter-barley",
                            "grain-corn_winter-wheat_clover",
                            "miscanthus",
-                           "bare-grass",
-                           "winter-wheat_silage-corn_yellow-mustard",
-                           "summer-wheat_winter-wheat_yellow-mustard",
-                           "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
-                           "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
-                           "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                           "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
-                           "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                           "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
+                           "bare-grass"]
 
 fertilization_intensities = ["low", "medium", "high"]
-
-_dict_fertilization_intensities = {"low": 501, 
-                                   "medium": 502, 
-                                   "high": 503}
 
 
 def nanmeanweighted(y, w, axis=None):
@@ -271,21 +261,37 @@ def main(tmp_dir):
     file = base_path_output / "data_nitrate_leaching" / "nitrate_leaching_values.csv"
     df = pd.read_csv(file, sep=";")
 
-    df_per_crop = pd.DataFrame(index=_dict_crop_id.keys(), columns=["MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"])
+    df_per_crop = pd.DataFrame(index=_dict_crop_id.keys(), columns=["QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"])
     df_per_crop.index.name = "crop"
     for key in _dict_crop_id.keys():
         df1 = df.copy()
-        cond = (df1["CID"] == _dict_crop_id[key])
+        cond = (df1["CID"] == _dict_crop_id[key]) & onp.isin(df1["FFID"].values, list(_dict_ffid_rev.keys())[:16])
         df1 = df1.loc[cond, :]
-        df2 = df1.loc[:, ["SID", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]].groupby(["SID"]).mean()
+        df2 = df1.loc[:, ["SID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]].groupby(["SID"]).mean()
         df2 = df2.sort_index(ascending=True)
 
-        for key1 in ["MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]:
+        for key1 in ["QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]:
             df_per_crop.loc[key, key1] = onp.sum(df2[key1] * df_areas["area_share"].values)
 
     df_per_crop = df_per_crop.fillna(-9999)
     file = base_path_output / "data_nitrate_leaching" / "nitrate_leaching_values_per_crop.csv"
     df_per_crop.to_csv(file, sep=";", index=True, header=True)
+
+    df_per_crop_rotation = pd.DataFrame(index=crop_rotation_scenarios, columns=["QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"])
+    df_per_crop_rotation.index.name = "crop_rotation"
+    for key in crop_rotation_scenarios:
+        df1 = df.copy()
+        cond = (df1["FFID"] == _dict_ffid[key])
+        df1 = df1.loc[cond, :]
+        df2 = df1.loc[:, ["SID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]].groupby(["SID"]).mean()
+        df2 = df2.sort_index(ascending=True)
+
+        for key1 in ["QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]:
+            df_per_crop_rotation.loc[key, key1] = onp.sum(df2[key1] * df_areas["area_share"].values)
+
+    df_per_crop_rotation = df_per_crop_rotation.fillna(-9999)
+    file = base_path_output / "data_nitrate_leaching" / "nitrate_leaching_values_per_crop_rotation.csv"
+    df_per_crop_rotation.to_csv(file, sep=";", index=True, header=True)
 
 
 if __name__ == "__main__":

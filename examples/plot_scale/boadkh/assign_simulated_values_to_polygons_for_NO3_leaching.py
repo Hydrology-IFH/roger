@@ -92,6 +92,8 @@ _dict_var_names = {"q_hof": "QSUR",
                    "M_q_ss": "MPERC",
                    "C_q_ss": "CPERC",
                    "q_ss": "PERC",
+                   "prec": "PRECIP",
+                   "Nfert": "NFERT",
 }
 
 _dict_fert = {"low": 1,
@@ -362,7 +364,7 @@ def main(tmp_dir):
             dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
     # aggregate nitrate leaching, surface runoff and percolation to annual average values
-    vars_sim = ["q_hof", "q_ss", "M_q_ss", "C_q_ss"]
+    vars_sim = ["q_hof", "q_ss", "M_q_ss", "C_q_ss", "prec", "Nfert"]
     ll_df = []
     for location in locations:
         click.echo(f"{location}")
@@ -391,12 +393,19 @@ def main(tmp_dir):
             df_values['CID'] = 400
             for var_sim in vars_sim:
                 click.echo(f"{var_sim}")
-                if var_sim in ["M_q_ss", "C_q_ss"]:
+                if var_sim in ["M_q_ss", "Nfert", "C_q_ss"]:
                     for fertilization_intensity in fertilization_intensities:
                         click.echo(f"{fertilization_intensity}")
                         df_values[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None
                         ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
                         if var_sim == "M_q_ss":
+                            sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1]
+                            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
+                            # calculate annual sum
+                            df_ann = df.resample("YE").sum() * 0.01  # convert from mg/m2 to kg/ha
+                            # calculate average
+                            df_avg = df_ann.mean(axis=0).to_frame()
+                        elif var_sim == "Nfert":
                             sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1]
                             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
                             # calculate annual sum
@@ -426,7 +435,7 @@ def main(tmp_dir):
                                 df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{_dict_clust_id[id1]}")
                                 cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{_dict_clust_id[id1]}"))
                                 df_values.loc[cond3, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = onp.round(val, 2)
-                elif var_sim in ["q_ss", "q_hof"]:
+                elif var_sim in ["q_ss", "q_hof", "prec"]:
                     df_values[f'{_dict_var_names[var_sim]}'] = None  # initialize field, float, two decimals
                     ds = dict_fluxes_states[location][crop_rotation_scenario]
                     sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
@@ -495,12 +504,23 @@ def main(tmp_dir):
                 df_lu_id = df_lu_id.astype({"lu_id": int, "crop_period": float, "day": float})
                 cond_crop = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
                 for var_sim in vars_sim:
-                    if var_sim in ["M_q_ss", "C_q_ss"]:
+                    if var_sim in ["M_q_ss", "C_q_ss", "Nfert"]:
                         for fertilization_intensity in fertilization_intensities:
                             click.echo(f"{crop_id}: {var_sim} {fertilization_intensity}")
                             df_values[f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = None  # initialize field, float, two decimals
                             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
                             if var_sim == "M_q_ss":
+                                sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1]
+                                df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
+                                df.loc[:, 'crop_period'] = df_lu_id.loc[:, 'crop_period'].values
+                                df = df.loc[cond_crop, :]
+                                # calculate sum per crop period
+                                weight = 365/df_lu_id.groupby("crop_period").sum()["day"].values
+                                weight = onp.where(weight > 1, 1, weight)
+                                df_cp = df.groupby("crop_period").sum() * weight[:, onp.newaxis] * 0.01  # convert from mg/m2 to kg/ha                            
+                                # calculate average
+                                df_avg = df_cp.mean(axis=0).to_frame()
+                            elif var_sim == "Nfert":
                                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1]
                                 df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T)
                                 df.loc[:, 'crop_period'] = df_lu_id.loc[:, 'crop_period'].values
@@ -533,7 +553,7 @@ def main(tmp_dir):
                                     df_values.loc[cond2, 'OID'] = int(f"{_dict_locations[location]}{_dict_clust_id[id1]}")
                                     cond3 = (df_values['OID'] == int(f"{_dict_locations[location]}{_dict_clust_id[id1]}"))
                                     df_values.loc[cond3, f'{_dict_var_names[var_sim]}_N{_dict_fert[fertilization_intensity]}'] = onp.round(val, 2)
-                    elif var_sim in ["q_ss", "q_hof"]:
+                    elif var_sim in ["q_ss", "q_hof", "prec"]:
                         click.echo(f"{crop_id}: {var_sim}")
                         df_values[f'{_dict_var_names[var_sim]}'] = None  # initialize field, float, two decimals
                         ds = dict_fluxes_states[location][crop_rotation_scenario]
@@ -568,7 +588,7 @@ def main(tmp_dir):
 
     df = pd.concat(ll_df, axis=0)
     df = df.drop(columns=["SHP_ID", "ID"])
-    df = df[["OID", "MID", "SID", "agr_region", "stationsna", "FFID", "CID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
+    df = df[["OID", "MID", "SID", "agr_region", "stationsna", "FFID", "CID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3", "PRECIP", "NFERT"]]
 
     df = df.fillna(-9999)
     file = Path(tmp_dir) / "nitrate_leaching_values.csv"
