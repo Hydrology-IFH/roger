@@ -63,8 +63,18 @@ _dict_fert = {"low": 1,
 }
 
 _dict_crop_id = {"winter-wheat": 115,
+                 "clover": 422,
                  "silage-corn": 411,
+                 "summer-wheat": 116,
+                 "sugar-beet": 603,
+                 "winter-rape": 311,
+                 "soybean": 330,
+                 "grain-corn": 171,
+                 "winter-barley": 131,
+                 "grass": 591,
+                 "miscanthus": 852,
                 }
+
 _dict_var_names = {"q_hof": "QSUR",
                    "ground_cover": "GC",
                    "M_q_ss": "MPERC",
@@ -76,10 +86,10 @@ _dict_var_names = {"q_hof": "QSUR",
 @click.option("-td", "--tmp-dir", type=str, default=Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output")
 @click.command("main")
 def main(tmp_dir):
-    file = Path(tmp_dir) / "data_for_nitrate_leaching" / "nitrate_leaching_geometries.gpkg"
+    file = Path(tmp_dir) / "data_nitrate_leaching" / "nitrate_leaching_geometries.gpkg"
     gdf_ = gpd.read_file(file)
 
-    file = Path(tmp_dir) / "data_for_nitrate_leaching" / "nitrate_leaching_values.csv"
+    file = Path(tmp_dir) / "data_nitrate_leaching" / "nitrate_leaching_values.csv"
     df_ = pd.read_csv(file, sep=";")
 
     # get the unique object identifiers
@@ -140,7 +150,7 @@ def main(tmp_dir):
                 fig.savefig(file, dpi=300)
 
     vars_sim = ["C_q_ss"]
-    crops = ["winter-wheat", "silage-corn"]
+    crops = ["summer-wheat", "winter-wheat", "silage-corn", "grain-corn", "sugar-beet", "winter-rape"]
     fertilisation_intensities = ["low", "medium", "high"]
 
     for var_sim in vars_sim:

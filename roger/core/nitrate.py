@@ -501,9 +501,6 @@ def calc_denit_gw(state, msa, k):
 def calc_nitrogen_cycle_kernel(state):
     vs = state.variables
 
-    # if vs.itt >= 53:
-    #     print("itt", vs.itt)
-
     nfix = allocate(state.dimensions, ("x", "y"))
     nfix = update(
         nfix,
