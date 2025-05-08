@@ -125,9 +125,9 @@ def main():
     df_recharge_avg.index = df_recharge_avg.index.rename("")
 
     # write to csv
-    output_path = base_path / "output" / f"gw_recharge_dyck-chardabellas.csv"
+    output_path = base_path / "output" / "no-irrigation" / f"gw_recharge_dyck-chardabellas.csv"
     df_recharge.to_csv(output_path, sep=";", index=True)
-    output_path_avg = base_path / "output" / f"gw_recharge_avg_dyck-chardabellas.csv"
+    output_path_avg = base_path / "output" / "no-irrigation" / f"gw_recharge_avg_dyck-chardabellas.csv"
     df_recharge_avg.to_csv(output_path_avg, sep=";", index=True)
     return
 
