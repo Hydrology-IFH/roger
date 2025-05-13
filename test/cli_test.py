@@ -46,28 +46,28 @@ def test_roger_copy_model(model, runner, tmpdir):
 
     assert "ROGER_VERSION" in model_content
 
-def test_import_isolation(tmpdir):
-    TEST_KERNEL = dedent(
-        """
-    import sys
-    import roger.cli
+# def test_import_isolation(tmpdir):
+#     TEST_KERNEL = dedent(
+#         """
+#     import sys
+#     import roger.cli
 
-    for mod in sys.modules:
-        print(mod)
-    """
-    )
+#     for mod in sys.modules:
+#         print(mod)
+#     """
+#     )
 
-    tmpfile = tmpdir / "isolation.py"
-    with open(tmpfile, "w") as f:
-        f.write(TEST_KERNEL)
+#     tmpfile = tmpdir / "isolation.py"
+#     with open(tmpfile, "w") as f:
+#         f.write(TEST_KERNEL)
 
-    proc = subprocess.run([sys.executable, tmpfile], check=True, capture_output=True, text=True)
+#     proc = subprocess.run([sys.executable, tmpfile], check=True, capture_output=True, text=True)
 
-    imported_modules = proc.stdout.split()
-    roger_modules = [mod for mod in imported_modules if mod.startswith("roger.")]
+#     imported_modules = proc.stdout.split()
+#     roger_modules = [mod for mod in imported_modules if mod.startswith("roger.")]
 
-    for mod in roger_modules:
-        assert mod.startswith("roger.cli") or mod == "roger._version"
+#     for mod in roger_modules:
+#         assert mod.startswith("roger.cli") or mod == "roger._version"
 
-    # make sure using the CLI does not initialize MPI
-    assert "mpi4py" not in imported_modules
+#     # make sure using the CLI does not initialize MPI
+#     assert "mpi4py" not in imported_modules

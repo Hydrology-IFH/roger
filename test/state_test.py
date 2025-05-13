@@ -72,7 +72,7 @@ def test_to_xarray(dummy_state):
     assert set(ds.coords.keys()) == used_dims
 
     for dim in used_dims:
-        assert int(ds.dims[dim]) == dummy_state.dimensions[dim]
+        assert int(ds.sizes[dim]) == dummy_state.dimensions[dim]
 
     # variables
     for var in dummy_state.variables.fields():
