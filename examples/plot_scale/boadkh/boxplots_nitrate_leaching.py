@@ -433,7 +433,7 @@ vars_sim = ["M_q_ss", "C_q_ss"]
 for var_sim in vars_sim:
         ll_df = []
         for location in locations:
-            for crop_rotation_scenario in crop_rotation_scenarios:
+            for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
                 for fertilization_intensity in fertilization_intensities:
                     if var_sim == "M_q_ss":
                         ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
@@ -542,7 +542,7 @@ vars_sim = ["M_q_ss", "C_q_ss"]
 for var_sim in vars_sim:
         ll_df = []
         for location in locations:
-            for crop_rotation_scenario in crop_rotation_scenarios:
+            for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
                 for fertilization_intensity in fertilization_intensities:
                     if var_sim == "M_q_ss":
                         ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
@@ -673,7 +673,7 @@ vars_sim = ["q_ss", "q_hof"]
 for var_sim in vars_sim:
         ll_df = []
         for location in locations:
-            for crop_rotation_scenario in crop_rotation_scenarios:
+            for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
                 ds = dict_fluxes_states[location][crop_rotation_scenario]
                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
                 cond1 = (df_params["CLUST_flag"] == 1)
@@ -745,7 +745,7 @@ vars_sim = ["q_ss", "q_hof"]
 for var_sim in vars_sim:
         ll_df = []
         for location in locations:
-            for crop_rotation_scenario in crop_rotation_scenarios:
+            for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
                 ds = dict_fluxes_states[location][crop_rotation_scenario]
                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
                 cond1 = (df_params["CLUST_flag"] == 1)
@@ -826,7 +826,7 @@ for var_sim in vars_sim:
 # plot relative nitrate leaching
 ll_df = []
 for location in locations:
-    for crop_rotation_scenario in crop_rotation_scenarios:
+    for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
         for fertilization_intensity in fertilization_intensities:
             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
             sim_vals1 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
@@ -898,11 +898,10 @@ file = base_path_figs / "boxplot_annual_average_relative_nitrate_leaching_crop_r
 fig.savefig(file, dpi=300)
 plt.close(fig)
 
-
 # plot weighted relative nitrate leaching
 ll_df = []
 for location in locations:
-    for crop_rotation_scenario in crop_rotation_scenarios:
+    for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
         for fertilization_intensity in fertilization_intensities:
             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
             sim_vals1 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
@@ -1001,7 +1000,7 @@ plt.close(fig)
 # plot weighted relative nitrogen uptake
 ll_df = []
 for location in locations:
-    for crop_rotation_scenario in crop_rotation_scenarios:
+    for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
         for fertilization_intensity in fertilization_intensities:
             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
             sim_vals1_ = ds["M_transp"].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
@@ -1095,6 +1094,102 @@ axes.set_xlabel("")
 plt.xticks(rotation=33)
 fig.tight_layout()
 file = base_path_figs / "boxplot_annual_average_relative_nitrogen_uptake_crop_rotations_weighted.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
+
+# plot weighted relative groundwater recharge
+ll_df = []
+for location in locations:
+    for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
+        for fertilization_intensity in fertilization_intensities:
+            ds = dict_fluxes_states[location][crop_rotation_scenario]
+            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+            sim_vals2 = ds["prec"].isel(y=0).values[:, 1:]
+            cond1 = (df_params["CLUST_flag"] == 1)
+            df1 = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals1.T).loc[:, cond1]
+            df2 = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals2.T).loc[:, cond1]
+            # calculate annual sum
+            df1_ann_avg = df1.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+            df2_ann_avg = df2.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+            cond = (df_areas["location"] == location)
+            df_area_share = df_areas.loc[cond, :]
+            cond1 = (df_params["CLUST_flag"] == 1)
+            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+            data.loc[:, "area_share"] = 0.0
+            for clust_id in clust_ids:
+                cond1 = (df_area_share["clust_id"] == clust_id)
+                if cond1.any():
+                    cond2 = (data["CLUST_ID"] == clust_id)
+                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+            data1 = repeat_by_areashare(df1_ann_avg.values, data["area_share"].values)
+            df2_ann_avg = df2.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+            cond = (df_areas["location"] == location)
+            df_area_share = df_areas.loc[cond, :]
+            cond1 = (df_params["CLUST_flag"] == 1)
+            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+            data.loc[:, "area_share"] = 0.0
+            for clust_id in clust_ids:
+                cond1 = (df_area_share["clust_id"] == clust_id)
+                if cond1.any():
+                    cond2 = (data["CLUST_ID"] == clust_id)
+                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+            data2 = repeat_by_areashare(df2_ann_avg.values, data["area_share"].values)
+            df_ann_avg = pd.DataFrame(data=(data1 / data2) * 100)
+            df_ann_avg.loc[:, "location"] = _dict_location[location]
+            df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+            if location in ["freiburg", "lahr", "muellheim"]:
+                df_ann_avg.loc[:, 'region'] = "Oberrhein"
+            elif location in ["stockach", "gottmadingen", "weingarten"]:
+                df_ann_avg.loc[:, 'region'] = "Bodensee"
+            elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                df_ann_avg.loc[:, 'region'] = "Kraichgau"
+            elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                df_ann_avg.loc[:, 'region'] = "Alb-Donau"
+            elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                df_ann_avg.loc[:, 'region'] = "Hohenlohe"
+            ll_df.append(df_ann_avg)
+df_ann_avg = pd.concat(ll_df).loc[:, [0, "location"]]
+df_ann_avg_long = df_ann_avg.melt(id_vars=["location"], value_name="vals").loc[:, ["location", "vals"]]        
+fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+sns.boxplot(data=df_ann_avg_long, x="location", y="vals", color="grey", ax=axes, whis=(1, 99), showfliers=False)
+axes.legend().set_visible(False)
+axes.set_xlabel("")
+axes.set_ylabel("PERC/PRECIP [%]")
+axes.set_ylim(25, 75)
+axes.set_xlabel("Location")
+plt.xticks(rotation=45)
+fig.tight_layout()
+file = base_path_figs / "boxplot_annual_average_relative_gw_recharge_locations_weighted.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
+
+df_ann_avg = pd.concat(ll_df).loc[:, [0, "region"]]
+df_ann_avg_long = df_ann_avg.melt(id_vars=["region"], value_name="vals").loc[:, ["region", "vals"]]        
+fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+sns.boxplot(data=df_ann_avg_long, x="region", y="vals", color="grey", ax=axes, whis=(1, 99), showfliers=False)
+axes.legend().set_visible(False)
+axes.set_xlabel("")
+axes.set_ylabel("PERC/PRECIP [%]")
+axes.set_ylim(25, 75)
+axes.set_xlabel("")
+plt.xticks(rotation=33)
+fig.tight_layout()
+file = base_path_figs / "boxplot_annual_average_relative_gw_recharge_regions_weighted.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
+
+df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation"]]
+df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation"], value_name="vals").loc[:, ["crop_rotation", "vals"]]        
+fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", color="grey", ax=axes, whis=(1, 99), showfliers=False)
+axes.legend().set_visible(False)
+axes.set_xlabel("")
+axes.set_ylabel("PERC/PRECIP [%]")
+axes.set_ylim(25, 75)
+axes.set_xlabel("")
+plt.xticks(rotation=33)
+fig.tight_layout()
+file = base_path_figs / "boxplot_annual_average_relative_gw_recharge_crop_rotations_weighted.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
 

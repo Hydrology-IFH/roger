@@ -17,8 +17,8 @@ jobs:
       fail-fast: false
 
       matrix:
-        os: [ubuntu-20.04]
-        python-version: ["3.9", "3.10", "3.11"]
+        os: [ubuntu-24.04]
+        python-version: ["3.9", "3.12"]
         backend: [numpy, jax]
 
     env:

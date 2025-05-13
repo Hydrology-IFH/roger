@@ -213,6 +213,7 @@ _lab_unit_annual = {
     "C_q_ss": "$NO_3$ [mg/l]",
     "q_ss": "GW-Neubildung\n [mm/Jahr]",
     "q_hof": "Oberflaechenabfluss\n [mm/Jahr]",
+    "prec": "Niederschlag\n [mm/Jahr]",
 }
 
 # load model parameters
@@ -232,30 +233,30 @@ clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
 # cond = onp.isin(df_link_bk50_cluster_cropland.index.values, gdf_bk50["SHP_ID"].values)
 # clust_ids = onp.unique(df_link_bk50_cluster_cropland.loc[cond, "CLUST_ID"].values).astype(str)
 
-# df_areas = pd.read_csv(base_path / "output" / "areas.csv", sep=";")
+df_areas = pd.read_csv(base_path / "output" / "areas.csv", sep=";")
 
-# # load simulated fluxes and states
-# dict_fluxes_states = {}
-# for location in locations:
-#     dict_fluxes_states[location] = {}
-#     for crop_rotation_scenario in crop_rotation_scenarios:
-#         dict_fluxes_states[location][crop_rotation_scenario] = {}
-#         output_hm_file = (
-#             base_path_output
-#             / "svat_crop"
-#             / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
-#         )
-#         ds_fluxes_states = xr.open_dataset(output_hm_file, engine="h5netcdf")
-#         # assign date
-#         days = ds_fluxes_states["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
-#         date = num2date(
-#             days,
-#             units=f"days since {ds_fluxes_states['Time'].attrs['time_origin']}",
-#             calendar="standard",
-#             only_use_cftime_datetimes=False,
-#         )
-#         ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
-#         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
+# load simulated fluxes and states
+dict_fluxes_states = {}
+for location in locations:
+    dict_fluxes_states[location] = {}
+    for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
+        dict_fluxes_states[location][crop_rotation_scenario] = {}
+        output_hm_file = (
+            base_path_output
+            / "svat_crop"
+            / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+        )
+        ds_fluxes_states = xr.open_dataset(output_hm_file, engine="h5netcdf")
+        # assign date
+        days = ds_fluxes_states["Time"].values / onp.timedelta64(24 * 60 * 60, "s")
+        date = num2date(
+            days,
+            units=f"days since {ds_fluxes_states['Time'].attrs['time_origin']}",
+            calendar="standard",
+            only_use_cftime_datetimes=False,
+        )
+        ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
+        dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
 # # file = base_path_output / "dict_fluxes_states.pickle"
 # # with open(file, 'wb') as handle:
@@ -419,92 +420,93 @@ clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
 #         plt.close(fig)
 
 
-# # plot weighted average annual sum
-# vars_sim = ["q_ss", "q_hof"]
-# for var_sim in vars_sim:
-#         ll_df = []
-#         for location in locations:
-#             for crop_rotation_scenario in crop_rotation_scenarios:
-#                 ds = dict_fluxes_states[location][crop_rotation_scenario]
-#                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
-#                 cond1 = (df_params["CLUST_flag"] == 1)
-#                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-#                 # calculate annual sum
-#                 df_ann_avg1 = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
-#                 cond = (df_areas["location"] == location)
-#                 df_area_share = df_areas.loc[cond, :]
-#                 data = df_params.loc[cond1, "CLUST_ID"].to_frame()
-#                 data.loc[:, "area_share"] = 0.0
-#                 for clust_id in clust_ids:
-#                     cond1 = (df_area_share["clust_id"] == clust_id)
-#                     if cond1.any():
-#                         cond2 = (data["CLUST_ID"] == clust_id)
-#                         data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
-#                 data = repeat_by_areashare(df_ann_avg1.values, data["area_share"].values)
-#                 df_ann_avg = pd.DataFrame(data=data).mean().to_frame()
-#                 df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
-#                 df_ann_avg.loc[:, "location"] = _dict_location[location]
-#                 df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
-#                 if location in ["freiburg", "lahr", "muellheim"]:
-#                     df_ann_avg.loc[:, 'region'] = "Oberrheingraben"
-#                 elif location in ["stockach", "gottmadingen", "weingarten"]:
-#                     df_ann_avg.loc[:, 'region'] = "Bodensee"
-#                 elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
-#                     df_ann_avg.loc[:, 'region'] = "Kraichgau"
-#                 elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
-#                     df_ann_avg.loc[:, 'region'] = "Alb-Donau"
-#                 elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
-#                     df_ann_avg.loc[:, 'region'] = "Hohenlohe"
-#                 ll_df.append(df_ann_avg)
-#                 if var_sim == "q_ss":
-#                     ylim = (0, 600)
-#                 elif var_sim == "q_hof":
-#                     ylim = (0, 100)
-#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
-#         df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
-#         fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
-#         sns.barplot(data=df_ann_avg_long, x="location", y="vals", ax=axes, errorbar=None, color="purple")
-#         axes.legend().set_visible(False)
-#         axes.set_xlabel("")
-#         axes.set_ylabel(_lab_unit_annual[var_sim])
-#         axes.set_ylim(ylim)
-#         axes.set_xlabel("")
-#         plt.xticks(rotation=45)
-#         fig.tight_layout()
-#         file = base_path_figs / f"barplot_average_{var_sim}_locations_weighted.png"
-#         fig.savefig(file, dpi=300)
-#         plt.close(fig)
+# plot weighted average annual sum
+vars_sim = ["q_ss", "q_hof", "prec"]
+vars_sim = ["prec"]
+for var_sim in vars_sim:
+        ll_df = []
+        for location in locations:
+            for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
+                ds = dict_fluxes_states[location][crop_rotation_scenario]
+                sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+                cond1 = (df_params["CLUST_flag"] == 1)
+                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                # calculate annual sum
+                df_ann_avg1 = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+                cond = (df_areas["location"] == location)
+                df_area_share = df_areas.loc[cond, :]
+                data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+                data.loc[:, "area_share"] = 0.0
+                for clust_id in clust_ids:
+                    cond1 = (df_area_share["clust_id"] == clust_id)
+                    if cond1.any():
+                        cond2 = (data["CLUST_ID"] == clust_id)
+                        data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+                data = repeat_by_areashare(df_ann_avg1.values, data["area_share"].values)
+                df_ann_avg = pd.DataFrame(data=data).mean().to_frame()
+                df_ann_avg.loc[:, "location"] = _dict_location[location]
+                df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+                if location in ["freiburg", "lahr", "muellheim"]:
+                    df_ann_avg.loc[:, 'region'] = "Oberrheingraben"
+                elif location in ["stockach", "gottmadingen", "weingarten"]:
+                    df_ann_avg.loc[:, 'region'] = "Bodensee"
+                elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                    df_ann_avg.loc[:, 'region'] = "Kraichgau"
+                elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                    df_ann_avg.loc[:, 'region'] = "Alb-Donau"
+                elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                    df_ann_avg.loc[:, 'region'] = "Hohenlohe"
+                ll_df.append(df_ann_avg)
+                if var_sim == "q_ss":
+                    ylim = (0, 600)
+                    color = "grey"
+                elif var_sim == "q_hof":
+                    ylim = (0, 100)
+                    color = "grey"
+                elif var_sim == "prec":
+                    ylim = (0, 1100)
+                    color = "blue"
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "location"]]
+        df_ann_avg_long = df_ann_avg.melt(id_vars=["location"], value_name="vals").loc[:, ["location", "vals"]]        
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.barplot(data=df_ann_avg_long, x="location", y="vals", ax=axes, errorbar=None, color=color)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        axes.set_ylim(ylim)
+        axes.set_xlabel("")
+        plt.xticks(rotation=45)
+        fig.tight_layout()
+        file = base_path_figs / f"barplot_average_{var_sim}_locations_weighted.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
 
-#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
-#         df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
-#         fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
-#         sns.barplot(data=df_ann_avg_long, x="region", y="vals", ax=axes,  errorbar=None, color="purple")
-#         axes.legend().set_visible(False)
-#         axes.set_xlabel("")
-#         axes.set_ylabel(_lab_unit_annual[var_sim])
-#         axes.set_ylim(ylim)
-#         axes.set_xlabel("")
-#         plt.xticks(rotation=33)
-#         fig.tight_layout()
-#         file = base_path_figs / f"barplot_average_{var_sim}_regions_weighted.png"
-#         fig.savefig(file, dpi=300)
-#         plt.close(fig)
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "region"]]
+        df_ann_avg_long = df_ann_avg.melt(id_vars=["region"], value_name="vals").loc[:, ["region", "vals"]]        
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.barplot(data=df_ann_avg_long, x="region", y="vals", ax=axes,  errorbar=None, color=color)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        axes.set_ylim(ylim)
+        axes.set_xlabel("")
+        plt.xticks(rotation=33)
+        fig.tight_layout()
+        file = base_path_figs / f"barplot_average_{var_sim}_regions_weighted.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
 
-#         df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
-#         df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
-#         fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
-#         sns.barplot(data=df_ann_avg_long, x="crop_rotation", y="vals", ax=axes, errorbar=None, color="purple")
-#         axes.legend().set_visible(False)
-#         axes.set_xlabel("")
-#         axes.set_ylabel(_lab_unit_annual[var_sim])
-#         axes.set_ylim(ylim)
-#         axes.set_xlabel("")
-#         plt.xticks(rotation=33)
-#         fig.tight_layout()
-#         file = base_path_figs / f"barplot_average_{var_sim}_crop_rotations_weighted.png"
-#         fig.savefig(file, dpi=300)
-#         plt.close(fig)
-
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation"]]
+        df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation"], value_name="vals").loc[:, ["crop_rotation", "vals"]]        
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.barplot(data=df_ann_avg_long, x="crop_rotation", y="vals", ax=axes, errorbar=None, color=color)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        axes.set_ylim(ylim)
+        axes.set_xlabel("")
+        plt.xticks(rotation=33)
+        fig.tight_layout()
+        file = base_path_figs / f"barplot_average_{var_sim}_crop_rotations_weighted.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
 
 file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh/output/data_nitrate_leaching") / "nitrate_leaching_values_per_crop.csv"
 df = pd.read_csv(file, sep=";")
@@ -594,6 +596,15 @@ df_long_ = df_long.loc[cond, :]
 sns.barplot(data=df_long_, x="crop", y="vals", ax=axes[0], errorbar=None, color="grey")
 axes[0].set_xlabel("")
 axes[0].set_ylabel("GW-Neubildung\n [mm/Jahr]")
+axes[0].text(
+    0.97,
+    0.92,
+    "(a)",
+    fontsize=9,
+    horizontalalignment="center",
+    verticalalignment="center",
+    transform=axes[0].transAxes,
+)
 
 cond = (df_long["variable"] == "CPERC")
 df_long_ = df_long.loc[cond, :]
@@ -602,6 +613,15 @@ axes[1].legend(title="N-Düngeintensität", loc="upper center", fontsize=8, titl
 axes[1].set_ylim(0, 50)
 axes[1].set_xlabel("")
 axes[1].set_ylabel("$NO_3$-N in\n GW-Neubildung\n [kg N/ha/Jahr]")
+axes[1].text(
+    0.97,
+    0.92,
+    "(b)",
+    fontsize=9,
+    horizontalalignment="center",
+    verticalalignment="center",
+    transform=axes[1].transAxes,
+)
 
 cond = (df_long["variable"] == "MPERC")
 df_long_ = df_long.loc[cond, :]
@@ -612,6 +632,15 @@ axes[2].set_ylim(0, 60)
 axes[2].axhline(y=50, color="red", linestyle="--", linewidth=2)
 axes[2].axhline(y=37.5, color="orange", linestyle="--", linewidth=2)
 axes[2].set_ylabel("$NO_3$ in\n GW-Neubildung\n [mg/l]")
+axes[2].text(
+    0.97,
+    0.92,
+    "(c)",
+    fontsize=9,
+    horizontalalignment="center",
+    verticalalignment="center",
+    transform=axes[2].transAxes,
+)
 plt.xticks(rotation=33)
 
 fig.tight_layout()
