@@ -32,7 +32,11 @@ MODEL_NAMES = sorted(MODELS.keys())
 def rewrite_main_file(target_file, model_name):
     from roger import __version__ as roger_version
 
-    current_date = datetime.datetime.now(datetime.UTC)
+    try:
+        current_date = datetime.datetime.now(datetime.UTC)
+    except AttributeError:
+        # Fallback for Python < 3.10
+        current_date = datetime.datetime.utcnow()
     header_str = textwrap.dedent(
         f'''
         """
