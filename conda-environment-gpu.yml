@@ -18,3 +18,4 @@ dependencies:
     - matplotlib
     - seaborn
     - cftime
+    - bmipy
