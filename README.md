@@ -111,13 +111,13 @@ If you use Roger in scientific work, please consider citing [the following publi
 
 ```bibtex
 @article{
-	title = {Roger v3.0.3 – a process-based hydrologic toolbox model in {Python}},
-	volume = {...},
-	doi = {https://doi.org/10.5194/gmd-2023-118},
+	title = {RoGeR v.3.0.5 - a process-based hydrological toolbox model in Python},
+	volume = {17},
+	doi = {https://doi.org/10.5194/gmd-17-5249-2024},
 	journal = {Geosci. Model Dev.},
 	author = {Schwemmle, Robin, and Leistert, Hannes, and Weiler, Markus},
-	year = {2023},
-	pages = {...},
+	year = {2024},
+	pages = {5249-5262},
 }
 ```
 
