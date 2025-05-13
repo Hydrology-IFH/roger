@@ -54,16 +54,17 @@ sns.plotting_context(
 )
 
 _LABS_UNIT = {
-    "z_soil": r"$z_{soil}$ [mm]",
+    "z_soil": r"$z_{Boden}$ [mm]",
     "lmpv": r"$l_{mpv}$ [mm]",
     "dmpv": r"$\rho_{mpv}$ [1/$m^2$]",
     "theta_ac": r"$\theta_{ac}$ [-]",
     "theta_ufc": r"$\theta_{ufc}$ [-]",
     "theta_pwp": r"$\theta_{pwp}$ [-]",
-    "ks": r"$k_{s}$ [mm/hour]",
-    "kf": r"$k_{f}$ [mm/hour]",
-    "soil_fertility": r"soil fertility",
+    "ks": r"$k_{s}$ [mm/h]",
+    "kf": r"$k_{f}$ [mm/h]",
+    "soil_fertility": "Bodenfrucht-\nbarkeit",
     "clay": r"clay [-]",
+    "area_share": r"Fläche [%]",
 }
 
 _LABS = {
@@ -112,7 +113,12 @@ locations = ["freiburg", "lahr", "muellheim",
              "ehingen-kirchen", "merklingen", "hayingen",
              "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
 
-regions = ["upper rhine valley", "lake constance", "kraichgau", "alb-danube", "hohenlohe"]
+# regions = ["upper rhine valley", "lake constance", "kraichgau", "alb-danube", "hohenlohe"]
+regions = ['Oberrhein',
+            'Kraichgau',
+            'Hohenlohe',
+            'Donau-Alb',
+            'Bodensee']
 
 
 # load linkage between BK50 and cropland clusters
@@ -149,15 +155,15 @@ if not file.exists():
         mask = (gdf1['stationsna'] == location)
         gdf = gdf1.loc[mask, :]
         if location in ["freiburg", "lahr", "muellheim"]:
-            region = "upper rhine valley"
+            region = "Oberrhein"
         elif location in ["stockach", "gottmadingen", "weingarten"]:
-            region = "lake constance"
+            region = "Bodensee"
         elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
-            region = "kraichgau"
+            region = "Kraichgau"
         elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
-            region = "alb-danube"
+            region = "Alb-Donau"
         elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
-            region = "hohenlohe"
+            region = "Hohenlohe"
         # assign aggregated values to polygons
         for clust_id in clust_ids:
             cond = (df_link_bk50_cluster_cropland["CLUST_ID"] == clust_id)
@@ -192,6 +198,15 @@ if not file.exists():
     df.to_csv(file, sep=";", index=False)
 
 df = pd.read_csv(base_path / "output" / "areas.csv", sep=";")
+df["clust_id"] = [int(x.split("-")[-1]) for x in df["clust_id"].values]
+
+df_soil_types = df.iloc[:19, 4:13]
+df_soil_types["clust_id"] = df.iloc[:19, 2]
+df_soil_types.index = df_soil_types["clust_id"]
+df_soil_types = df_soil_types.sort_index(inplace=False)
+df_soil_types["area"] = df.groupby(["clust_id"]).sum()["area"]
+df_soil_types["area_share"] = (df_soil_types["area"]/df_soil_types["area"].sum()) * 100
+
 
 columns = ['region', 'clust_id', 'z_soil', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks',
        'soil_fertility', 'clay', 'area_share']
@@ -201,7 +216,7 @@ df_region.loc[:, "area_share"] = df.loc[:, columns].groupby(["region", "clust_id
 df_region.loc[:, "area_share"] = (df_region.loc[:, "area_share"].values / 3) * 100
 df_region["region1"] = df_region.index.get_level_values(0)
 
-colors = sns.color_palette("YlGnBu", n_colors=5)
+colors = sns.color_palette("RdYlBu", n_colors=5)
 legend_elements= []
 for j, region in enumerate(regions):
     element = Line2D([0], [0], color=colors[j], lw=2, label=region)
@@ -210,7 +225,7 @@ ll_params = ['z_soil', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks
 fig, axs = plt.subplots(3, 3, figsize=(6, 6), sharey=True)
 for i, param in enumerate(ll_params):
     axes = axs.flatten()[i]
-    g = sns.lineplot(data=df_region, x=param, y="area_share", hue="region", ax=axes, errorbar=None, palette="YlGnBu")
+    g = sns.lineplot(data=df_region, x=param, y="area_share", hue="region", ax=axes, errorbar=None, palette="RdYlBu")
     axes.set_ylim(0, 50)
     axes.set_ylabel("area [%]")
     axes.set_xlabel(_LABS_UNIT[param])
@@ -221,7 +236,7 @@ file = base_path / "figures" / "plot_parameters_cluster2.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
 
-colors = sns.color_palette("YlGnBu", n_colors=5)
+colors = sns.color_palette("RdYlBu", n_colors=5)
 legend_elements= []
 for j, region in enumerate(regions):
     element = Patch(facecolor=colors[j], edgecolor='k',
@@ -236,9 +251,9 @@ for i, param in enumerate(ll_params):
     columns = ['region1', 'category', 'area_share']
     df1 = df_region.loc[:, columns].groupby(["region1", "category"]).sum()
     axes = axs.flatten()[i]
-    g = sns.barplot(data=df1, x="category", y="area_share", hue="region1", ax=axes, errorbar=None, palette="YlGnBu")
+    g = sns.barplot(data=df1, x="category", y="area_share", hue="region1", ax=axes, errorbar=None, palette="RdYlBu")
     axes.set_ylim(0, 100)
-    axes.set_ylabel("area [%]")
+    axes.set_ylabel("Fläche [%]")
     axes.set_xlabel(_LABS_UNIT[param])
     g.legend().set_visible(False)
     axes.tick_params(axis='x', labelrotation=25)
@@ -247,6 +262,29 @@ fig.subplots_adjust(top=0.9, bottom=0.1, left=0.1, right=0.9, hspace=0.8, wspace
 file = base_path / "figures" / "barplot_parameters_cluster2.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
+
+ll_params = ['', 'area_share', '', 'z_soil', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks', 'clay', 'soil_fertility']
+fig, axs = plt.subplots(4, 3, figsize=(6, 5), sharex=True, sharey=False)
+for i, param in enumerate(ll_params):
+    axes = axs.flatten()[i]
+    if i == 0 or i == 2:
+        axes.set_axis_off()
+    else:
+        g = sns.barplot(data=df_soil_types, x="clust_id", y=param, hue="clust_id", ax=axes, errorbar=None, palette="Oranges")
+        axes.set_ylabel(_LABS_UNIT[param])
+        g.legend().set_visible(False)
+        axes.tick_params(axis='x', labelrotation=90)
+axs.flatten()[-3].set_xlabel("")
+axs.flatten()[-1].set_xlabel("")
+axs.flatten()[-2].set_xlabel("# repräsentativer Bodentyp")
+axs.flatten()[-1].set_xticklabels(['1', '', '3', '', '5', '', '7', '', '9', '', '11', '', '13', '', '15', '', '17', '', '19'], rotation=90, fontsize=9)
+axs.flatten()[-2].set_xticklabels(['1', '', '3', '', '5', '', '7', '', '9', '', '11', '', '13', '', '15', '', '17', '', '19'], rotation=90, fontsize=9)
+axs.flatten()[-3].set_xticklabels(['1', '', '3', '', '5', '', '7', '', '9', '', '11', '', '13', '', '15', '', '17', '', '19'], rotation=90, fontsize=9)
+fig.tight_layout()
+file = base_path / "figures" / "barplot_parameters_cluster.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)
+
 
 # regions = ["upper rhine valley"]
 # colors = sns.color_palette("YlGnBu", n_colors=5)
