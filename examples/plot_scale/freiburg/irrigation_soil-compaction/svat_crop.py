@@ -63,7 +63,7 @@ from roger.cli.roger_run_base import roger_base_cli
 def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at
+    from roger.core.operators import numpy as npx, update, update_add, at
     from roger.core.surface import calc_parameters_surface_kernel
     from roger.tools.setup import write_forcing, write_crop_rotation
     import roger.lookuptables as lut
@@ -394,44 +394,43 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 vs.itt_forc = vs.itt_forc + 6 * 24
 
                 if vs.itt_forc < (settings.nitt_forc - 5 * 6 * 24):
+                    vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], 0
+                        )
                     # irrigate if sum of rainfall for the next 5 days is less than 1 mm
                     sum_rainfall_next5days = npx.sum(vs.PREC[vs.itt_forc:vs.itt_forc + 5 * 6 * 24])
                     if sum_rainfall_next5days <= 1 and vs.month[1] in [4, 5] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
-                        # irrigate 30 mm for 4 hours from 06:00 to 10:00
-                        vs.prec_day = update(
-                            vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 20 / (6 * 4), 0)[:, :, npx.newaxis]
-                        )
                         mask_crops = npx.isin(vs.lu_id, [515, 550])
                         vs.irrig = update(
-                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, 0)
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
                         )
                     elif sum_rainfall_next5days <= 1 and vs.month[1] in [4, 5, 6] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
-                        # irrigate 30 mm for 4 hours from 06:00 to 10:00
-                        vs.prec_day = update(
-                            vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 20 / (6 * 4), 0)[:, :, npx.newaxis]
-                        )
                         mask_crops = npx.isin(vs.lu_id, [541, 542, 543, 544, 546, 556, 557, 558, 559, 560, 579])
                         vs.irrig = update(
-                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, 0)
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
                         )
                     elif sum_rainfall_next5days <= 1 and vs.month[1] in [4, 5, 6, 7] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
-                        # irrigate 30 mm for 4 hours from 06:00 to 10:00
-                        vs.prec_day = update(
-                            vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 20 / (6 * 4), 0)[:, :, npx.newaxis]
-                        )
-                        mask_crops = npx.isin(vs.lu_id, [525, 539, 563, 575, 259, 510])
+                        mask_crops = npx.isin(vs.lu_id, [525, 539, 575, 510])
                         vs.irrig = update(
-                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, 0)
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
+                        )
+                        mask_crops = npx.isin(vs.lu_id, [563])
+                        vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 40, vs.irrig[2:-2, 2:-2])
                         )
                     elif sum_rainfall_next5days <= 1 and vs.month[1] in [4, 5, 6, 7, 8] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
-                        # irrigate 30 mm for 4 hours from 06:00 to 10:00
-                        vs.prec_day = update(
-                            vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], npx.where(vs.irr_demand[2:-2, 2:-2] > 0, 20 / (6 * 4), 0)[:, :, npx.newaxis]
-                        )
-                        mask_crops = npx.isin(vs.lu_id, [513, 567])
+                        mask_crops = npx.isin(vs.lu_id, [513])
                         vs.irrig = update(
-                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, 0)
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, vs.irrig[2:-2, 2:-2])
                         )
+                        mask_crops = npx.isin(vs.lu_id, [567])
+                        vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
+                        )
+                    # irrigate 30 mm for 4 hours from 06:00 to 10:00
+                    vs.prec_day = update_add(
+                        vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], vs.irrig[2:-2, 2:-2, npx.newaxis] / (6 * 4)
+                    )
 
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
                 vs.itt_cr = vs.itt_cr + 2

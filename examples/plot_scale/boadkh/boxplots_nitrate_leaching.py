@@ -148,6 +148,47 @@ _dict_crop_id_rev = {115: "winter wheat",
                      131: "winter barley",
                     }
 
+_dict_lu_id = {"winter-wheat": [557],
+               "clover": [583, 584, 585],
+               "silage-corn": [539],
+               "summer-wheat": [543],
+               "sugar-beet": [563],
+               "winter-rape": [559],
+               "soybean": [541],
+               "grain-corn": [525],
+               "winter-barley": [556],
+               "miscanthus": [589, 590, 591],
+               "grass": [571, 573, 574],
+               "bare": [599],
+                }
+
+_dict_crop_periods = {"winter-wheat_clover": {"winter-wheat": [557], "clover": [583, 584, 585]},
+                      "winter-wheat_silage-corn": {"winter-wheat": [557], "silage-corn": [539]},
+                      "summer-wheat_winter-wheat": {"winter-wheat": [557], "summer-wheat": [543]},
+                      "summer-wheat_clover_winter-wheat": {"winter-wheat": [557], "summer-wheat": [543], "clover": [583, 584, 585]},
+                      "winter-wheat_clover_silage-corn": {"winter-wheat": [557], "silage-corn": [539], "clover": [583, 584, 585]},
+                      "winter-wheat_sugar-beet_silage-corn": {"winter-wheat": [557], "silage-corn": [539], "sugar-beet": [563]},
+                      "summer-wheat_winter-wheat_silage-corn": {"winter-wheat": [557], "summer-wheat": [543], "silage-corn": [539]},
+                      "summer-wheat_winter-wheat_winter-rape": {"winter-wheat": [557], "summer-wheat": [543], "winter-rape": [559]},
+                      "winter-wheat_winter-rape": {"winter-wheat": [557], "winter-rape": [559]},
+                      "winter-wheat_soybean_winter-rape": {"winter-wheat": [557], "winter-rape": [559], "soybean": [541]},
+                      "sugar-beet_winter-wheat_winter-barley": {"winter-wheat": [557], "winter-barley": [556], "sugar-beet": [563]}, 
+                      "grain-corn_winter-wheat_winter-rape": {"grain-corn": [525], "winter-wheat": [557], "winter-rape": [559]},
+                      "grain-corn_winter-wheat_winter-barley": {"grain-corn": [525], "winter-wheat": [557], "winter-barley": [556]},
+                      "grain-corn_winter-wheat_clover": {"grain-corn": [525], "winter-wheat": [557], "clover": [583, 584, 585]},
+                      "miscanthus": {"miscanthus": [589, 590, 591]},
+                      "bare-grass": {"grass": [599, 571, 573, 574]},
+                      "winter-wheat_silage-corn_yellow-mustard": {"winter-wheat": [557], "silage-corn": [539]},
+                      "summer-wheat_winter-wheat_yellow-mustard": {"winter-wheat": [557], "summer-wheat": [543]},
+                      "winter-wheat_sugar-beet_silage-corn_yellow-mustard": {"winter-wheat": [557], "silage-corn": [539], "sugar-beet": [563]},
+                      "summer-wheat_winter-wheat_silage-corn_yellow-mustard": {"winter-wheat": [557], "summer-wheat": [543], "silage-corn": [539]},
+                      "summer-wheat_winter-wheat_winter-rape_yellow-mustard": {"winter-wheat": [557], "summer-wheat": [543], "winter-rape": [559]},
+                      "sugar-beet_winter-wheat_winter-barley_yellow-mustard": {"winter-wheat": [557], "winter-barley": [556], "sugar-beet": [563]},  
+                      "grain-corn_winter-wheat_winter-rape_yellow-mustard": {"grain-corn": [525], "winter-wheat": [557], "winter-rape": [559]}, 
+                      "grain-corn_winter-wheat_winter-barley_yellow-mustard": {"grain-corn": [525], "winter-wheat": [557], "winter-barley": [556]}, 
+}
+
+
 # identifiers for simulations
 locations = ["freiburg", "lahr", "muellheim", 
              "stockach", "gottmadingen", "weingarten",
@@ -485,7 +526,7 @@ for var_sim in vars_sim:
 
         df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
         df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
         if var_sim == "C_q_ss":
             axes.axhline(y=50, color='r', linestyle='--', lw=2) 
             axes.axhline(y=37.5, color='orange', linestyle='--', lw=2) 
@@ -503,7 +544,7 @@ for var_sim in vars_sim:
 
         df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
         df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
         if var_sim == "C_q_ss":
             axes.axhline(y=50, color='r', linestyle='--', lw=2) 
             axes.axhline(y=37.5, color='orange', linestyle='--', lw=2) 
@@ -521,7 +562,7 @@ for var_sim in vars_sim:
 
         df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
         df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
         if var_sim == "C_q_ss":
             axes.axhline(y=50, color='r', linestyle='--', lw=2) 
             axes.axhline(y=37.5, color='orange', linestyle='--', lw=2) 
@@ -612,10 +653,10 @@ for var_sim in vars_sim:
                         elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
                             df_avg.loc[:, 'region'] = "Hohenlohe"
                         ll_df.append(df_avg)
-                        ylim = (0, 80)
+                        ylim = (0, 70)
         df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
         df_ann_avg_long = df_ann_avg.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
         if var_sim == "C_q_ss":
             axes.axhline(y=50, color='r', linestyle='--', lw=2) 
             axes.axhline(y=37.5, color='orange', linestyle='--', lw=2)  
@@ -633,7 +674,7 @@ for var_sim in vars_sim:
 
         df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
         df_ann_avg_long = df_ann_avg.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
         if var_sim == "C_q_ss":
             axes.axhline(y=50, color='r', linestyle='--', lw=2) 
             axes.axhline(y=37.5, color='orange', linestyle='--', lw=2)  
@@ -651,7 +692,7 @@ for var_sim in vars_sim:
 
         df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
         df_ann_avg_long = df_ann_avg.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]        
-        fig, axes = plt.subplots(1, 1, figsize=(6, 4), sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
         if var_sim == "C_q_ss":
             axes.axhline(y=50, color='r', linestyle='--', lw=2) 
             axes.axhline(y=37.5, color='orange', linestyle='--', lw=2)  
@@ -661,9 +702,129 @@ for var_sim in vars_sim:
         axes.set_ylabel(_lab_unit_annual[var_sim])
         axes.set_ylim(ylim)
         axes.set_xlabel("")
-        plt.xticks(rotation=33)
+        plt.xticks(rotation=0)
         fig.tight_layout()
         file = base_path_figs / f"boxplot_annual_average_{var_sim}_crop_rotations_weighted.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
+
+# plot weighted average annual sum per crop type
+vars_sim = ["M_q_ss", "C_q_ss"]
+for var_sim in vars_sim:
+        ll_df = []
+        for location in locations:
+            for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
+                # extract the values for the single crop periods within the crop rotation
+                crop_ids = _dict_crop_periods[crop_rotation_scenario]
+                for crop_id in crop_ids:
+                    ds = dict_fluxes_states[location][crop_rotation_scenario]
+                    lu_id = ds["lu_id"].isel(x=0, y=0).values[1:]
+                    df_lu_id = pd.DataFrame(index=ds["Time"].values[1:], data=lu_id)
+                    df_lu_id.columns = ["lu_id"]
+                    cond = onp.isin(df_lu_id.values, onp.array([586, 587, 599])).flatten()
+                    df_lu_id.loc[cond, "lu_id"] = onp.nan
+                    df_lu_id = df_lu_id.bfill()
+                    df_lu_id.loc[:, 'mask'] = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_lu_id[crop_id]).flatten()
+                    df_lu_id['new'] = df_lu_id['mask'].gt(df_lu_id['mask'].shift(fill_value=False))
+                    df_lu_id['crop_period'] = (df_lu_id.new + 0).cumsum() * df_lu_id['mask']
+                    df_lu_id['day'] = 1
+                    df_lu_id.replace(onp.nan, 0, inplace=True)
+                    df_lu_id['crop_period'] = df_lu_id['crop_period'].replace(0, onp.nan)
+                    df_lu_id = df_lu_id.drop(columns=['mask', 'new'])
+                    df_lu_id = df_lu_id.astype({"lu_id": int, "crop_period": float, "day": float})
+                    cond_crop = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
+                    for fertilization_intensity in fertilization_intensities:
+                        if var_sim == "M_q_ss":
+                            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+                            sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+                            cond1 = (df_params["CLUST_flag"] == 1)
+                            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+                            df.loc[:, 'crop_period'] = df_lu_id.loc[:, 'crop_period'].values
+                            df = df.loc[cond_crop, :]
+                            # calculate sum per crop period
+                            weight = 365/df_lu_id.groupby("crop_period").sum()["day"].values
+                            weight = onp.where(weight > 1, 1, weight)
+                            df_cp = df.groupby("crop_period").sum() * weight[:, onp.newaxis]
+                            # calculate average
+                            df_ann_avg1 = df_cp.mean(axis=0).to_frame()
+                            cond = (df_areas["location"] == location)
+                            df_area_share = df_areas.loc[cond, :]
+                            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+                            data.loc[:, "area_share"] = 0.0
+                            for clust_id in clust_ids:
+                                cond1 = (df_area_share["clust_id"] == clust_id)
+                                if cond1.any():
+                                    cond2 = (data["CLUST_ID"] == clust_id)
+                                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+                            data = repeat_by_areashare(df_ann_avg1.values, data["area_share"].values)
+                            df_ann_avg = pd.DataFrame(data=data)
+                            df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+                            df_ann_avg.loc[:, "location"] = _dict_location[location]
+                            df_ann_avg.loc[:, "crop"] = crop_id
+                            if location in ["freiburg", "lahr", "muellheim"]:
+                                df_ann_avg.loc[:, 'region'] = "Oberrhein"
+                            elif location in ["stockach", "gottmadingen", "weingarten"]:
+                                df_ann_avg.loc[:, 'region'] = "Bodensee"
+                            elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                                df_ann_avg.loc[:, 'region'] = "Kraichgau"
+                            elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                                df_ann_avg.loc[:, 'region'] = "Alb-Donau"
+                            elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                                df_ann_avg.loc[:, 'region'] = "Hohenlohe"
+                            ll_df.append(df_ann_avg)
+                            ylim = (0, 70)
+                        elif var_sim == "C_q_ss":
+                            ds = dict_fluxes_states[location][crop_rotation_scenario]
+                            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:][:, cond_crop]
+                            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+                            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1][:, cond_crop] * 4.427  # convert nitrate-nitrogen to nitrate
+                            sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
+                            cond1 = (df_params["CLUST_flag"] == 1)
+                            df = pd.DataFrame(data=sim_vals.T).loc[:, cond1]
+                            # calculate annual mean
+                            df_avg1 = df.sum(axis=0).to_frame()
+                            cond = (df_areas["location"] == location)
+                            df_area_share = df_areas.loc[cond, :]
+                            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+                            data.loc[:, "area_share"] = 0.0
+                            for clust_id in clust_ids:
+                                cond1 = (df_area_share["clust_id"] == clust_id)
+                                if cond1.any():
+                                    cond2 = (data["CLUST_ID"] == clust_id)
+                                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+                            data = repeat_by_areashare(df_avg1.values, data["area_share"].values)
+                            df_avg = pd.DataFrame(data=data)
+                            df_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+                            df_avg.loc[:, "location"] = _dict_location[location]
+                            df_avg.loc[:, "crop"] = crop_id
+                            if location in ["freiburg", "lahr", "muellheim"]:
+                                df_avg.loc[:, 'region'] = "Oberrhein"
+                            elif location in ["stockach", "gottmadingen", "weingarten"]:
+                                df_avg.loc[:, 'region'] = "Bodensee"
+                            elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                                df_avg.loc[:, 'region'] = "Kraichgau"
+                            elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                                df_avg.loc[:, 'region'] = "Alb-Donau"
+                            elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                                df_avg.loc[:, 'region'] = "Hohenlohe"
+                            ll_df.append(df_avg)
+                            ylim = (0, 100)
+
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop", "fertilization_intensity"]]
+        df_ann_avg_long = df_ann_avg.melt(id_vars=["crop", "fertilization_intensity"], value_name="vals").loc[:, ["crop", "fertilization_intensity", "vals"]]        
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        if var_sim == "C_q_ss":
+            axes.axhline(y=50, color='r', linestyle='--', lw=2) 
+            axes.axhline(y=37.5, color='orange', linestyle='--', lw=2)  
+        sns.boxplot(data=df_ann_avg_long, x="crop", y="vals", hue="fertilization_intensity", ax=axes, whis=(1, 99), showfliers=False, palette="PuRd")
+        axes.legend().set_visible(False)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        axes.set_ylim(ylim)
+        axes.set_xlabel("")
+        plt.xticks(rotation=45)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_annual_average_{var_sim}_crops_weighted.png"
         fig.savefig(file, dpi=300)
         plt.close(fig)
 
@@ -816,9 +977,91 @@ for var_sim in vars_sim:
         axes.set_ylabel(_lab_unit_annual[var_sim])
         axes.set_ylim(ylim)
         axes.set_xlabel("")
-        plt.xticks(rotation=33)
+        plt.xticks(rotation=0)
         fig.tight_layout()
         file = base_path_figs / f"boxplot_annual_average_{var_sim}_crop_rotations_weighted.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
+
+
+# plot weighted average annual sum per crop type
+vars_sim = ["q_ss", "q_hof"]
+for var_sim in vars_sim:
+        ll_df = []
+        for location in locations:
+            for crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
+                # extract the values for the single crop periods within the crop rotation
+                crop_ids = _dict_crop_periods[crop_rotation_scenario]
+                for crop_id in crop_ids:
+                    ds = dict_fluxes_states[location][crop_rotation_scenario]
+                    lu_id = ds["lu_id"].isel(x=0, y=0).values[1:]
+                    df_lu_id = pd.DataFrame(index=ds["Time"].values[1:], data=lu_id)
+                    df_lu_id.columns = ["lu_id"]
+                    cond = onp.isin(df_lu_id.values, onp.array([586, 587, 599])).flatten()
+                    df_lu_id.loc[cond, "lu_id"] = onp.nan
+                    df_lu_id = df_lu_id.bfill()
+                    df_lu_id.loc[:, 'mask'] = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_lu_id[crop_id]).flatten()
+                    df_lu_id['new'] = df_lu_id['mask'].gt(df_lu_id['mask'].shift(fill_value=False))
+                    df_lu_id['crop_period'] = (df_lu_id.new + 0).cumsum() * df_lu_id['mask']
+                    df_lu_id['day'] = 1
+                    df_lu_id.replace(onp.nan, 0, inplace=True)
+                    df_lu_id['crop_period'] = df_lu_id['crop_period'].replace(0, onp.nan)
+                    df_lu_id = df_lu_id.drop(columns=['mask', 'new'])
+                    df_lu_id = df_lu_id.astype({"lu_id": int, "crop_period": float, "day": float})
+                    cond_crop = onp.isin(df_lu_id.loc[:, "lu_id"].values, _dict_crop_periods[crop_rotation_scenario][crop_id]).flatten()
+
+                    ds = dict_fluxes_states[location][crop_rotation_scenario]
+                    sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+                    cond1 = (df_params["CLUST_flag"] == 1)
+                    df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                    df.loc[:, 'crop_period'] = df_lu_id.loc[:, 'crop_period'].values
+                    df = df.loc[cond_crop, :]
+                    # calculate sum per crop period
+                    weight = 365/df_lu_id.groupby("crop_period").sum()["day"].values
+                    weight = onp.where(weight > 1, 1, weight)
+                    df_cp = df.groupby("crop_period").sum() * weight[:, onp.newaxis]
+                    # calculate annual sum
+                    df_ann_avg1 = df_cp.mean(axis=0).to_frame()
+                    cond = (df_areas["location"] == location)
+                    df_area_share = df_areas.loc[cond, :]
+                    data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+                    data.loc[:, "area_share"] = 0.0
+                    for clust_id in clust_ids:
+                        cond1 = (df_area_share["clust_id"] == clust_id)
+                        if cond1.any():
+                            cond2 = (data["CLUST_ID"] == clust_id)
+                            data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+                    data = repeat_by_areashare(df_ann_avg1.values, data["area_share"].values)
+                    df_ann_avg = pd.DataFrame(data=data)
+                    df_ann_avg.loc[:, "location"] = _dict_location[location]
+                    df_ann_avg.loc[:, "crop"] = crop_id
+                    if location in ["freiburg", "lahr", "muellheim"]:
+                        df_ann_avg.loc[:, 'region'] = "Oberrhein"
+                    elif location in ["stockach", "gottmadingen", "weingarten"]:
+                        df_ann_avg.loc[:, 'region'] = "Bodensee"
+                    elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                        df_ann_avg.loc[:, 'region'] = "Kraichgau"
+                    elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                        df_ann_avg.loc[:, 'region'] = "Alb-Donau"
+                    elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                        df_ann_avg.loc[:, 'region'] = "Hohenlohe"
+                    ll_df.append(df_ann_avg)
+                    if var_sim == "q_ss":
+                        ylim = (0, 800)
+                    elif var_sim == "q_hof":
+                        ylim = (0, 200)
+
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop"]]
+        df_ann_avg_long = df_ann_avg.melt(id_vars=["crop"], value_name="vals").loc[:, ["crop", "vals"]]        
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.boxplot(data=df_ann_avg_long, x="crop", y="vals", color="#969696", ax=axes, whis=(1, 99), showfliers=False)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        axes.set_ylim(ylim)
+        axes.set_xlabel("")
+        plt.xticks(rotation=45)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_annual_average_{var_sim}_crops_weighted.png"
         fig.savefig(file, dpi=300)
         plt.close(fig)
 
@@ -1212,7 +1455,7 @@ for var_sim in vars_sim:
                         else:
                             df_ann_avg.loc[:, "fertilization_intensity"] = _dict_intercropping_effects[f'{fertilization_intensity} Nfert & intercropping']
                         df_ann_avg.loc[:, "location"] = _dict_location[location]
-                        df_ann_avg.loc[:, "crop_rotation"] = _dict_location[location]
+                        df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
                         if location in ["freiburg", "lahr", "muellheim"]:
                             df_ann_avg['region'] = "Oberrhein"
                         elif location in ["stockach", "gottmadingen", "weingarten"]:
@@ -1240,6 +1483,7 @@ for var_sim in vars_sim:
                         else:
                             df_avg.loc[:, "fertilization_intensity"] = _dict_intercropping_effects[f'{fertilization_intensity} Nfert & intercropping']
                         df_avg.loc[:, "location"] = _dict_location[location]
+                        df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
                         if location in ["freiburg", "lahr", "muellheim"]:
                             df_avg['region'] = "Oberrhein"
                         elif location in ["stockach", "gottmadingen", "weingarten"]:
@@ -1302,6 +1546,7 @@ for var_sim in vars_sim:
                         # calculate annual sum
                         df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
                         df_ann_avg.loc[:, "location"] = _dict_location[location]
+                        df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
                         if location in ["freiburg", "lahr", "muellheim"]:
                             df_ann_avg['region'] = "Oberrhein"
                         elif location in ["stockach", "gottmadingen", "weingarten"]:
@@ -1329,6 +1574,7 @@ for var_sim in vars_sim:
                         # calculate annual mean
                         df_avg = df.sum(axis=0).to_frame()
                         df_avg.loc[:, "location"] = _dict_location[location]
+                        df_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
                         if location in ["freiburg", "lahr", "muellheim"]:
                             df_avg['region'] = "Oberrhein"
                         elif location in ["stockach", "gottmadingen", "weingarten"]:
@@ -1374,9 +1620,166 @@ for var_sim in vars_sim:
         axes.set_xlabel("")
         axes.set_ylabel(_lab_unit_annual[var_sim])
         # axes.set_ylim(ylim)
-        plt.xticks(rotation=45)
+        plt.xticks(rotation=0)
         fig.tight_layout()
         file = base_path_figs / f"boxplot_difference_annual_average_{var_sim}_intercropping_effects_regions.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
+
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
+        df_ann_avg_mustard = pd.concat(ll_df_mustard).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
+        df_ann_avg_diff = df_ann_avg.copy()        
+        df_ann_avg_diff.iloc[:, 0] = -(df_ann_avg.iloc[:, 0] - df_ann_avg_mustard.iloc[:, 0])
+        df_ann_avg_long = df_ann_avg_diff.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]       
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(1, 99), showfliers=False, palette="PuRd")
+        axes.legend().set_visible(False)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        # axes.set_ylim(ylim)
+        plt.xticks(rotation=0)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_difference_annual_average_{var_sim}_intercropping_effects_crop_rotations.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
+
+
+# plot weighted difference between average annual sum considering crop rotations with and without mustard
+vars_sim = ["M_q_ss", "C_q_ss"]
+for var_sim in vars_sim:
+        ll_df = []
+        ll_df_mustard = []
+        for location in locations:
+            for crop_rotation_scenario in crop_rotation_scenarios_mustard:
+                for fertilization_intensity in fertilization_intensities:
+                    if var_sim == "M_q_ss":
+                        ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+                        sim_vals = ds[var_sim].isel(y=0).values[:, 1:-1] * 0.01 # convert from mg/m2 to kg/ha
+                        cond1 = (df_params["CLUST_flag"] == 1)
+                        df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+                        # calculate annual sum
+                        df_ann_avg1 = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+                        cond = (df_areas["location"] == location)
+                        df_area_share = df_areas.loc[cond, :]
+                        data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+                        data.loc[:, "area_share"] = 0.0
+                        for clust_id in clust_ids:
+                            cond1 = (df_area_share["clust_id"] == clust_id)
+                            if cond1.any():
+                                cond2 = (data["CLUST_ID"] == clust_id)
+                                data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+                        data = repeat_by_areashare(df_ann_avg1.values, data["area_share"].values)
+                        df_ann_avg = pd.DataFrame(data=data)
+                        df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+                        df_ann_avg.loc[:, "location"] = _dict_location[location]
+                        df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+                        if location in ["freiburg", "lahr", "muellheim"]:
+                            df_ann_avg['region'] = "Oberrhein"
+                        elif location in ["stockach", "gottmadingen", "weingarten"]:
+                            df_ann_avg['region'] = "Bodensee"
+                        elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                            df_ann_avg['region'] = "Kraichgau"
+                        elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                            df_ann_avg['region'] = "Alb-Donau"
+                        elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                            df_ann_avg['region'] = "Hohenlohe"
+                        if crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
+                            df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+                            ll_df.append(df_ann_avg)
+                        else:
+                            df_ann_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+                            ll_df_mustard.append(df_ann_avg)
+                    elif var_sim == "C_q_ss":
+                        ds = dict_fluxes_states[location][crop_rotation_scenario]
+                        sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+                        ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+                        sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+                        sim_vals = onp.where(sim_vals1 > 0.01, (sim_vals2/sim_vals1) * (sim_vals1/onp.sum(sim_vals1, axis=-1)[:, onp.newaxis]), onp.nan)
+                        cond1 = (df_params["CLUST_flag"] == 1)
+                        df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+                        # calculate annual mean
+                        df_avg1 = df.sum(axis=0).to_frame()
+                        cond = (df_areas["location"] == location)
+                        df_area_share = df_areas.loc[cond, :]
+                        data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+                        data.loc[:, "area_share"] = 0.0
+                        for clust_id in clust_ids:
+                            cond1 = (df_area_share["clust_id"] == clust_id)
+                            if cond1.any():
+                                cond2 = (data["CLUST_ID"] == clust_id)
+                                data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+                        data = repeat_by_areashare(df_avg1.values, data["area_share"].values)
+                        df_avg = pd.DataFrame(data=data)
+                        df_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+                        df_avg.loc[:, "location"] = _dict_location[location]
+                        df_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+                        if location in ["freiburg", "lahr", "muellheim"]:
+                            df_avg['region'] = "Oberrhein"
+                        elif location in ["stockach", "gottmadingen", "weingarten"]:
+                            df_avg['region'] = "Bodensee"
+                        elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                            df_avg['region'] = "Kraichgau"
+                        elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                            df_avg['region'] = "Alb-Donau"
+                        elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                            df_avg['region'] = "Hohenlohe"
+                        if crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
+                            df_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+                            ll_df.append(df_avg)
+                        else:
+                            df_avg.loc[:, "fertilization_intensity"] = fertilization_intensity
+                            ll_df_mustard.append(df_avg)
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "location", "fertilization_intensity"]]
+        df_ann_avg_mustard = pd.concat(ll_df_mustard).loc[:, [0, "location", "fertilization_intensity"]]
+        df_ann_avg_diff = df_ann_avg.copy()        
+        df_ann_avg_diff.iloc[:, 0] = -(df_ann_avg.iloc[:, 0] - df_ann_avg_mustard.iloc[:, 0])
+        df_ann_avg_long = df_ann_avg_diff.melt(id_vars=["location", "fertilization_intensity"], value_name="vals").loc[:, ["location", "fertilization_intensity", "vals"]]        
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.boxplot(data=df_ann_avg_long, x="location", y="vals", hue="fertilization_intensity", ax=axes, whis=(1, 99), showfliers=False, palette="PuRd")
+        axes.legend().set_visible(False)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        # axes.set_ylim(ylim)
+        axes.set_xlabel("Location")
+        plt.xticks(rotation=45)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_difference_annual_average_{var_sim}_intercropping_effects_locations_weighted.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
+
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "region", "fertilization_intensity"]]
+        df_ann_avg_mustard = pd.concat(ll_df_mustard).loc[:, [0, "region", "fertilization_intensity"]]
+        df_ann_avg_diff = df_ann_avg.copy()        
+        df_ann_avg_diff.iloc[:, 0] = -(df_ann_avg.iloc[:, 0] - df_ann_avg_mustard.iloc[:, 0])
+        df_ann_avg_long = df_ann_avg_diff.melt(id_vars=["region", "fertilization_intensity"], value_name="vals").loc[:, ["region", "fertilization_intensity", "vals"]]       
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.boxplot(data=df_ann_avg_long, x="region", y="vals", hue="fertilization_intensity", ax=axes, whis=(1, 99), showfliers=False, palette="PuRd")
+        axes.legend().set_visible(False)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        if var_sim == "C_q_ss":
+            axes.set_ylim(-10, 10)
+        plt.xticks(rotation=0)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_difference_annual_average_{var_sim}_intercropping_effects_regions_weighted.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
+
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
+        df_ann_avg_mustard = pd.concat(ll_df_mustard).loc[:, [0, "crop_rotation", "fertilization_intensity"]]
+        df_ann_avg_diff = df_ann_avg_mustard.copy()        
+        df_ann_avg_diff.iloc[:, 0] = -(df_ann_avg.iloc[:, 0] - df_ann_avg_mustard.iloc[:, 0])
+        df_ann_avg_long = df_ann_avg_diff.melt(id_vars=["crop_rotation", "fertilization_intensity"], value_name="vals").loc[:, ["crop_rotation", "fertilization_intensity", "vals"]]       
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", hue="fertilization_intensity", ax=axes, whis=(1, 99), showfliers=False, palette="PuRd")
+        axes.legend().set_visible(False)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        if var_sim == "C_q_ss":
+            axes.set_ylim(-10, 10)
+        plt.xticks(rotation=0)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_difference_annual_average_{var_sim}_intercropping_effects_crop_rotations_weighted.png"
         fig.savefig(file, dpi=300)
         plt.close(fig)
 
@@ -1394,6 +1797,7 @@ for var_sim in vars_sim:
                 # calculate annual sum
                 df_ann_avg = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
                 df_ann_avg.loc[:, "location"] = _dict_location[location]
+                df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
                 if location in ["freiburg", "lahr", "muellheim"]:
                     df_ann_avg['region'] = "Oberrhein"
                 elif location in ["stockach", "gottmadingen", "weingarten"]:
@@ -1435,11 +1839,104 @@ for var_sim in vars_sim:
         axes.set_xlabel("")
         axes.set_ylabel(_lab_unit_annual[var_sim])
         # axes.set_ylim(ylim)
-        plt.xticks(rotation=45)
+        plt.xticks(rotation=0)
         fig.tight_layout()
         file = base_path_figs / f"boxplot_difference_annual_average_{var_sim}_intercropping_effects_regions.png"
         fig.savefig(file, dpi=300)
         plt.close(fig)
+
+
+vars_sim = ["q_ss", "q_hof"]
+for var_sim in vars_sim:
+        ll_df = []
+        ll_df_mustard = []
+        for location in locations:
+            for crop_rotation_scenario in crop_rotation_scenarios_mustard:
+                ds = dict_fluxes_states[location][crop_rotation_scenario]
+                sim_vals = ds[var_sim].isel(y=0).values[:, 1:]
+                cond1 = (df_params["CLUST_flag"] == 1)
+                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                # calculate annual sum
+                df_ann_avg1 = df.resample("YE").sum().iloc[:-1, :].mean(axis=0).to_frame()
+                cond = (df_areas["location"] == location)
+                df_area_share = df_areas.loc[cond, :]
+                data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+                data.loc[:, "area_share"] = 0.0
+                for clust_id in clust_ids:
+                    cond1 = (df_area_share["clust_id"] == clust_id)
+                    if cond1.any():
+                        cond2 = (data["CLUST_ID"] == clust_id)
+                        data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+                data = repeat_by_areashare(df_ann_avg1.values, data["area_share"].values)
+                df_ann_avg = pd.DataFrame(data=data)
+                df_ann_avg.loc[:, "location"] = _dict_location[location]
+                df_ann_avg.loc[:, "crop_rotation"] = _dict_ffid[crop_rotation_scenario]
+                if location in ["freiburg", "lahr", "muellheim"]:
+                    df_ann_avg['region'] = "Oberrhein"
+                elif location in ["stockach", "gottmadingen", "weingarten"]:
+                    df_ann_avg['region'] = "Bodensee"
+                elif location in ["eppingen-elsenz", "bruchsal-heidelsheim", "bretten"]:
+                    df_ann_avg['region'] = "Kraichgau"
+                elif location in ["ehingen-kirchen", "merklingen", "hayingen"]:
+                    df_ann_avg['region'] = "Alb-Donau"
+                elif location in ["kupferzell", "oehringen", "vellberg-kleinaltdorf"]:
+                    df_ann_avg['region'] = "Hohenlohe"
+                if crop_rotation_scenario in crop_rotation_scenarios_without_mustard:
+                    ll_df.append(df_ann_avg)
+                else:
+                    ll_df_mustard.append(df_ann_avg)
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "location"]]
+        df_ann_avg_mustard = pd.concat(ll_df_mustard).loc[:, [0, "location"]]
+        df_ann_avg_diff = df_ann_avg.copy()        
+        df_ann_avg_diff.iloc[:, 0] = -(df_ann_avg.iloc[:, 0] - df_ann_avg_mustard.iloc[:, 0])
+        df_ann_avg_long = df_ann_avg_diff.melt(id_vars=["location"], value_name="vals").loc[:, ["location", "vals"]]        
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.boxplot(data=df_ann_avg_long, x="location", y="vals", color="#969696", ax=axes, whis=(1, 99), showfliers=False)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        # axes.set_ylim(ylim)
+        axes.set_xlabel("Location")
+        plt.xticks(rotation=45)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_difference_annual_average_{var_sim}_intercropping_effects_locations_weighted.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
+
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "region"]]
+        df_ann_avg_mustard = pd.concat(ll_df_mustard).loc[:, [0, "region"]]
+        df_ann_avg_diff = df_ann_avg.copy()        
+        df_ann_avg_diff.iloc[:, 0] = -(df_ann_avg.iloc[:, 0] - df_ann_avg_mustard.iloc[:, 0])
+        df_ann_avg_long = df_ann_avg_diff.melt(id_vars=["region"], value_name="vals").loc[:, ["region", "vals"]]       
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.boxplot(data=df_ann_avg_long, x="region", y="vals", color="#969696", ax=axes, whis=(1, 99), showfliers=False)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        if var_sim == "q_ss":
+            axes.set_ylim(-70, 40)
+        plt.xticks(rotation=0)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_difference_annual_average_{var_sim}_intercropping_effects_regions_weighted.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
+
+        df_ann_avg = pd.concat(ll_df).loc[:, [0, "crop_rotation"]]
+        df_ann_avg_mustard = pd.concat(ll_df_mustard).loc[:, [0, "crop_rotation"]]
+        df_ann_avg_diff = df_ann_avg_mustard.copy()        
+        df_ann_avg_diff.iloc[:, 0] = -(df_ann_avg.iloc[:, 0] - df_ann_avg_mustard.iloc[:, 0])
+        df_ann_avg_long = df_ann_avg_diff.melt(id_vars=["crop_rotation"], value_name="vals").loc[:, ["crop_rotation", "vals"]]       
+        fig, axes = plt.subplots(1, 1, figsize=(6, 3), sharex=True, sharey=True)
+        sns.boxplot(data=df_ann_avg_long, x="crop_rotation", y="vals", color="#969696", ax=axes, whis=(1, 99), showfliers=False)
+        axes.set_xlabel("")
+        axes.set_ylabel(_lab_unit_annual[var_sim])
+        if var_sim == "q_ss":
+            axes.set_ylim(-70, 40)
+        plt.xticks(rotation=0)
+        fig.tight_layout()
+        file = base_path_figs / f"boxplot_difference_annual_average_{var_sim}_intercropping_effects_crop_rotations_weighted.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
+
+
 
 # # plot average annual sum considering crop rotations with and without mustard
 # vars_sim = ["M_q_ss", "C_q_ss"]
