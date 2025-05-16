@@ -647,3 +647,44 @@ fig.tight_layout()
 file = base_path_figs / "barplot_per_crop_types_.png"
 fig.savefig(file, dpi=300)
 plt.close(fig)
+
+fig, axes = plt.subplots(2, 1, figsize=(6, 4), sharex=True, sharey=False)
+cond = (df_long["variable"] == "PERC")
+df_long_ = df_long.loc[cond, :]
+sns.barplot(data=df_long_, x="crop", y="vals", ax=axes[0], errorbar=None, color="grey")
+axes[0].set_xlabel("")
+axes[0].set_ylabel("GW-Neubildung\n [mm/Jahr]")
+axes[0].text(
+    0.97,
+    0.92,
+    "(a)",
+    fontsize=9,
+    horizontalalignment="center",
+    verticalalignment="center",
+    transform=axes[0].transAxes,
+)
+
+cond = (df_long["variable"] == "CPERC")
+df_long_ = df_long.loc[cond, :]
+sns.barplot(data=df_long_, x="crop", y="vals", hue="fertilization_intensity", ax=axes[1], errorbar=None, palette="PuRd")
+axes[1].legend(title="N-Düngeintensität", loc="upper center", fontsize=8, title_fontsize=9, frameon=False, ncol=3)
+axes[1].set_ylim(0, 75)
+axes[1].axhline(y=50, color="red", linestyle="--", linewidth=2)
+axes[1].axhline(y=37.5, color="orange", linestyle="--", linewidth=2)
+axes[1].set_xlabel("")
+axes[1].set_ylabel("$NO_3$ in\n GW-Neubildung\n [mg/l]")
+axes[1].text(
+    0.97,
+    0.92,
+    "(b)",
+    fontsize=9,
+    horizontalalignment="center",
+    verticalalignment="center",
+    transform=axes[1].transAxes,
+)
+plt.xticks(rotation=45)
+
+fig.tight_layout()
+file = base_path_figs / "barplot_per_crop_types__.png"
+fig.savefig(file, dpi=300)
+plt.close(fig)

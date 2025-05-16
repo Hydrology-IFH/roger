@@ -148,14 +148,15 @@ def main(tmp_dir):
     norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
     fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-    gdf.plot(column="SID", ax=ax, cmap=cmap, norm=norm, legend=True, legend_kwds={"label": "# repräsentativer\n Bodentyp", "shrink": 0.62})
+    gdf.plot(column="SID", ax=ax, cmap=cmap, norm=norm, legend=True, legend_kwds={"label": "# repräsentativer Bodentyp", "shrink": 0.62})
+    meteo_stations.plot(ax=ax, color="black", markersize=100, zorder=2)
     ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
     north_arrow(
     ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
     )
     scale_bar(ax, location="lower right", style="boxes", bar={"projection": gdf.crs, "height": 0.3}, text = {"fontfamily": "monospace", "fontsize": 24})
     ax.text(
-    0.09,
+    0.11,
     0.025,
     "EPSG: 25832",
     fontsize=28,
@@ -172,168 +173,217 @@ def main(tmp_dir):
     file = Path(__file__).parent / "figures" / "map_soil_type.png"
     fig.savefig(file, dpi=300)
 
-    # plot the map (increase the dpi and figsize to make polygons visible)
-    fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-    gdf.plot(column="value", ax=ax, cmap="RdYlBu", vmin=0, vmax=5, legend=False, zorder=1)
-    meteo_stations.plot(ax=ax, color="black", markersize=100, zorder=2)
-    ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
-    north_arrow(
-    ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
-    )
-    scale_bar(ax, location="lower right", style="boxes", bar={"projection": gdf.crs, "height": 0.3}, text = {"fontfamily": "monospace", "fontsize": 24})
-    ax.text(
-    0.09,
-    0.025,
-    "EPSG: 25832",
-    fontsize=28,
-    horizontalalignment="center",
-    verticalalignment="center",
-    transform=ax.transAxes,
-    )
-    texts = []
-    for x, y, label in zip(meteo_stations.geometry.x, meteo_stations.geometry.y, meteo_stations["stationsna"]):
-        texts.append(ax.text(x, y, label, fontsize=32, weight="bold"))
-    aT.adjust_text(texts, force_static=(0.05, 0.05), force_text=(0.1, 0.1), expand=(1, 1), time_lim=5, pull_threshold=5, force_pull=(0.06, 0.06),
-                   arrowprops=dict(arrowstyle="-", color='grey', lw=4), ax=ax)
-    fig.tight_layout()
-    file = Path(__file__).parent / "figures" / "map_regions.png"
-    fig.savefig(file, dpi=300)
+    # # plot the map (increase the dpi and figsize to make polygons visible)
+    # fig, ax = plt.subplots(1, 1, figsize=(20, 24))
+    # gdf.plot(column="value", ax=ax, cmap="RdYlBu", vmin=0, vmax=5, legend=False, zorder=1)
+    # meteo_stations.plot(ax=ax, color="black", markersize=100, zorder=2)
+    # ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
+    # north_arrow(
+    # ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
+    # )
+    # scale_bar(ax, location="lower right", style="boxes", bar={"projection": gdf.crs, "height": 0.3}, text = {"fontfamily": "monospace", "fontsize": 24})
+    # ax.text(
+    # 0.09,
+    # 0.025,
+    # "EPSG: 25832",
+    # fontsize=28,
+    # horizontalalignment="center",
+    # verticalalignment="center",
+    # transform=ax.transAxes,
+    # )
+    # texts = []
+    # for x, y, label in zip(meteo_stations.geometry.x, meteo_stations.geometry.y, meteo_stations["stationsna"]):
+    #     texts.append(ax.text(x, y, label, fontsize=32, weight="bold"))
+    # aT.adjust_text(texts, force_static=(0.05, 0.05), force_text=(0.1, 0.1), expand=(1, 1), time_lim=5, pull_threshold=5, force_pull=(0.06, 0.06),
+    #                arrowprops=dict(arrowstyle="-", color='grey', lw=4), ax=ax)
+    # fig.tight_layout()
+    # file = Path(__file__).parent / "figures" / "map_regions.png"
+    # fig.savefig(file, dpi=300)
 
-    gdf = gdf_.copy()
-    gdf["value"] = onp.nan
+    # gdf = gdf_.copy()
+    # gdf["value"] = onp.nan
 
-    color_ids = [0.1, 0.4, 0.7, 1.3, 1.5, 1.7, 2.5, 2.6, 2.7, 3.1, 3.4, 3.7, 4.5, 4.75, 5.0]
+    # color_ids = [0.1, 0.4, 0.7, 1.3, 1.5, 1.7, 2.5, 2.6, 2.7, 3.1, 3.4, 3.7, 4.5, 4.75, 5.0]
 
-    for i, location in enumerate(locations):
-        mask = (gdf["stationsna"].values.astype(str) == location)
-        gdf.loc[mask, "value"] = color_ids[i]
+    # for i, location in enumerate(locations):
+    #     mask = (gdf["stationsna"].values.astype(str) == location)
+    #     gdf.loc[mask, "value"] = color_ids[i]
 
-    # plot the map (increase the dpi and figsize to make polygons visible)
-    fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-    gdf.plot(column="value", ax=ax, cmap="RdYlBu", vmin=0, vmax=5, legend=False, zorder=1)
-    meteo_stations.plot(ax=ax, color="black", markersize=100, zorder=2)
-    ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
-    north_arrow(
-    ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"},
-    )
-    scale_bar(ax, location="lower right", style="boxes", bar={"projection": gdf.crs, "height": 0.3}, text = {"fontfamily": "monospace", "fontsize": 24})
-    ax.text(
-    0.09,
-    0.025,
-    "EPSG: 25832",
-    fontsize=28,
-    horizontalalignment="center",
-    verticalalignment="center",
-    transform=ax.transAxes,
-    )
-    fig.tight_layout()
-    file = Path(__file__).parent / "figures" / "map_locations.png"
-    fig.savefig(file, dpi=300)
-
-
-    # bounds = [10, 25, 37.5, 50, 75]
-    # norm = mpl.colors.BoundaryNorm(bounds, mpl.colormaps["OrRd"].N)
-
-    # vars_sim = ["C_q_ss"]
-    # crop_rotations = ["winter-wheat_silage-corn", "winter-wheat_silage-corn_yellow-mustard", "winter-wheat_soybean_winter-rape"]
-    # fertilisation_intensities = ["low", "medium", "high"]
-
-    # for var_sim in vars_sim:
-    #     for crop_rotation in crop_rotations:
-    #         for fertilisation_intensity in fertilisation_intensities:
-    #             gdf = gdf_.copy()
-    #             gdf["value"] = onp.nan
-    #             # assign the values to the geometries
-    #             for oid in oids:
-    #                 mask = (gdf["OID"].values.astype(int) == oid)
-    #                 ffid = _dict_ffid[crop_rotation]
-    #                 variable = f"{_dict_var_names[var_sim]}_N{_dict_fert[fertilisation_intensity]}"
-    #                 cond = (df_["OID"] == oid) & (df_["FFID"] == ffid) & (df_["CID"] == 400)
-    #                 value = df_.loc[cond, variable].values[0]
-    #                 gdf.loc[mask, "value"] = value
-
-    #             # plot the map (increase the dpi and figsize to make polygons visible)
-    #             fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-    #             gdf.plot(column="value", ax=ax, cmap="OrRd", vmin=10, vmax=120, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.68})
-    #             ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
-    #             ax.tick_params(bottom=False, left=False, labelbottom=False, labelleft=False)
-    #             fig.tight_layout()
-    #             file = Path(__file__).parent / "figures" / f"map_{crop_rotation}_{fertilisation_intensity}Nfert_{var_sim}.png"
-    #             fig.savefig(file, dpi=300)
+    # # plot the map (increase the dpi and figsize to make polygons visible)
+    # fig, ax = plt.subplots(1, 1, figsize=(20, 24))
+    # gdf.plot(column="value", ax=ax, cmap="RdYlBu", vmin=0, vmax=5, legend=False, zorder=1)
+    # meteo_stations.plot(ax=ax, color="black", markersize=100, zorder=2)
+    # ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
+    # north_arrow(
+    # ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"},
+    # )
+    # scale_bar(ax, location="lower right", style="boxes", bar={"projection": gdf.crs, "height": 0.3}, text = {"fontfamily": "monospace", "fontsize": 24})
+    # ax.text(
+    # 0.09,
+    # 0.025,
+    # "EPSG: 25832",
+    # fontsize=28,
+    # horizontalalignment="center",
+    # verticalalignment="center",
+    # transform=ax.transAxes,
+    # )
+    # fig.tight_layout()
+    # file = Path(__file__).parent / "figures" / "map_locations.png"
+    # fig.savefig(file, dpi=300)
 
 
-    # for var_sim in vars_sim:
-    #     for crop_rotation in crop_rotations:
-    #         for fertilisation_intensity in fertilisation_intensities:
-    #             gdf = gdf_.copy()
-    #             gdf["value"] = onp.nan
-    #             # assign the values to the geometries
-    #             for oid in oids:
-    #                 mask = (gdf["OID"].values.astype(int) == oid)
-    #                 ffid = _dict_ffid[crop_rotation]
-    #                 variable = f"{_dict_var_names[var_sim]}_N{_dict_fert[fertilisation_intensity]}"
-    #                 cond = (df_["OID"] == oid) & (df_["FFID"] == ffid) & (df_["CID"] == 400)
-    #                 value = df_.loc[cond, variable].values[0]
-    #                 gdf.loc[mask, "value"] = value
+    bounds = [10, 25, 37.5, 50, 75]
+    norm = mpl.colors.BoundaryNorm(bounds, mpl.colormaps["OrRd"].N)
 
-    #             # plot the map (increase the dpi and figsize to make polygons visible)
-    #             fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-    #             gdf.plot(column="value", ax=ax, cmap="OrRd", norm=norm, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.5, "ticks": [10, 25, 37.5, 50, 75], "format": mpl.ticker.FixedFormatter(['<10', '25', '37.5', '50', '>75'])})
-    #             ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
-    #             ax.tick_params(bottom=False, left=False, labelbottom=False, labelleft=False)
-    #             fig.tight_layout()
-    #             file = Path(__file__).parent / "figures" / f"map_{crop_rotation}_{fertilisation_intensity}Nfert_{var_sim}_.png"
-    #             fig.savefig(file, dpi=300)
+    vars_sim = ["C_q_ss"]
+    crop_rotations = ["winter-wheat_silage-corn", "winter-wheat_silage-corn_yellow-mustard", "winter-wheat_soybean_winter-rape"]
+    fertilisation_intensities = ["low", "medium", "high"]
 
-    # vars_sim = ["C_q_ss"]
-    # crops = ["summer-wheat", "winter-wheat", "silage-corn", "grain-corn", "sugar-beet", "winter-rape"]
-    # fertilisation_intensities = ["low", "medium", "high"]
+    for var_sim in vars_sim:
+        for crop_rotation in crop_rotations:
+            for fertilisation_intensity in fertilisation_intensities:
+                gdf = gdf_.copy()
+                gdf["value"] = onp.nan
+                # assign the values to the geometries
+                for oid in oids:
+                    mask = (gdf["OID"].values.astype(int) == oid)
+                    ffid = _dict_ffid[crop_rotation]
+                    variable = f"{_dict_var_names[var_sim]}_N{_dict_fert[fertilisation_intensity]}"
+                    cond = (df_["OID"] == oid) & (df_["FFID"] == ffid) & (df_["CID"] == 400)
+                    value = df_.loc[cond, variable].values[0]
+                    gdf.loc[mask, "value"] = value
 
-    # for var_sim in vars_sim:
-    #     for crop in crops:
-    #         for fertilisation_intensity in fertilisation_intensities:
-    #             gdf = gdf_.copy()
-    #             gdf["value"] = onp.nan
-    #             # assign the values to the geometries
-    #             for oid in oids:
-    #                 mask = (gdf["OID"].values.astype(int) == oid)
-    #                 cid = _dict_crop_id[crop]
-    #                 variable = f"{_dict_var_names[var_sim]}_N{_dict_fert[fertilisation_intensity]}"
-    #                 cond = (df_["OID"] == oid) & (df_["CID"] == cid)
-    #                 value = onp.nanmean(df_.loc[cond, variable].values)
-    #                 gdf.loc[mask, "value"] = value
+                # plot the map (increase the dpi and figsize to make polygons visible)
+                fig, ax = plt.subplots(1, 1, figsize=(20, 24))
+                gdf.plot(column="value", ax=ax, cmap="OrRd", vmin=0, vmax=70, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.62})
+                ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
+                north_arrow(
+                ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
+                )
+                scale_bar(ax, location="lower right", style="boxes", bar={"projection": gdf.crs, "height": 0.3}, text = {"fontfamily": "monospace", "fontsize": 24})
+                ax.text(
+                0.11,
+                0.025,
+                "EPSG: 25832",
+                fontsize=28,
+                horizontalalignment="center",
+                verticalalignment="center",
+                transform=ax.transAxes,
+                )
+                fig.tight_layout()
+                file = Path(__file__).parent / "figures" / f"map_{crop_rotation}_{fertilisation_intensity}Nfert_{var_sim}.png"
+                fig.savefig(file, dpi=300)
 
-    #             # plot the map (increase the dpi and figsize to make polygons visible)
-    #             fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-    #             gdf.plot(column="value", ax=ax, cmap="OrRd", vmin=10, vmax=120, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.68})
-    #             ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
-    #             ax.tick_params(bottom=False, left=False, labelbottom=False, labelleft=False)
-    #             fig.tight_layout()
-    #             file = Path(__file__).parent / "figures" / f"map_{crop}_{fertilisation_intensity}Nfert_{var_sim}.png"
-    #             fig.savefig(file, dpi=300)
 
-    # for var_sim in vars_sim:
-    #     for crop in crops:
-    #         for fertilisation_intensity in fertilisation_intensities:
-    #             gdf = gdf_.copy()
-    #             gdf["value"] = onp.nan
-    #             # assign the values to the geometries
-    #             for oid in oids:
-    #                 mask = (gdf["OID"].values.astype(int) == oid)
-    #                 cid = _dict_crop_id[crop]
-    #                 variable = f"{_dict_var_names[var_sim]}_N{_dict_fert[fertilisation_intensity]}"
-    #                 cond = (df_["OID"] == oid) & (df_["CID"] == cid)
-    #                 value = onp.nanmean(df_.loc[cond, variable].values)
-    #                 gdf.loc[mask, "value"] = value
+    for var_sim in vars_sim:
+        for crop_rotation in crop_rotations:
+            for fertilisation_intensity in fertilisation_intensities:
+                gdf = gdf_.copy()
+                gdf["value"] = onp.nan
+                # assign the values to the geometries
+                for oid in oids:
+                    mask = (gdf["OID"].values.astype(int) == oid)
+                    ffid = _dict_ffid[crop_rotation]
+                    variable = f"{_dict_var_names[var_sim]}_N{_dict_fert[fertilisation_intensity]}"
+                    cond = (df_["OID"] == oid) & (df_["FFID"] == ffid) & (df_["CID"] == 400)
+                    value = df_.loc[cond, variable].values[0]
+                    gdf.loc[mask, "value"] = value
 
-    #             # plot the map (increase the dpi and figsize to make polygons visible)
-    #             fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-    #             gdf.plot(column="value", ax=ax, cmap="OrRd", norm=norm, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.5, "ticks": [10, 25, 37.5, 50, 75], "format": mpl.ticker.FixedFormatter(['<10', '25', '37.5', '50', '>75'])})
-    #             ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
-    #             ax.tick_params(bottom=False, left=False, labelbottom=False, labelleft=False)
-    #             fig.tight_layout()
-    #             file = Path(__file__).parent / "figures" / f"map_{crop}_{fertilisation_intensity}Nfert_{var_sim}_.png"
-    #             fig.savefig(file, dpi=300)
+                # plot the map (increase the dpi and figsize to make polygons visible)
+                fig, ax = plt.subplots(1, 1, figsize=(20, 24))
+                gdf.plot(column="value", ax=ax, cmap="OrRd", norm=norm, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.5, "ticks": [10, 25, 37.5, 50, 75], "format": mpl.ticker.FixedFormatter(['<10', '25', '37.5', '50', '>75'])})
+                ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
+                north_arrow(
+                ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
+                )
+                scale_bar(ax, location="lower right", style="boxes", bar={"projection": gdf.crs, "height": 0.3}, text = {"fontfamily": "monospace", "fontsize": 24})
+                ax.text(
+                0.11,
+                0.025,
+                "EPSG: 25832",
+                fontsize=28,
+                horizontalalignment="center",
+                verticalalignment="center",
+                transform=ax.transAxes,
+                )
+                ax.tick_params(bottom=False, left=False, labelbottom=False, labelleft=False)
+                fig.tight_layout()
+                file = Path(__file__).parent / "figures" / f"map_{crop_rotation}_{fertilisation_intensity}Nfert_{var_sim}_.png"
+                fig.savefig(file, dpi=300)
+
+    vars_sim = ["C_q_ss"]
+    crops = ["summer-wheat", "winter-wheat", "silage-corn", "grain-corn", "sugar-beet", "winter-rape"]
+    fertilisation_intensities = ["low", "medium", "high"]
+
+    for var_sim in vars_sim:
+        for crop in crops:
+            for fertilisation_intensity in fertilisation_intensities:
+                gdf = gdf_.copy()
+                gdf["value"] = onp.nan
+                # assign the values to the geometries
+                for oid in oids:
+                    mask = (gdf["OID"].values.astype(int) == oid)
+                    cid = _dict_crop_id[crop]
+                    variable = f"{_dict_var_names[var_sim]}_N{_dict_fert[fertilisation_intensity]}"
+                    cond = (df_["OID"] == oid) & (df_["CID"] == cid)
+                    value = onp.nanmean(df_.loc[cond, variable].values)
+                    gdf.loc[mask, "value"] = value
+
+                # plot the map (increase the dpi and figsize to make polygons visible)
+                fig, ax = plt.subplots(1, 1, figsize=(20, 24))
+                gdf.plot(column="value", ax=ax, cmap="OrRd", vmin=0, vmax=70, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.62})
+                ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
+                north_arrow(
+                ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
+                )
+                scale_bar(ax, location="lower right", style="boxes", bar={"projection": gdf.crs, "height": 0.3}, text = {"fontfamily": "monospace", "fontsize": 24})
+                ax.text(
+                0.11,
+                0.025,
+                "EPSG: 25832",
+                fontsize=28,
+                horizontalalignment="center",
+                verticalalignment="center",
+                transform=ax.transAxes,
+                )
+                fig.tight_layout()
+                file = Path(__file__).parent / "figures" / f"map_{crop}_{fertilisation_intensity}Nfert_{var_sim}.png"
+                fig.savefig(file, dpi=300)
+
+    for var_sim in vars_sim:
+        for crop in crops:
+            for fertilisation_intensity in fertilisation_intensities:
+                gdf = gdf_.copy()
+                gdf["value"] = onp.nan
+                # assign the values to the geometries
+                for oid in oids:
+                    mask = (gdf["OID"].values.astype(int) == oid)
+                    cid = _dict_crop_id[crop]
+                    variable = f"{_dict_var_names[var_sim]}_N{_dict_fert[fertilisation_intensity]}"
+                    cond = (df_["OID"] == oid) & (df_["CID"] == cid)
+                    value = onp.nanmean(df_.loc[cond, variable].values)
+                    gdf.loc[mask, "value"] = value
+
+                # plot the map (increase the dpi and figsize to make polygons visible)
+                fig, ax = plt.subplots(1, 1, figsize=(20, 24))
+                gdf.plot(column="value", ax=ax, cmap="OrRd", norm=norm, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.5, "ticks": [10, 25, 37.5, 50, 75], "format": mpl.ticker.FixedFormatter(['<10', '25', '37.5', '50', '>75'])})
+                ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
+                north_arrow(
+                ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
+                )
+                scale_bar(ax, location="lower right", style="boxes", bar={"projection": gdf.crs, "height": 0.3}, text = {"fontfamily": "monospace", "fontsize": 24})
+                ax.text(
+                0.11,
+                0.025,
+                "EPSG: 25832",
+                fontsize=28,
+                horizontalalignment="center",
+                verticalalignment="center",
+                transform=ax.transAxes,
+                )
+                fig.tight_layout()
+                file = Path(__file__).parent / "figures" / f"map_{crop}_{fertilisation_intensity}Nfert_{var_sim}_.png"
+                fig.savefig(file, dpi=300)
 
 
 if __name__ == "__main__":
