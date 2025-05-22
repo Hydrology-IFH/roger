@@ -44,6 +44,18 @@ def nanmeanweighted(y, w, axis=None):
 
     return wavg
 
+def repeat_by_areashare(values, area_share):
+    ncols = values.shape[1]
+    nrows = values.shape[0]
+    ll = []
+    for i in range(ncols):
+        reps = int(onp.round(area_share[i], 0))
+        if reps > 0:
+            array = onp.zeros((nrows, reps))
+            for j in range(reps):
+                array[:, j] = values[:, i]
+            ll.append(array)
+    return onp.concatenate(ll, axis=1)
 
 base_path = Path(__file__).parent
 # directory of results
@@ -61,9 +73,6 @@ locations = ["freiburg", "lahr", "muellheim",
              "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
              "ehingen-kirchen", "merklingen", "hayingen",
              "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-locations = [
-    "freiburg",
-]
 
 crop_rotation_scenarios = ["winter-wheat_clover",
                            "winter-wheat_silage-corn",
@@ -109,9 +118,8 @@ _lab_unit_annual = {
 csv_file = base_path / "parameters.csv"
 df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
 clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
+df_areas = pd.read_csv(base_path / "output" / "areas.csv", sep=";")
 
-
-crop_rotation_scenarios = ["winter-wheat_winter-rape"]
 
 # load nitrogen loads and concentrations
 dict_nitrate = {}
@@ -148,17 +156,29 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             fig, axes = plt.subplots(4, 1, figsize=(6, 6)) 
             for i, var_sim in enumerate(vars_sim):
                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
-                cond1 = (df_params["CLUST_flag"] == 2)
+                cond1 = (df_params["CLUST_flag"] == 1)
                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                df = df.loc['2014-01-01':'2022-12-31', :]
+                cond = (df_areas["location"] == location)
+                df_area_share = df_areas.loc[cond, :]
+                data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+                data.loc[:, "area_share"] = 0.0
+                for clust_id in clust_ids:
+                    cond1 = (df_area_share["clust_id"] == clust_id)
+                    if cond1.any():
+                        cond2 = (data["CLUST_ID"] == clust_id)
+                        data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+                data = repeat_by_areashare(df.values, data["area_share"].values)
+                df = pd.DataFrame(data=data, index=df.index)
                 if var_sim in ["M_s"]:
                     # calculate annual sum
-                    df_ann = df.resample("YE").sum().iloc[:-1, :]
+                    df_ann = df.resample("YE").last().iloc[:-1, :]
                     df_ann.loc[:, "year"] = df_ann.index.year
                     df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
                     df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
                 else:
                     # calculate annual average
-                    df_ann = df.resample("YE").mean().iloc[:-1, :]
+                    df_ann = df.resample("YE").sum().iloc[:-1, :]
                     df_ann.loc[:, "year"] = df_ann.index.year
                     df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
                     df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
@@ -168,44 +188,9 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 axes[i].set_ylabel(_lab_unit_annual[var_sim])
                 axes[i].set_ylim(0, )
                 fig.tight_layout()
-                file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.png"
+                file = base_path_figs / f"boxplot_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.png"
                 fig.savefig(file, dpi=250)
                 plt.close(fig)
-
-# plot annual nitrate-nitrogen balance
-vars_sim = ["M_in", "M_transp", "M_s", "M_q_ss"]
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        fig, axes = plt.subplots(4, 1, figsize=(6, 6)) 
-        for i, var_sim in enumerate(vars_sim):
-            ll_df = []
-            for fertilization_intensity in fertilization_intensities:
-                ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert']
-                sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
-                cond1 = (df_params["CLUST_flag"] == 2)
-                df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-                if var_sim in ["M_s"]:
-                    # calculate annual sum
-                    df_ann = df.resample("YE").sum().iloc[:-1, :]
-                    df_ann.loc[:, "year"] = df_ann.index.year
-                    df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
-                    df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
-                else:
-                    # calculate annual average
-                    df_ann = df.resample("YE").mean().iloc[:-1, :]
-                    df_ann.loc[:, "year"] = df_ann.index.year
-                    df_ann_long = df_ann.melt(id_vars="year", value_name="vals", var_name='Nfert')
-                    df_ann_long.loc[:, "Nfert"] = f'{fertilization_intensity}'
-    
-            sns.boxplot(data=df_ann_long, x="year", y="vals", ax=axes[i], color="red", whis=(5, 95), showfliers=False)
-            axes[i].set_xlabel("Time [Year]")
-            axes[i].set_ylabel(_lab_unit_annual[var_sim])
-            axes[i].set_ylim(0, )
-        fig.tight_layout()
-        file = base_path_figs / f"boxplot_{var_sim}_{location}_{crop_rotation_scenario}_{fertilization_intensity}_Nfert.png"
-        fig.savefig(file, dpi=250)
-        plt.close(fig)
-
 
 vars_sim = ["M_q_ss"]
 for crop_rotation_scenario in crop_rotation_scenarios:
@@ -215,8 +200,20 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             for fertilization_intensity in fertilization_intensities:
                 ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
                 sim_vals = ds[var_sim].isel(y=0).values[:, 1:] * 0.01 # convert from mg/m2 to kg/ha
-                cond1 = (df_params["CLUST_flag"] == 2)
+                cond1 = (df_params["CLUST_flag"] == 1)
                 df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+                df = df.loc['2014-01-01':'2022-12-31', :]
+                cond = (df_areas["location"] == location)
+                df_area_share = df_areas.loc[cond, :]
+                data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+                data.loc[:, "area_share"] = 0.0
+                for clust_id in clust_ids:
+                    cond1 = (df_area_share["clust_id"] == clust_id)
+                    if cond1.any():
+                        cond2 = (data["CLUST_ID"] == clust_id)
+                        data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+                data = repeat_by_areashare(df.values, data["area_share"].values)
+                df = pd.DataFrame(data=data, index=df.index)
                 # calculate annual sum
                 df_ann = df.resample("YE").sum().iloc[:-1, :]
                 df_ann.loc[:, "year"] = df_ann.index.year

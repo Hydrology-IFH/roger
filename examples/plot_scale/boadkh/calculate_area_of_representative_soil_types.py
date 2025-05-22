@@ -9,14 +9,6 @@ import seaborn as sns
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-# mpl.rcParams["font.size"] = 8
-# mpl.rcParams["axes.titlesize"] = 8
-# mpl.rcParams["axes.labelsize"] = 9
-# mpl.rcParams["xtick.labelsize"] = 8
-# mpl.rcParams["ytick.labelsize"] = 8
-# mpl.rcParams["legend.fontsize"] = 8
-# mpl.rcParams["legend.title_fontsize"] = 9
-
 mpl.rcParams["font.size"] = 10
 mpl.rcParams["axes.titlesize"] = 10
 mpl.rcParams["axes.labelsize"] = 11
@@ -25,20 +17,6 @@ mpl.rcParams["ytick.labelsize"] = 10
 mpl.rcParams["legend.fontsize"] = 10
 mpl.rcParams["legend.title_fontsize"] = 11
 sns.set_style("ticks")
-# sns.plotting_context(
-#     "paper",
-#     font_scale=1,
-#     rc={
-#         "font.size": 8.0,
-#         "axes.labelsize": 9.0,
-#         "axes.titlesize": 8.0,
-#         "xtick.labelsize": 8.0,
-#         "ytick.labelsize": 8.0,
-#         "legend.fontsize": 8.0,
-#         "legend.title_fontsize": 9.0,
-#     },
-# )
-
 sns.plotting_context(
     "paper",
     font_scale=1,
@@ -57,13 +35,13 @@ _LABS_UNIT = {
     "z_soil": r"$z_{Boden}$ [mm]",
     "lmpv": r"$l_{mpv}$ [mm]",
     "dmpv": r"$\rho_{mpv}$ [1/$m^2$]",
-    "theta_ac": r"$\theta_{ac}$ [-]",
-    "theta_ufc": r"$\theta_{ufc}$ [-]",
+    "theta_ac": r"$\theta_{lk}$ [-]",
+    "theta_ufc": r"$\theta_{nfk}$ [-]",
     "theta_pwp": r"$\theta_{pwp}$ [-]",
     "ks": r"$k_{s}$ [mm/h]",
     "kf": r"$k_{f}$ [mm/h]",
     "soil_fertility": "Bodenfrucht-\nbarkeit",
-    "clay": r"clay [-]",
+    "clay": r"Tongehalt [-]",
     "area_share": r"Fläche [%]",
 }
 
@@ -122,7 +100,7 @@ regions = ['Oberrhein',
 
 
 # load linkage between BK50 and cropland clusters
-file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "link_shp_clust_acker.h5"
+file = Path(__file__).parent / "output" / "link_cluster_geometries_cropland.h5"
 df_link_bk50_cluster_cropland = pd.read_hdf(file)
 
 # load model parameters
@@ -431,7 +409,7 @@ plt.close(fig)
 # ll_params = ['z_soil', 'dmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'lmpv', 'ks', 'clay', 'soil_fertility']
 # fig, axs = plt.subplots(2, 5, figsize=(6, 4))
 # for i, param in enumerate(ll_params):
-#     cond = (df_params["CLUST_flag"] == 2)
+#     cond = (df_params["CLUST_flag"] == 1)
 #     df = df_params.loc[cond, param].to_frame()
 #     df_long = pd.melt(df, value_vars=df.columns)
 #     axes = axs.flatten()[i]
@@ -448,7 +426,7 @@ plt.close(fig)
 # ll_params = ['z_soil', 'dmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'lmpv', 'ks', 'clay', 'soil_fertility']
 # fig, axs = plt.subplots(2, 5, figsize=(6, 4), sharex=True)
 # for i, param in enumerate(ll_params):
-#     cond = (df_params["CLUST_flag"] == 2)
+#     cond = (df_params["CLUST_flag"] == 1)
 #     df = df_params.loc[cond, param].to_frame()
 #     df_long = pd.melt(df, value_vars=df.columns)
 #     axes = axs.flatten()[i]

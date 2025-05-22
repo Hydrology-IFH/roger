@@ -21,7 +21,7 @@ _UNITS = {
 base_path = Path(__file__).parent
 
 # load the base matrix
-file = base_path / "test_matrix_acker_base.csv"
+file = base_path / "agricultural_soil_type_clusters.csv"
 df = pd.read_csv(file, sep=",")
 
 # create a dataframe for the parameters
@@ -113,21 +113,21 @@ df_parameters.columns = [
 ]
 df_parameters.to_csv(file, index=False, sep=";")
 
-file = base_path / "clay.csv"
+file = base_path.parent / "svat_crop_nitrate" / "clay.csv"
 df_clay.columns = [
     ["", "", "", "[-]",],
     ["CLUST_ID", "SHP_ID", "CLUST_flag", "clay"],
 ]
 df_clay.to_csv(file, index=False, sep=";")
 
-file = base_path / "soil_fertility.csv"
+file = base_path.parent / "svat_crop_nitrate" / "soil_fertility.csv"
 df_soil_fertility.columns = [
     ["", "", "", "",],
     ["CLUST_ID", "SHP_ID", "CLUST_flag", "soil_fertility"],
 ]
 df_soil_fertility.to_csv(file, index=False, sep=";")
 
-file = base_path / "z_soil.csv"
+file = base_path.parent / "svat_crop_nitrate" / "z_soil.csv"
 df_zsoil.columns = [
     ["", "", "", "[mm]",],
     ["CLUST_ID", "SHP_ID", "CLUST_flag", "z_soil"],

@@ -99,7 +99,7 @@ def main(tmp_dir):
     file = Path(tmp_dir) / "data_nitrate_leaching" / "nitrate_leaching_values.csv"
     df_ = pd.read_csv(file, sep=";")
 
-    file = Path(tmp_dir).parent / "N-Stationen_WeatherDB.shp"
+    file = Path(tmp_dir).parent / "DWD-stations_WeatherDB.shp"
     shp = gpd.read_file(file)
     Locations = ['Müllheim', 'Freiburg', 'Lahr',
                  'Bretten, Kreis Karlsruhe', 'Bruchsal-Heidelsheim', 'Eppingen-Elsenz',
