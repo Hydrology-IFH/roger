@@ -69,8 +69,17 @@ def nanmeanweighted(y, w, axis=None):
     return wavg
 
 def repeat_by_areashare(values, area_share):
-    ll = [np.repeat(val, int(np.round(area_share[i], 0)))for i, val in enumerate(values)]
-    return np.concatenate(ll)
+    ncols = values.shape[1]
+    nrows = values.shape[0]
+    ll = []
+    for i in range(ncols):
+        reps = int(np.round(area_share[i], 0))
+        if reps > 0:
+            array = np.zeros((nrows, reps))
+            for j in range(reps):
+                array[:, j] = values[:, i]
+            ll.append(array)
+    return np.concatenate(ll, axis=1)
 
 
 base_path = Path(__file__).parent
@@ -155,6 +164,8 @@ locations = ["freiburg", "lahr", "muellheim",
              "ehingen-kirchen", "merklingen", "hayingen",
              "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
 
+locations = ["freiburg"]
+
 _dict_location = {"freiburg": "Freiburg",
                   "lahr": "Lahr",
                   "muellheim": "Müllheim",
@@ -195,6 +206,8 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
                            "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
                            "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
+
+crop_rotation_scenarios = ["winter-wheat_winter-rape"]
 
 crop_rotation_scenarios_without_mustard = ["winter-wheat_silage-corn",
                                            "summer-wheat_winter-wheat",
@@ -254,6 +267,7 @@ _lab_unit_total = {
 csv_file = base_path / "parameters.csv"
 df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
 clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
+df_areas = pd.read_csv(base_path / "output" / "areas.csv", sep=";")
 
 # # load linkage between BK50 and cropland clusters
 # file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "link_shp_clust_acker.h5"
@@ -266,8 +280,6 @@ clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
 # # get unique cluster ids for cropland
 # cond = onp.isin(df_link_bk50_cluster_cropland.index.values, gdf_bk50["SHP_ID"].values)
 # clust_ids = onp.unique(df_link_bk50_cluster_cropland.loc[cond, "CLUST_ID"].values).astype(str)
-
-df_areas = pd.read_csv(base_path / "output" / "areas.csv", sep=";")
 
 # load simulated fluxes and states
 dict_fluxes_states = {}
@@ -341,7 +353,18 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             cond1 = (df_params["CLUST_flag"] == 1)
             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
             df = df.loc["2014-01-01":"2022-12-31", :]
-            vals = df.values.T
+            cond = (df_areas["location"] == location)
+            df_area_share = df_areas.loc[cond, :]
+            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+            data.loc[:, "area_share"] = 0.0
+            for clust_id in clust_ids:
+                cond1 = (df_area_share["clust_id"] == clust_id)
+                if cond1.any():
+                    cond2 = (data["CLUST_ID"] == clust_id)
+                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+            data = repeat_by_areashare(df.values, data["area_share"].values)
+            df1 = pd.DataFrame(data=data, index=df.index)
+            vals = df1.values.T
             median_vals = onp.nanmedian(vals, axis=0)
             min_vals = onp.nanmin(vals, axis=0)
             max_vals = onp.nanmax(vals, axis=0)
@@ -383,7 +406,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             ax.set_xlim(df.index[0], df.index[-1])
             ax.set_ylim(0, )
             fig.tight_layout()
-            file = base_path_figs / f"trace_perc_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}.png"
+            file = base_path_figs / f"trace_perc_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}Nfert.png"
             fig.savefig(file, dpi=300)
             plt.close(fig)
 
@@ -399,7 +422,18 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             cond1 = (df_params["CLUST_flag"] == 1)
             df = pd.DataFrame(index=ds["Time"].values, data=sim_vals.T).loc[:, cond1]
             df = df.loc["2014-01-01":"2022-12-31", :]
-            vals = df.values.T
+            cond = (df_areas["location"] == location)
+            df_area_share = df_areas.loc[cond, :]
+            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+            data.loc[:, "area_share"] = 0.0
+            for clust_id in clust_ids:
+                cond1 = (df_area_share["clust_id"] == clust_id)
+                if cond1.any():
+                    cond2 = (data["CLUST_ID"] == clust_id)
+                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+            data = repeat_by_areashare(df.values, data["area_share"].values)
+            df1 = pd.DataFrame(data=data, index=df.index)
+            vals = df1.values.T
             median_vals = onp.nanmedian(vals, axis=0)
             min_vals = onp.nanmin(vals, axis=0)
             max_vals = onp.nanmax(vals, axis=0)
@@ -449,7 +483,18 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             cond1 = (df_params["CLUST_flag"] == 1)
             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
             df = df.loc["2014-01-01":"2022-12-31", :]
-            vals = df.values.T
+            cond = (df_areas["location"] == location)
+            df_area_share = df_areas.loc[cond, :]
+            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+            data.loc[:, "area_share"] = 0.0
+            for clust_id in clust_ids:
+                cond1 = (df_area_share["clust_id"] == clust_id)
+                if cond1.any():
+                    cond2 = (data["CLUST_ID"] == clust_id)
+                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+            data = repeat_by_areashare(df.values, data["area_share"].values)
+            df1 = pd.DataFrame(data=data, index=df.index)
+            vals = df1.values.T
             median_vals = onp.nanmedian(vals, axis=0)
             min_vals = onp.nanmin(vals, axis=0)
             max_vals = onp.nanmax(vals, axis=0)
@@ -489,9 +534,11 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             ax[1].set_xlabel("Time [Year]")
             ax[1].set_ylabel(_lab_unit_daily["C_q_ss"])
             ax[1].set_xlim(df.index[0], df.index[-1])
-            ax[1].set_ylim(0, 300)
+            ax[1].set_ylim(0, 200)
+            ax[i].axhline(y=50, color='r', linestyle='--', lw=1) 
+            ax[i].axhline(y=37.5, color='orange', linestyle='--', lw=1)   
             fig.tight_layout()
-            file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}.png"
+            file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}Nfert.png"
             fig.savefig(file, dpi=300)
             plt.close(fig)
 
@@ -543,7 +590,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             ax[1].set_xlim(df.index[0], df.index[-1])
             ax[1].set_ylim(0, )
             fig.tight_layout()
-            file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}_{maxcol}.png"
+            file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensity}Nfert_{maxcol}.png"
             fig.savefig(file, dpi=300)
             plt.close(fig)
 
@@ -562,7 +609,18 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             cond1 = (df_params["CLUST_flag"] == 1)
             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
             df = df.loc["2014-01-01":"2022-12-31", :]
-            ll_dfs.append(df)
+            cond = (df_areas["location"] == location)
+            df_area_share = df_areas.loc[cond, :]
+            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+            data.loc[:, "area_share"] = 0.0
+            for clust_id in clust_ids:
+                cond1 = (df_area_share["clust_id"] == clust_id)
+                if cond1.any():
+                    cond2 = (data["CLUST_ID"] == clust_id)
+                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+            data = repeat_by_areashare(df.values, data["area_share"].values)
+            df1 = pd.DataFrame(data=data, index=df.index)
+            ll_dfs.append(df1)
         df = pd.concat(ll_dfs, axis=1)
         vals = df.values.T
         fig, ax = plt.subplots(1, 1, figsize=(6, 2))
@@ -607,68 +665,151 @@ for crop_rotation_scenario in crop_rotation_scenarios:
         ax.set_xlim(df.index[0], df.index[-1])
         ax.set_ylim(0, )
         fig.tight_layout()
-        file = base_path_figs / f"trace_perc_nitrate_conc_{crop_rotation_scenario}_{fertilization_intensity}.png"
+        file = base_path_figs / f"trace_perc_nitrate_conc_{crop_rotation_scenario}_{fertilization_intensity}Nfert.png"
         fig.savefig(file, dpi=300)
         plt.close(fig)
 
-colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
-for crop_rotation_scenario in crop_rotation_scenarios:
-    color = "blue"
-    fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
-    ll_dfs_flux = []
-    for location in locations:
-        ds = dict_fluxes_states[location][crop_rotation_scenario]
-        sim_vals = ds["q_ss"].isel(y=0).values[:, 1:]
-        cond1 = (df_params["CLUST_flag"] == 1)
-        df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
-        ll_dfs_flux.append(df)
-        df = df.loc["2014-01-01":"2022-12-31", :]
-    df = pd.concat(ll_dfs_flux, axis=1)
-    vals = df.values.T
-    median_vals = onp.nanmedian(vals, axis=0)
-    min_vals = onp.nanmin(vals, axis=0)
-    max_vals = onp.nanmax(vals, axis=0)
-    p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-    p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-    p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-    p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-    ax[0].fill_between(
-        df.index,
-        min_vals,
-        max_vals,
-        edgecolor=None,
-        facecolor=color,
-        alpha=0.33,
-        label="Min-Max interval",
-    )
-    # ax[0].fill_between(
-    #     df.index,
-    #     p5_vals,
-    #     p95_vals,
-    #     edgecolor=color,
-    #     facecolor=color,
-    #     alpha=0.66,
-    #     label="95% interval",
-    # )
-    # ax[0].fill_between(
-    #     df.index,
-    #     p25_vals,
-    #     p75_vals,
-    #     edgecolor=color,
-    #     facecolor=color,
-    #     alpha=1,
-    #     label="75% interval",
-    # )
-    ax[0].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
-    ax[0].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-    ax[0].set_ylabel('PERC [mm/day]')
-    ax[0].set_xlim(df.index[0], df.index[-1])
-    ax[0].set_ylim(0, )
+# colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))
+# for crop_rotation_scenario in crop_rotation_scenarios:
+#     color = "blue"
+#     fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
+#     ll_dfs_flux = []
+#     for location in locations:
+#         ds = dict_fluxes_states[location][crop_rotation_scenario]
+#         sim_vals = ds["q_ss"].isel(y=0).values[:, 1:]
+#         cond1 = (df_params["CLUST_flag"] == 1)
+#         df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals.T).loc[:, cond1]
+#         df = df.loc["2014-01-01":"2022-12-31", :]
+#         cond = (df_areas["location"] == location)
+#         df_area_share = df_areas.loc[cond, :]
+#         data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+#         data.loc[:, "area_share"] = 0.0
+#         for clust_id in clust_ids:
+#             cond1 = (df_area_share["clust_id"] == clust_id)
+#             if cond1.any():
+#                 cond2 = (data["CLUST_ID"] == clust_id)
+#                 data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+#         data = repeat_by_areashare(df.values, data["area_share"].values)
+#         df1 = pd.DataFrame(data=data, index=df.index)
+#         ll_dfs_flux.append(df1)
+#     df = pd.concat(ll_dfs_flux, axis=1)
+#     vals = df.values.T
+#     median_vals = onp.nanmedian(vals, axis=0)
+#     min_vals = onp.nanmin(vals, axis=0)
+#     max_vals = onp.nanmax(vals, axis=0)
+#     p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+#     p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+#     p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+#     p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+#     ax[0].fill_between(
+#         df.index,
+#         min_vals,
+#         max_vals,
+#         edgecolor=None,
+#         facecolor=color,
+#         alpha=0.33,
+#         label="Min-Max interval",
+#     )
+#     # ax[0].fill_between(
+#     #     df.index,
+#     #     p5_vals,
+#     #     p95_vals,
+#     #     edgecolor=color,
+#     #     facecolor=color,
+#     #     alpha=0.66,
+#     #     label="95% interval",
+#     # )
+#     # ax[0].fill_between(
+#     #     df.index,
+#     #     p25_vals,
+#     #     p75_vals,
+#     #     edgecolor=color,
+#     #     facecolor=color,
+#     #     alpha=1,
+#     #     label="75% interval",
+#     # )
+#     ax[0].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
+#     ax[0].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
+#     ax[0].set_ylabel('PERC [mm/day]')
+#     ax[0].set_xlim(df.index[0], df.index[-1])
+#     ax[0].set_ylim(0, )
 
-    ll_dfs_conc = []
-    for i, fertilization_intensity in enumerate(fertilization_intensities):
-        for location in locations:
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#     ll_dfs_conc = []
+#     for i, fertilization_intensity in enumerate(fertilization_intensities):
+#         for location in locations:
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             ds = dict_fluxes_states[location][crop_rotation_scenario]
+#             sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
+#             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
+#             sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
+#             sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
+#             cond1 = (df_params["CLUST_flag"] == 1)
+#             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
+#             df = df.loc["2014-01-01":"2022-12-31", :]
+#             cond = (df_areas["location"] == location)
+#             df_area_share = df_areas.loc[cond, :]
+#             data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+#             data.loc[:, "area_share"] = 0.0
+#             for clust_id in clust_ids:
+#                 cond1 = (df_area_share["clust_id"] == clust_id)
+#                 if cond1.any():
+#                     cond2 = (data["CLUST_ID"] == clust_id)
+#                     data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+#             data = repeat_by_areashare(df.values, data["area_share"].values)
+#             df1 = pd.DataFrame(data=data, index=df.index)
+#             ll_dfs_conc.append(df1)
+#         df = pd.concat(ll_dfs_conc, axis=1)
+#         vals = df.values.T
+#         median_vals = onp.nanmedian(vals, axis=0)
+#         min_vals = onp.nanmin(vals, axis=0)
+#         max_vals = onp.nanmax(vals, axis=0)
+#         p5_vals = onp.nanquantile(vals, 0.05, axis=0)
+#         p25_vals = onp.nanquantile(vals, 0.25, axis=0)
+#         p75_vals = onp.nanquantile(vals, 0.75, axis=0)
+#         p95_vals = onp.nanquantile(vals, 0.95, axis=0)
+#         ax[1].fill_between(
+#             df.index,
+#             min_vals,
+#             max_vals,
+#             edgecolor=None,
+#             facecolor=color,
+#             alpha=0.33,
+#             label="Min-Max interval",
+#         )
+#         # ax[1].fill_between(
+#         #     df.index,
+#         #     p5_vals,
+#         #     p95_vals,
+#         #     edgecolor=color,
+#         #     facecolor=color,
+#         #     alpha=0.66,
+#         #     label="95% interval",
+#         # )
+#         # ax[1].fill_between(
+#         #     df.index,
+#         #     p25_vals,
+#         #     p75_vals,
+#         #     edgecolor=color,
+#         #     facecolor=color,
+#         #     alpha=1,
+#         #     label="75% interval",
+#         # )
+#         ax[1].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
+#         ax[1].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
+#         ax[1].set_xlabel("Time [Year]")
+#         ax[1].set_ylabel(_lab_unit_daily["C_q_ss"])
+#         ax[1].set_xlim(df.index[0], df.index[-1])
+#         ax[1].set_ylim(0, 300)
+#         fig.tight_layout()
+#         file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}.png"
+#         fig.savefig(file, dpi=300)
+#         plt.close(fig)
+
+colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))[::-1]
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        fig, axs = plt.subplots(3, 1, figsize=(6, 6), sharex=True)
+        for i, fertilization_intensity in enumerate(fertilization_intensities[::-1]):
             ds = dict_fluxes_states[location][crop_rotation_scenario]
             sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
             ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
@@ -677,67 +818,18 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             cond1 = (df_params["CLUST_flag"] == 1)
             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
             df = df.loc["2014-01-01":"2022-12-31", :]
-            ll_dfs_conc.append(df)
-        df = pd.concat(ll_dfs_conc, axis=1)
-        vals = df.values.T
-        median_vals = onp.nanmedian(vals, axis=0)
-        min_vals = onp.nanmin(vals, axis=0)
-        max_vals = onp.nanmax(vals, axis=0)
-        p5_vals = onp.nanquantile(vals, 0.05, axis=0)
-        p25_vals = onp.nanquantile(vals, 0.25, axis=0)
-        p75_vals = onp.nanquantile(vals, 0.75, axis=0)
-        p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-        ax[1].fill_between(
-            df.index,
-            min_vals,
-            max_vals,
-            edgecolor=None,
-            facecolor=color,
-            alpha=0.33,
-            label="Min-Max interval",
-        )
-        # ax[1].fill_between(
-        #     df.index,
-        #     p5_vals,
-        #     p95_vals,
-        #     edgecolor=color,
-        #     facecolor=color,
-        #     alpha=0.66,
-        #     label="95% interval",
-        # )
-        # ax[1].fill_between(
-        #     df.index,
-        #     p25_vals,
-        #     p75_vals,
-        #     edgecolor=color,
-        #     facecolor=color,
-        #     alpha=1,
-        #     label="75% interval",
-        # )
-        ax[1].plot(df.index, median_vals, color=color, label="Median", linewidth=1)
-        ax[1].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-        ax[1].set_xlabel("Time [Year]")
-        ax[1].set_ylabel(_lab_unit_daily["C_q_ss"])
-        ax[1].set_xlim(df.index[0], df.index[-1])
-        ax[1].set_ylim(0, 300)
-        fig.tight_layout()
-        file = base_path_figs / f"trace_perc_flux_nitrate_conc_{location}_{crop_rotation_scenario}.png"
-        fig.savefig(file, dpi=300)
-        plt.close(fig)
-
-for crop_rotation_scenario in crop_rotation_scenarios:
-    for location in locations:
-        for fertilization_intensity in fertilization_intensities:
-            ds = dict_fluxes_states[location][crop_rotation_scenario]
-            sim_vals1 = ds["q_ss"].isel(y=0).values[:, 1:]
-            ds = dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] 
-            sim_vals2 = ds["M_q_ss"].isel(y=0).values[:, 1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
-            sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
-            cond1 = (df_params["CLUST_flag"] == 1)
-            df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
-            df = df.loc["2014-01-01":"2022-12-31", :]
-            vals = df.values.T
-            fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+            cond = (df_areas["location"] == location)
+            df_area_share = df_areas.loc[cond, :]
+            data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+            data.loc[:, "area_share"] = 0.0
+            for clust_id in clust_ids:
+                cond1 = (df_area_share["clust_id"] == clust_id)
+                if cond1.any():
+                    cond2 = (data["CLUST_ID"] == clust_id)
+                    data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+            data = repeat_by_areashare(df.values, data["area_share"].values)
+            df1 = pd.DataFrame(data=data, index=df.index)
+            vals = df1.values.T
             median_vals = onp.nanmedian(vals, axis=0)
             min_vals = onp.nanmin(vals, axis=0)
             max_vals = onp.nanmax(vals, axis=0)
@@ -745,12 +837,12 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             p25_vals = onp.nanquantile(vals, 0.25, axis=0)
             p75_vals = onp.nanquantile(vals, 0.75, axis=0)
             p95_vals = onp.nanquantile(vals, 0.95, axis=0)
-            ax.fill_between(
+            axs[i].fill_between(
                 df.index,
                 min_vals,
                 max_vals,
                 edgecolor=None,
-                facecolor='grey',
+                facecolor=colors[i],
                 alpha=0.33,
                 label="Min-Max interval",
             )
@@ -758,8 +850,8 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             #     df.index,
             #     p5_vals,
             #     p95_vals,
-            #     edgecolor='grey',
-            #     facecolor='grey',
+            #     edgecolor=colors[i],
+            #     facecolor=colors[i],
             #     alpha=0.66,
             #     label="95% interval",
             # )
@@ -767,21 +859,24 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             #     df.index,
             #     p25_vals,
             #     p75_vals,
-            #     edgecolor='grey',
-            #     facecolor='grey',
+            #     edgecolor=colors[i],
+            #     facecolor=colors[i],
             #     alpha=1,
             #     label="75% interval",
             # )
-            ax.plot(df.index, median_vals, color="black", label="Median", linewidth=1)
-            ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
-            ax.set_xlabel("Time [Year]")
-            ax.set_ylabel(_lab_unit_daily["C_q_ss"])
-            ax.set_xlim(df.index[0], df.index[-1])
-            ax.set_ylim(0, 300)
-            fig.tight_layout()
-            file = base_path_figs / f"trace_perc_nitrate_conc_{location}_{crop_rotation_scenario}_{fertilization_intensities}.png"
-            fig.savefig(file, dpi=300)
-            plt.close(fig)
+            axs[i].plot(df.index, median_vals, color=colors[i], label="Median", linewidth=1.2)
+            axs[i].set_xlabel("")
+            axs[i].set_ylabel(_lab_unit_daily["C_q_ss"])
+            axs[i].set_xlim(df.index[0], df.index[-1])
+            axs[i].set_ylim(0, 200)
+            axs[i].axhline(y=50, color='r', linestyle='--', lw=1) 
+            axs[i].axhline(y=37.5, color='orange', linestyle='--', lw=1)   
+            axs[i].legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.8, 1.0))
+        axs[-1].set_xlabel("Time [Year]")
+        fig.tight_layout()
+        file = base_path_figs / f"trace_perc_nitrate_conc_{location}_{crop_rotation_scenario}.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
 
 # plot daily values
 vars_sim = ["M_q_ss"]
@@ -794,7 +889,18 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 cond1 = (df_params["CLUST_flag"] == 1)
                 df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals.T).loc[:, cond1]
                 df = df.loc["2014-01-01":"2022-12-31", :]
-                vals = df.values.T
+                cond = (df_areas["location"] == location)
+                df_area_share = df_areas.loc[cond, :]
+                data = df_params.loc[cond1, "CLUST_ID"].to_frame()
+                data.loc[:, "area_share"] = 0.0
+                for clust_id in clust_ids:
+                    cond1 = (df_area_share["clust_id"] == clust_id)
+                    if cond1.any():
+                        cond2 = (data["CLUST_ID"] == clust_id)
+                        data.loc[cond2, "area_share"] = df_area_share.loc[cond1, "area_share"].values[0] * 100
+                data = repeat_by_areashare(df.values, data["area_share"].values)
+                df1 = pd.DataFrame(data=data, index=df.index)
+                vals = df1.values.T
                 fig, ax = plt.subplots(1, 1, figsize=(6, 2))
                 median_vals = onp.nanmedian(vals, axis=0)
                 min_vals = onp.nanmin(vals, axis=0)
@@ -831,11 +937,12 @@ for crop_rotation_scenario in crop_rotation_scenarios:
                 #     label="75% interval",
                 # )
                 ax.plot(df.index, median_vals, color="black", label="Median", linewidth=1)
-                ax.legend(frameon=False, loc="upper right", ncol=4, bbox_to_anchor=(0.93, 1.19))
+                ax.legend(frameon=False, loc="upper right", ncol=2, bbox_to_anchor=(0.8, 1.27))
                 ax.set_xlabel("Time [Year]")
                 ax.set_ylabel(_lab_unit_daily[var_sim])
                 ax.set_xlim(df.index[0], df.index[-1])
+                ax.set_ylim(0,)
                 fig.tight_layout()
-                file = base_path_figs / f"trace_{var_sim}_{location}_{crop_rotation_scenario}.png"
+                file = base_path_figs / f"trace_{var_sim}_{location}_{crop_rotation_scenario}_{fertilization_intensity}Nfert.png"
                 fig.savefig(file, dpi=300)
                 plt.close(fig)

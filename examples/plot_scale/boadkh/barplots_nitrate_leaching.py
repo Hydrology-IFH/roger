@@ -14,14 +14,6 @@ import pickle
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
 
-# mpl.rcParams["font.size"] = 8
-# mpl.rcParams["axes.titlesize"] = 8
-# mpl.rcParams["axes.labelsize"] = 9
-# mpl.rcParams["xtick.labelsize"] = 8
-# mpl.rcParams["ytick.labelsize"] = 8
-# mpl.rcParams["legend.fontsize"] = 8
-# mpl.rcParams["legend.title_fontsize"] = 9
-
 mpl.rcParams["font.size"] = 10
 mpl.rcParams["axes.titlesize"] = 10
 mpl.rcParams["axes.labelsize"] = 11
@@ -30,19 +22,6 @@ mpl.rcParams["ytick.labelsize"] = 10
 mpl.rcParams["legend.fontsize"] = 10
 mpl.rcParams["legend.title_fontsize"] = 11
 sns.set_style("ticks")
-# sns.plotting_context(
-#     "paper",
-#     font_scale=1,
-#     rc={
-#         "font.size": 8.0,
-#         "axes.labelsize": 9.0,
-#         "axes.titlesize": 8.0,
-#         "xtick.labelsize": 8.0,
-#         "ytick.labelsize": 8.0,
-#         "legend.fontsize": 8.0,
-#         "legend.title_fontsize": 9.0,
-#     },
-# )
 
 sns.plotting_context(
     "paper",

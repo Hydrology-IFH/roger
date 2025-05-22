@@ -159,6 +159,10 @@ examples/plot_scale/stgallen/
 examples/plot_scale/freiburg_altheim_kupferzell/climate_projections
 examples/plot_scale/boadkh/input/
 examples/plot_scale/boadkh/climate_projections/
+examples/plot_scale/boadkh/soil_temperature.py
+examples/plot_scale/boadkh/find_clust_id.py
+examples/plot_scale/boadkh/plot_single_time_series.py
+examples/plot_scale/boadkh/_plot_nitrate_leaching.py
 gpu_memory_profiling/
 *_2016-*.sh
 debug_setup/
