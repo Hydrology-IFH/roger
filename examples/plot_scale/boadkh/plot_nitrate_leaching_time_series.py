@@ -4,12 +4,9 @@ import xarray as xr
 from cftime import num2date
 import pandas as pd
 import numpy as np
-import geopandas as gpd
 import numpy as onp
-from matplotlib.patches import Patch
 import matplotlib as mpl
 import seaborn as sns
-import pickle
 
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -92,95 +89,12 @@ base_path_figs = base_path / "figures"
 if not os.path.exists(base_path_figs):
     os.mkdir(base_path_figs)
 
-# identifiers for crop rotation scenarios
-_dict_ffid = {"winter-wheat_clover": "1_0",
-              "winter-wheat_silage-corn": "2_0",
-              "summer-wheat_winter-wheat": "3_0",
-              "summer-wheat_clover_winter-wheat": "4_0",
-              "winter-wheat_clover_silage-corn": "5_0",
-              "winter-wheat_sugar-beet_silage-corn": "6_0",
-              "summer-wheat_winter-wheat_silage-corn": "7_0",
-              "summer-wheat_winter-wheat_winter-rape": "8_0",
-              "winter-wheat_winter-rape": "9_0",
-              "winter-wheat_soybean_winter-rape": "10_0",
-              "sugar-beet_winter-wheat_winter-barley": "11_0", 
-              "grain-corn_winter-wheat_winter-rape": "12_0", 
-              "grain-corn_winter-wheat_winter-barley": "13_0",
-              "grain-corn_winter-wheat_clover": "14_0",
-              "miscanthus": "15_0",
-              "bare-grass": "16_0",
-              "winter-wheat_silage-corn_yellow-mustard": "2_1",
-              "summer-wheat_winter-wheat_yellow-mustard": "3_1",
-              "winter-wheat_sugar-beet_silage-corn_yellow-mustard": "6_1",
-              "summer-wheat_winter-wheat_silage-corn_yellow-mustard": "7_1",
-              "summer-wheat_winter-wheat_winter-rape_yellow-mustard": "8_1",
-              "sugar-beet_winter-wheat_winter-barley_yellow-mustard": "11_1", 
-              "grain-corn_winter-wheat_winter-rape_yellow-mustard": "12_1", 
-              "grain-corn_winter-wheat_winter-barley_yellow-mustard": "13_1", 
-}
-
-_ffids_mustard = ["2_0", "3_0", "6_0", "7_0", "8_0", "11_0", "12_0", "13_0",
-                  "2_1", "3_1", "6_1", "7_1", "8_1", "11_1", "12_1", "13_1"]
-
-_ffids_no_mustard = ["2_0", "3_0", "6_0", "7_0", "8_0", "11_0", "12_0", "13_0"]
-
-_ffids_with_mustard = ["2_1", "3_1", "6_1", "7_1", "8_1", "11_1", "12_1", "13_1"]
-
-_dict_intercropping_effects = {'low Nfert & no intercropping': 1.0,
-                               'low Nfert & intercropping': 1.01,
-                               'medium Nfert & no intercropping': 2.0,
-                               'medium Nfert & intercropping': 2.01,
-                               'high Nfert & no intercropping': 3,
-                               'high Nfert & intercropping': 3.01
-                               }
-
-_dict_var_names = {"q_hof": "QSUR",
-                   "ground_cover": "GC",
-                   "M_q_ss": "MPERC",
-                   "C_q_ss": "CPERC",
-                   "q_ss": "PERC",
-}
-
-_dict_fert = {"low": 1,
-              "medium": 2,
-              "high": 3,
-}
-
-_dict_crop_id_rev = {115: "winter wheat",
-                     425: "clover",
-                     411: "silage corn",
-                     116: "summer wheat",
-                     603: "sugar beet",
-                     311: "winter rape",
-                     330: "soybean",
-                     171: "grain corn",
-                     131: "winter barley",
-                    }
-
 # identifiers for simulations
 locations = ["freiburg", "lahr", "muellheim", 
              "stockach", "gottmadingen", "weingarten",
              "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
              "ehingen-kirchen", "merklingen", "hayingen",
              "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-
-locations = ["freiburg"]
-
-_dict_location = {"freiburg": "Freiburg",
-                  "lahr": "Lahr",
-                  "muellheim": "Müllheim",
-                  "stockach": "Stockach",
-                  "gottmadingen": "Gottmadingen",
-                  "weingarten": "Weingarten",
-                  "eppingen-elsenz": "Eppingen",
-                  "bruchsal-heidelsheim": "Bruchsal",
-                  "bretten": "Bretten",
-                  "ehingen-kirchen": "Ehingen",
-                  "merklingen": "Merklingen",
-                  "hayingen": "Hayingen",
-                  "kupferzell": "Kupferzell",
-                  "oehringen": "Öhringen",
-                  "vellberg-kleinaltdorf": "Vellberg"}
 
 crop_rotation_scenarios = ["winter-wheat_clover",
                            "winter-wheat_silage-corn",
@@ -269,18 +183,6 @@ df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
 clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
 df_areas = pd.read_csv(base_path / "output" / "areas.csv", sep=";")
 
-# # load linkage between BK50 and cropland clusters
-# file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "link_shp_clust_acker.h5"
-# df_link_bk50_cluster_cropland = pd.read_hdf(file)
-
-# # load BK50 shapefile for Freiburg
-# file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
-# gdf_bk50 = gpd.read_file(file, include_fields=["SHP_ID", "area"]).loc[:, ["SHP_ID", "area"]]
-
-# # get unique cluster ids for cropland
-# cond = onp.isin(df_link_bk50_cluster_cropland.index.values, gdf_bk50["SHP_ID"].values)
-# clust_ids = onp.unique(df_link_bk50_cluster_cropland.loc[cond, "CLUST_ID"].values).astype(str)
-
 # load simulated fluxes and states
 dict_fluxes_states = {}
 for location in locations:
@@ -303,10 +205,6 @@ for location in locations:
         )
         ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
-
-# file = base_path_output / "dict_fluxes_states.pickle"
-# with open(file, 'wb') as handle:
-#     pickle.dump(dict_fluxes_states, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # load nitrogen loads and concentrations
 dict_nitrate = {}
@@ -332,10 +230,6 @@ for location in locations:
             )
             ds_nitrate = ds_nitrate.assign_coords(Time=("Time", date))
             dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] = ds_nitrate
-
-# file = base_path_output / "dict_nitrate.pickle"
-# with open(file, 'wb') as handle:
-#     pickle.dump(dict_nitrate, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # plot daily values
 colors = sns.color_palette("RdPu", n_colors=len(fertilization_intensities))

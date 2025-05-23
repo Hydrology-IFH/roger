@@ -4,9 +4,7 @@ import xarray as xr
 from cftime import num2date
 import pandas as pd
 import numpy as onp
-import roger.tools.labels as labs
 import matplotlib as mpl
-import matplotlib.dates as mdates
 import seaborn as sns
 
 mpl.use("agg")
@@ -127,16 +125,6 @@ _lab_unit_daily = {
     "evap_soil": "$EVAP_{soil}$ [mm/day]",
     "aet": "$AET$ [mm/day]",
     "q_ss": "$PERC$ [mm/day]",
-    "theta": "$\theta$ [-]",
-}
-
-_lab_unit_annual = {
-    "q_hof": "$Q_{HOF}$ [mm/year]",
-    "ground_cover": "GC [-]",
-    "transp": "$TRANSP$ [mm/year]",
-    "evap_soil": "$EVAP_{soil}$ [mm/year]",
-    "aet": "$AET$ [mm/year]",
-    "q_ss": "$PERC$ [mm/year]",
     "theta": "$\theta$ [-]",
 }
 
