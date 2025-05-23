@@ -4,12 +4,10 @@ import xarray as xr
 from cftime import num2date
 import pandas as pd
 import numpy as np
-import geopandas as gpd
 import numpy as onp
 from matplotlib.patches import Patch
 import matplotlib as mpl
 import seaborn as sns
-import pickle
 
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -199,19 +197,6 @@ _lab_unit_annual = {
 csv_file = base_path / "parameters.csv"
 df_params = pd.read_csv(csv_file, sep=";", skiprows=1)
 clust_ids = pd.unique(df_params["CLUST_ID"].values).tolist()
-
-# # load linkage between BK50 and cropland clusters
-# file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "link_shp_clust_acker.h5"
-# df_link_bk50_cluster_cropland = pd.read_hdf(file)
-
-# # load BK50 shapefile for Freiburg
-# file = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "BK50_acker_freiburg.gpkg"
-# gdf_bk50 = gpd.read_file(file, include_fields=["SHP_ID", "area"]).loc[:, ["SHP_ID", "area"]]
-
-# # get unique cluster ids for cropland
-# cond = onp.isin(df_link_bk50_cluster_cropland.index.values, gdf_bk50["SHP_ID"].values)
-# clust_ids = onp.unique(df_link_bk50_cluster_cropland.loc[cond, "CLUST_ID"].values).astype(str)
-
 df_areas = pd.read_csv(base_path / "output" / "areas.csv", sep=";")
 
 # load simulated fluxes and states
@@ -236,10 +221,6 @@ for location in locations:
         )
         ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
-
-# # file = base_path_output / "dict_fluxes_states.pickle"
-# # with open(file, 'wb') as handle:
-# #     pickle.dump(dict_fluxes_states, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # # load nitrogen loads and concentrations
 # dict_nitrate = {}

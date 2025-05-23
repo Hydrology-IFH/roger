@@ -4,9 +4,7 @@ import xarray as xr
 from cftime import num2date
 import pandas as pd
 import numpy as onp
-import roger.tools.labels as labs
 import matplotlib as mpl
-import matplotlib.dates as mdates
 import seaborn as sns
 
 mpl.use("agg")

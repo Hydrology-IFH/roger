@@ -311,7 +311,7 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             sim_vals2 = ds["M_q_ss"].isel(y=0, x=36).values[1:-1] * 4.427  # convert nitrate-nitrogen to nitrate
             sim_vals = onp.where(sim_vals1 > 0.01, sim_vals2/sim_vals1, onp.nan)
             df = pd.DataFrame(index=ds["Time"].values[1:-1], data=sim_vals)
-            df = df.loc["2014-01-01":"2023-12-31"]
+            df = df.loc["2014-01-01":"2022-12-31"]
             fig, ax = plt.subplots(1, 1, figsize=(6, 2))
             ax.plot(df.index, df.values, color="black", linewidth=1)
             ax.set_xlabel("Time [Year]")
@@ -323,6 +323,43 @@ for crop_rotation_scenario in crop_rotation_scenarios:
             file = base_path_figs / f"trace_C_q_ss_{location}_{crop_rotation_scenario}_{fertilization_intensity}_.png"
             fig.savefig(file, dpi=300)
             plt.close(fig)
+
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        ds = dict_fluxes_states[location][crop_rotation_scenario]
+        sim_vals = ds["ground_cover"].isel(y=0, x=36).values[1:]
+        df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals)
+        df = df.loc["2014-01-01":"2022-12-31"]
+        fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+        ax.plot(df.index, df.values, color="black", linewidth=1)
+        ax.set_xlabel("Time [Year]")
+        ax.set_ylabel("canopy cover [-]")
+        ax.set_xlim(df.index[0], df.index[-1])
+        ax.set_ylim(0, )
+        plt.xticks(rotation=33)
+        fig.tight_layout()
+        file = base_path_figs / f"trace_canopy_cover_{location}_{crop_rotation_scenario}_.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
+
+for crop_rotation_scenario in crop_rotation_scenarios:
+    for location in locations:
+        ds = dict_fluxes_states[location][crop_rotation_scenario]
+        sim_vals = ds["z_root"].isel(y=0, x=36).values[1:] / 10
+        df = pd.DataFrame(index=ds["Time"].values[1:], data=sim_vals)
+        df = df.loc["2014-01-01":"2022-12-31"]
+        fig, ax = plt.subplots(1, 1, figsize=(6, 2))
+        ax.plot(df.index, df.values, color="black", linewidth=1)
+        ax.set_xlabel("Time [Year]")
+        ax.set_ylabel("root depth [cm]")
+        ax.set_xlim(df.index[0], df.index[-1])
+        ax.set_ylim(0, )
+        ax.invert_yaxis()
+        plt.xticks(rotation=33)
+        fig.tight_layout()
+        file = base_path_figs / f"trace_root_depth_{location}_{crop_rotation_scenario}_.png"
+        fig.savefig(file, dpi=300)
+        plt.close(fig)
 
 
 # for crop_rotation_scenario in crop_rotation_scenarios:

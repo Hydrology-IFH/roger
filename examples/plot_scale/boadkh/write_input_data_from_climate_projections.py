@@ -1,5 +1,4 @@
 import warnings
-
 warnings.simplefilter(action="ignore", category=FutureWarning)
 
 from pathlib import Path

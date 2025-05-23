@@ -4,12 +4,10 @@ import xarray as xr
 from cftime import num2date
 import pandas as pd
 import numpy as np
-import geopandas as gpd
 import numpy as onp
 from matplotlib.patches import Patch
 import matplotlib as mpl
 import seaborn as sns
-import pickle
 
 mpl.use("agg")
 import matplotlib.pyplot as plt  # noqa: E402
@@ -299,10 +297,6 @@ for location in locations:
         ds_fluxes_states = ds_fluxes_states.assign_coords(Time=("Time", date))
         dict_fluxes_states[location][crop_rotation_scenario] = ds_fluxes_states
 
-# file = base_path_output / "dict_fluxes_states.pickle"
-# with open(file, 'wb') as handle:
-#     pickle.dump(dict_fluxes_states, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
 # load nitrogen loads and concentrations
 dict_nitrate = {}
 for location in locations:
@@ -327,10 +321,6 @@ for location in locations:
             )
             ds_nitrate = ds_nitrate.assign_coords(Time=("Time", date))
             dict_nitrate[location][crop_rotation_scenario][f'{fertilization_intensity}_Nfert'] = ds_nitrate
-
-# file = base_path_output / "dict_nitrate.pickle"
-# with open(file, 'wb') as handle:
-#     pickle.dump(dict_nitrate, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 # # plot annual sums
 # vars_sim = ["M_q_ss"]

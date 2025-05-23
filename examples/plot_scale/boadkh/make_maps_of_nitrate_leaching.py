@@ -1,7 +1,5 @@
 
 from pathlib import Path
-import xarray as xr
-from cftime import num2date
 import pandas as pd
 import geopandas as gpd
 import contextily as ctx
@@ -10,7 +8,6 @@ import matplotlib as mpl
 from matplotlib_map_utils.core.north_arrow import north_arrow
 from matplotlib_map_utils.core.scale_bar import scale_bar
 import adjustText as aT
-import seaborn as sns
 import click
 import warnings
 warnings.filterwarnings('ignore')
@@ -233,7 +230,8 @@ def main(tmp_dir):
 
 
     bounds = [10, 25, 37.5, 50, 75]
-    norm = mpl.colors.BoundaryNorm(bounds, mpl.colormaps["OrRd"].N)
+    cmap = mpl.colors.LinearSegmentedColormap.from_list("", ["#feb24c", "#800026"])
+    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
     vars_sim = ["C_q_ss"]
     crop_rotations = ["winter-wheat_silage-corn", "winter-wheat_silage-corn_yellow-mustard", "winter-wheat_soybean_winter-rape"]
@@ -255,7 +253,7 @@ def main(tmp_dir):
 
                 # plot the map (increase the dpi and figsize to make polygons visible)
                 fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-                gdf.plot(column="value", ax=ax, cmap="OrRd", vmin=0, vmax=70, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.62})
+                gdf.plot(column="value", ax=ax, cmap="Purples", vmin=0, vmax=70, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.62})
                 ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
                 north_arrow(
                 ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
@@ -291,7 +289,7 @@ def main(tmp_dir):
 
                 # plot the map (increase the dpi and figsize to make polygons visible)
                 fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-                gdf.plot(column="value", ax=ax, cmap="OrRd", norm=norm, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.5, "ticks": [10, 25, 37.5, 50, 75], "format": mpl.ticker.FixedFormatter(['<10', '25', '37.5', '50', '>75'])})
+                gdf.plot(column="value", ax=ax, cmap=cmap, norm=norm, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.5, "ticks": [10, 25, 37.5, 50, 75], "format": mpl.ticker.FixedFormatter(['<10', '25', '37.5', '50', '>75'])})
                 ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
                 north_arrow(
                 ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
@@ -331,8 +329,8 @@ def main(tmp_dir):
 
                 # plot the map (increase the dpi and figsize to make polygons visible)
                 fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-                gdf.plot(column="value", ax=ax, cmap="OrRd", vmin=0, vmax=70, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.62})
-                ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
+                gdf.plot(column="value", ax=ax, cmap="Purples", vmin=0, vmax=70, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.62})
+                ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs, alpha=0.5)
                 north_arrow(
                 ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
                 )
@@ -366,8 +364,8 @@ def main(tmp_dir):
 
                 # plot the map (increase the dpi and figsize to make polygons visible)
                 fig, ax = plt.subplots(1, 1, figsize=(20, 24))
-                gdf.plot(column="value", ax=ax, cmap="OrRd", norm=norm, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.5, "ticks": [10, 25, 37.5, 50, 75], "format": mpl.ticker.FixedFormatter(['<10', '25', '37.5', '50', '>75'])})
-                ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs)
+                gdf.plot(column="value", ax=ax, cmap=cmap, norm=norm, legend=True, legend_kwds={"label": "$NO_3$ [mg/l]", "shrink": 0.5, "ticks": [10, 25, 37.5, 50, 75], "format": mpl.ticker.FixedFormatter(['<10', '25', '37.5', '50', '>75'])})
+                ctx.add_basemap(ax, source=ctx.providers.CartoDB.Positron, crs=gdf.crs, alpha=0.9)
                 north_arrow(
                 ax, scale=1.25, location="upper left", rotation={"crs": gdf.crs, "reference": "center"}
                 )
