@@ -211,12 +211,12 @@ def nanmeanweighted(y, w, axis=None):
 
     return wavg
 
-@click.option("-td", "--tmp-dir", type=str, default=Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output")
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @click.command("main")
 def main(tmp_dir):
     base_path = Path(__file__).parent
     # directory of results
-    base_path_output = Path("/Volumes/LaCie/roger/examples/plot_scale/boadkh") / "output"
+    base_path_output = Path(__file__).parent / "output"
     # base_path_output = Path(__file__).parent / "output"
 
     # load linkage between BK50 and cropland clusters

@@ -9,23 +9,23 @@ This repository provides scripts and data to calculate surface runoff, percolati
 ---
 
 ## input
-Contains meteorological time series of 15 DWD stations and crop rotation scenarios (`/crop_rotation_scenarios`).
+Contains meteorological time series of 15 DWD stations and crop rotation scenarios (`/crop_rotation_scenarios`). The meteorological data has been downloaded from [WeatherDB](https://apps.hydro.uni-freiburg.de/de/weatherdb/).
 
-- `gottmadingen/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Gottmadingen (station_id: 1711) for the period 2013 to 2022.
-- `stockach/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Stockach (station_id: 4881) for the period 2013 to 2022.
-- `weingarten/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Weingarten (Kr. Ravensburg: station_id: 4094) for the period 2013 to 2022.
-- `muellheim/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Müllheim im Markgräflerland (station_id: 259) for the period 2013 to 2022.
-- `freiburg/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Freiburg (station_id: 1443) for the period 2013 to 2022.
-- `lahr/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Lahr (station_id: 2812) for the period 2013 to 2022.
-- `hayingen/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Hayingen (station_id: 2072) for the period 2013 to 2022.
-- `ehingen-kirchen/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Ehingen-Kirchen (station_id: 3418) for the period 2013 to 2022.
-- `merklingen/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Merklingen (station_id: 2814) for the period 2013 to 2022.
-- `bruchsal-heidelsheim/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Bruchsal-Heidelsheim (station_id: 731) for the period 2013 to 2022.
-- `bretten/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Bretten (Kreis Karlsruhe; station_id: 7490) for the period 2013 to 2022.
-- `eppingen-elsenz/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Eppingen-Elsenz (station_id: 1255) for the period 2013 to 2022.
-- `kupferzell/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Kupferzell-Rechbach (station_id: 2787) for the period 2013 to 2022.
-- `vellberg-kleinaltdorf/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Vellberg-Kleinaltdorf (station_id: 5206) for the period 2013 to 2022.
-- `oehringen/2013-2022/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Öhringen (station_id: 3761) for the period 2013 to 2022.
+- `gottmadingen/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Gottmadingen (station_id: 1711) for the period 2013 to 2022.
+- `stockach/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Stockach (station_id: 4881) for the period 2013 to 2022.
+- `weingarten/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Weingarten (Kr. Ravensburg: station_id: 4094) for the period 2013 to 2022.
+- `muellheim/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Müllheim im Markgräflerland (station_id: 259) for the period 2013 to 2022.
+- `freiburg/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Freiburg (station_id: 1443) for the period 2013 to 2022.
+- `lahr/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Lahr (station_id: 2812) for the period 2013 to 2022.
+- `hayingen/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Hayingen (station_id: 2072) for the period 2013 to 2022.
+- `ehingen-kirchen/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Ehingen-Kirchen (station_id: 3418) for the period 2013 to 2022.
+- `merklingen/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Merklingen (station_id: 2814) for the period 2013 to 2022.
+- `bruchsal-heidelsheim/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Bruchsal-Heidelsheim (station_id: 731) for the period 2013 to 2022.
+- `bretten/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Bretten (Kreis Karlsruhe; station_id: 7490) for the period 2013 to 2022.
+- `eppingen-elsenz/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Eppingen-Elsenz (station_id: 1255) for the period 2013 to 2022.
+- `kupferzell/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Kupferzell-Rechbach (station_id: 2787) for the period 2013 to 2022.
+- `vellberg-kleinaltdorf/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Vellberg-Kleinaltdorf (station_id: 5206) for the period 2013 to 2022.
+- `oehringen/`: precipitation (`PREC.txt`), air temperature (`TA.txt`), and potential evapotranspiration (`PET.txt`) time series collected at the DWD-station Öhringen (station_id: 3761) for the period 2013 to 2022.
 
 
 ### crop_rotation_scenarios
