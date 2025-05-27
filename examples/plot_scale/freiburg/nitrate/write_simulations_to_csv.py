@@ -16,6 +16,8 @@ def main():
     # load the parameters
     file = base_path / "parameters.csv"
     df_parameters = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
+    # normalise area_share
+    df_parameters["area_share"] = df_parameters["area_share"] / df_parameters["area_share"].sum()
     file = base_path / "crop_water_stress.csv"
     df_crop_water_stress = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
     df_crop_water_stress["crop_type"] = df_crop_water_stress.index
@@ -73,6 +75,7 @@ def main():
                             dir_csv_files = base_path / "output" / dir_name / f"{irrigation_scenario}{_soil_compaction_scenario}" / "crop-specific" / crop_rotation_scenario
                         if not os.path.exists(dir_csv_files):
                             os.makedirs(dir_csv_files)
+                        ll_area_weighted = []
                         for x, soil_type in enumerate(soil_types):
                             if irrigation_scenario == "no-irrigation":
                                 dir_csv_files = base_path / "output" / dir_name / f"{irrigation_scenario}{_soil_compaction_scenario}"/ crop_rotation_scenario / soil_type
@@ -91,12 +94,37 @@ def main():
                             df_simulation.loc[:, "NO3_soil_conc"] = ds["C_s"].isel(x=x, y=0).values * 4.43 # convert nitrate-nitrogen to nitrate
                             df_simulation.loc[:, "lu_id"] = ds["lu_id"].isel(x=x, y=0).values
                             df_simulation.loc[:, "crop_type"] = [dict_crop_types[lu_id] for lu_id in ds["lu_id"].isel(x=x, y=0).values]
+                            ll_area_weighted.append(df_simulation.copy())
                             df_simulation.columns =[["[kg N/ha/day]", "[kg N/ha/day]", "[kg N/ha/day]", "[mg/l]", "[mg/l]", "", ""],
                                                     ["N_fert", "N_uptake", "NO3-N_leach", "NO3_leach_conc", "NO3_soil_conc", "lu_id", "crop_type"]]
                             df_simulation = df_simulation.iloc[1:, :] # remove initial values
                             df_simulation.to_csv(
                                 dir_csv_files / "simulation.csv", sep=";"
                             )
+                        # calculate area weighted average
+                        df_simulation = pd.DataFrame(
+                            index=date, columns=["N_fert", "N_uptake", "NO3-N_leach", "NO3_leach_conc", "NO3_soil_conc", "lu_id", "crop_type"]
+                        )
+                        for var in df_simulation.columns:
+                            if var in ["lu_id", "crop_type"]:
+                                df_simulation.loc[:, var] = ll_area_weighted[0][var].values
+                            else:
+                                df_var = pd.DataFrame(index=date, columns=df_parameters.index[3:])
+                                for x, soil_type in enumerate(df_parameters.index[3:]):
+                                    df_var.loc[:, soil_type] = ll_area_weighted[x][var].values * df_parameters.loc[soil_type, "area_share"]
+                                df_simulation.loc[:, var] = df_var.sum(axis=1)
+                        df_simulation.columns =[["[kg N/ha/day]", "[kg N/ha/day]", "[kg N/ha/day]", "[mg/l]", "[mg/l]", "", ""],
+                                                ["N_fert", "N_uptake", "NO3-N_leach", "NO3_leach_conc", "NO3_soil_conc", "lu_id", "crop_type"]]
+                        if irrigation_scenario == "no-irrigation":
+                            dir_csv_files = base_path / "output" / dir_name / f"{irrigation_scenario}{_soil_compaction_scenario}"/ crop_rotation_scenario / "area_weighted"
+                        else:
+                            dir_csv_files = base_path / "output" / dir_name / f"{irrigation_scenario}{_soil_compaction_scenario}" / "crop-specific" / crop_rotation_scenario / "area_weighted"
+                        if not os.path.exists(dir_csv_files):
+                            os.makedirs(dir_csv_files)
+                        df_simulation.to_csv(
+                                dir_csv_files / "simulation.csv", sep=";"
+                            )
+
     return
 
 

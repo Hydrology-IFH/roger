@@ -16,6 +16,8 @@ def main():
     # load the parameters
     file = base_path / "parameters.csv"
     df_parameters = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
+    # normalise area_share
+    df_parameters["area_share"] = df_parameters["area_share"] / df_parameters["area_share"].sum()
     file = base_path / "crop_water_stress.csv"
     df_crop_water_stress = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
     df_crop_water_stress["crop_type"] = df_crop_water_stress.index
@@ -67,6 +69,7 @@ def main():
                     dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / crop_rotation_scenario
                     if not os.path.exists(dir_csv_files):
                         os.makedirs(dir_csv_files)
+                    ll_area_weighted = []
                     for x, soil_type in enumerate(soil_types):
                         dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / crop_rotation_scenario / soil_type
                         if not os.path.exists(dir_csv_files):
@@ -117,12 +120,37 @@ def main():
                             theta_irr = df_parameters.loc[f"{soil_type}", "theta_pwp"] + (c_irr * df_parameters.loc[f"{soil_type}", "theta_ufc"])
                             df_simulation.loc[:, "theta_irrig"] = theta_irr
                             df_simulation.loc[cond_bare, "theta_irrig"] = onp.nan
+                        ll_area_weighted.append(df_simulation.copy())
                         df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
                                                 ["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]]
                         df_simulation = df_simulation.iloc[1:, :] # remove initial values
                         df_simulation.to_csv(
                             dir_csv_files / "simulation.csv", sep=";"
                         )
+
+                # calculate area weighted average
+                df_simulation = pd.DataFrame(
+                        index=date, columns=["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]
+                    )
+                
+                for var in df_simulation.columns:
+                    if var in ["lu_id", "crop_type"]:
+                        df_simulation.loc[:, var] = ll_area_weighted[0][var].values
+                    else:
+                        df_var = pd.DataFrame(index=date, columns=df_parameters.index[3:])
+                        for x, soil_type in enumerate(df_parameters.index[3:]):
+                            df_var.loc[:, soil_type] = ll_area_weighted[x][var].values * df_parameters.loc[soil_type, "area_share"]
+                        df_simulation.loc[:, var] = df_var.sum(axis=1)
+                df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
+                                        ["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]]
+
+                dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / crop_rotation_scenario / "area_weighted"
+                if not os.path.exists(dir_csv_files):
+                    os.makedirs(dir_csv_files)
+                df_simulation.to_csv(
+                        dir_csv_files / "simulation.csv", sep=";"
+                    )
+
     return
 
 
