@@ -389,7 +389,6 @@ def calc_transp(state):
     transp_fp = allocate(state.dimensions, ("x", "y"))
     transp_lp = allocate(state.dimensions, ("x", "y"))
 
-    # potential transpiration (energy limited)
     vs.pt = update(
         vs.pt,
         at[2:-2, 2:-2],
