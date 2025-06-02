@@ -53,7 +53,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat",
                                                              "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="summer-barley")
+                                                             "bare-grass"]), default="winter-wheat")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no-irrigation")
 @roger_base_cli
 def main(crop_rotation_scenario, tmp_dir):
@@ -380,7 +380,9 @@ def main(crop_rotation_scenario, tmp_dir):
                 "cpr_rz",
                 "re_rg",
                 "re_rl",
-                "q_hof"
+                "q_hof",
+                "rain_top",
+                "rain_ground",
             ]
             diagnostics["rate"].output_frequency = 24 * 60 * 60
             diagnostics["rate"].sampling_frequency = 1
