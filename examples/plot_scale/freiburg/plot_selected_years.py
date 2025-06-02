@@ -42,9 +42,9 @@ def main():
     dict_data_daily["irrigation_soil-compaction"] = {}
     dict_data_daily["no-irrigation_soil-compaction"] = {}
 
-    years = [2003, 2018, 2021]
-    years1 = [2003, 2018, 2021]
-    years2 = [2003, 2018, 2021]
+    years = [2003, 2018, 2020]
+    years1 = [2003, 2018, 2020]
+    years2 = [2004, 2019, 2021]
 
     # identifiers of simulations
     scenarios = ["irrigation", "no-irrigation", "irrigation_soil-compaction", "no-irrigation_soil-compaction"]
@@ -54,7 +54,8 @@ def main():
                                "winter-wheat",
                                "summer-barley",
                                "potato"]
-    crop_rotation_scenarios = ["winter-wheat"]
+    crop_rotation_scenarios = ["winter-wheat",
+                               "grain-corn"]
     soil_types = ["3", "4", "area_weighted"]
     for irrigation_scenario in irrigation_scenarios:
         dict_data_daily["no-irrigation"][irrigation_scenario] = {}
@@ -394,8 +395,8 @@ def main():
                     for i, scenario in enumerate(scenarios):
                         data = dict_data_daily[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-02-01":f"{year}-10-15" , :]
                         axs[1].plot(data.index, data["pet"], color=colors[i], lw=(i+1)/2, zorder=i)
-                        axs[1].plot(data.index, data["transp"], color=colors[i], lw=(i+1)/2, zorder=5-i, ls="--")
-                        axs[1].plot(data.index, data["evap_soil"], color=colors[i], lw=(i+1)/2, zorder=5-i, ls=":")
+                        axs[1].plot(data.index, data["transp"], color=colors[i], lw=(i+1)/2, zorder=i, ls="--")
+                        axs[1].plot(data.index, data["evap_soil"], color=colors[i], lw=(i+1)/2, zorder=i, ls=":")
                     axs[1].set_ylabel('ET\n[mm/day]')
                     axs[1].set_xlabel('')
                     axs[1].set_ylim(0, 10)
@@ -409,7 +410,7 @@ def main():
                     axs[2].set_xlim(data.index[0], data.index[-1])
                     for i, scenario in enumerate(scenarios):
                         data = dict_data_daily[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-02-01":f"{year}-10-15" , :]
-                        axs[3].plot(data.index, data["perc"], color=colors[i], lw=(i+1)/2, zorder=5-i, label=_dict_scenario_labels[scenario])
+                        axs[3].plot(data.index, data["perc"], color=colors[i], lw=(i+1)/2, zorder=i, label=_dict_scenario_labels[scenario])
                     axs[3].legend(loc="upper right", ncol=2, frameon=False, fontsize=9)
                     axs[3].set_ylabel('PERC\n[mm/day]')
                     axs[3].set_xlabel('')
@@ -426,12 +427,11 @@ def main():
                     fig, axs = plt.subplots(4, 1, sharex=True, figsize=(6, 4))
                     for i, scenario in enumerate(scenarios):
                         data = dict_data_daily[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-02-01":f"{year}-10-15" , :]
-                        axs[0].plot(data.index, data["photosynthesis_index"], color=colors[i], lw=(i+1)/2, zorder=5-i, label=_dict_scenario_labels[scenario])
+                        axs[0].plot(data.index, data["photosynthesis_index"], color=colors[i], lw=(i+1)/2, zorder=i, label=_dict_scenario_labels[scenario])
                     axs[0].set_ylabel('PI [-]')
                     axs[0].set_xlabel('')
-                    axs[0].set_ylim(0, 1.1)
+                    axs[0].set_ylim(0, 1.0)
                     axs[0].set_xlim(data.index[0], data.index[-1])
-                    axs[0].legend(loc="upper center", ncol=2, frameon=False, fontsize=9)
                     for i, scenario in enumerate(scenarios):
                         data = dict_data_daily[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-02-01":f"{year}-10-15" , :]
                         axs[1].plot(data.index, data["canopy_cover"], color=colors[i], lw=(i+1)/2, zorder=i)
@@ -449,12 +449,13 @@ def main():
                     axs[2].invert_yaxis()
                     for i, scenario in enumerate(scenarios):
                         data = dict_data_daily[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-02-01":f"{year}-10-15" , :]
-                        axs[3].plot(data.index, data["irrigation_demand"], color=colors[i], lw=(i+1)/2, zorder=i)
+                        axs[3].plot(data.index, data["irrigation_demand"], color=colors[i], lw=(i+1)/2, zorder=i , label=_dict_scenario_labels[scenario])
                     axs[3].set_ylabel('Irrig. dem.\n[mm]')
                     axs[3].set_xlabel('')
                     axs[3].set_ylim(0, 100)
                     axs[3].set_xlim(data.index[0], data.index[-1])
                     axs[3].set_xlabel('[Year-Month]')
+                    axs[3].legend(loc="upper left", ncol=2, frameon=False, fontsize=9)
                     axs[3].xaxis.set_major_formatter(mpl.dates.DateFormatter("%y-%m"))
                     fig.tight_layout()
                     file_str = f"photosynthesis-index_canopy-cover_root-depth_irrig-demand_root_ventilation_{crop_rotation_scenario}_{soil_type}_{year}.png"
@@ -470,7 +471,7 @@ def main():
                     axs[0].set_xlim(data.index[0], data.index[-1])
                     for i, scenario in enumerate(scenarios):
                         data = dict_data_daily[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-02-01":f"{year}-10-15" , :]
-                        axs[1].plot(data.index, data["N_uptake"], color=colors[i], lw=(i+1)/2, zorder=5-i, label=_dict_scenario_labels[scenario])
+                        axs[1].plot(data.index, data["N_uptake"], color=colors[i], lw=(i+1)/2, zorder=i, label=_dict_scenario_labels[scenario])
                     axs[1].set_ylabel('N uptake\n[kg N/ha]')
                     axs[1].set_xlabel('')
                     axs[1].set_ylim(0, 3)
@@ -486,7 +487,7 @@ def main():
                     axs[2].axhline(y=50, color="black", ls="--", lw=1)
                     for i, scenario in enumerate(scenarios):
                         data = dict_data_daily[scenario][irrigation_scenario][crop_rotation_scenario][soil_type].loc[f"{year}-02-01":f"{year}-10-15" , :]
-                        axs[3].plot(data.index, data["NO3_leach_conc"], color=colors[i], lw=(i+1)/2, zorder=5-i, label=_dict_scenario_labels[scenario])
+                        axs[3].plot(data.index, data["NO3_leach_conc"], color=colors[i], lw=(i+1)/2, zorder=i, label=_dict_scenario_labels[scenario])
                     axs[3].set_ylabel('$NO_3$ leaching\n[mg/l]')
                     axs[3].set_xlabel('')
                     axs[3].set_ylim(0, 150)
