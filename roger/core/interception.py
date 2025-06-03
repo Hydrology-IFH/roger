@@ -55,7 +55,7 @@ def calc_rain_int_top(state):
 
     if settings.enable_net_irrigation:
         # interception losses of crops are ignored
-        mask = (vs.lu_id >= 500) & (vs.lu_id <= 598)
+        mask = (vs.lu_id >= 500) & (vs.lu_id <= 598) & (vs.irrig > 0)
         vs.int_rain_top = update(
             vs.int_rain_top, 
             at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 0, vs.int_rain_top[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
@@ -121,7 +121,7 @@ def calc_rain_int_ground(state):
 
     if settings.enable_net_irrigation:
         # interception losses of crops are ignored
-        mask = (vs.lu_id >= 500) & (vs.lu_id <= 598)
+        mask = (vs.lu_id >= 500) & (vs.lu_id <= 598) & (vs.irrig > 0)
         vs.int_rain_ground = update(
             vs.int_rain_ground, 
             at[2:-2, 2:-2], npx.where(mask[2:-2, 2:-2], 0, vs.int_rain_ground[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],

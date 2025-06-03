@@ -313,7 +313,7 @@ def calc_parameters_surface_kernel(state):
         at[2:-2, 2:-2],
         npx.where(
             npx.isin(vs.lu_id[2:-2, 2:-2], npx.array([10, 11, 12])),
-            npx.where(vs.lai[2:-2, 2:-2] > 1, 0.1, 1.1 - vs.lai[2:-2, 2:-2]),
+            npx.where(vs.lai[2:-2, 2:-2] > 1, 0.1, 1.0 - vs.lai[2:-2, 2:-2]),
             0,
         )
         * vs.maskCatch[2:-2, 2:-2],
@@ -324,7 +324,7 @@ def calc_parameters_surface_kernel(state):
         at[2:-2, 2:-2],
         npx.where(
             npx.isin(vs.lu_id[2:-2, 2:-2], npx.arange(500, 598)),
-            npx.where(vs.lai[2:-2, 2:-2] > 1, 0.1, 1.1 - vs.lai[2:-2, 2:-2]),
+            npx.where(vs.lai[2:-2, 2:-2] > 1, 0.1, 1.0 - vs.lai[2:-2, 2:-2]),
             0,
         )
         * vs.maskCatch[2:-2, 2:-2],
