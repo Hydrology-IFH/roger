@@ -5,13 +5,13 @@ irrigation_scenarios:
 - crop-specific
 
 crop_rotation_scenarios:
-- grain-corn
-- summer-barley
 - winter-wheat
-- potato
-- grain-corn_yellow-mustard
+- grain-corn
 - grain-corn_winter-wheat_winter-rape
 - grain-corn_winter-wheat_winter-rape_yellow-mustard
+- summer-barley
+- potato
+- grain-corn_yellow-mustard
 - winter-wheat_winter-rape
 - winter-wheat_silage-corn
 - winter-wheat_silage-corn_yellow-mustard
