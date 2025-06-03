@@ -4,11 +4,8 @@ import click
 
 
 @click.option("--job-type", type=click.Choice(['single-node', 'multi-node']), default='single-node')
-@click.option("--sas-solver", type=click.Choice(['RK4', 'Euler', 'deterministic']), default='deterministic')
 @click.command("main")
-def main(job_type, sas_solver):
-
-
+def main(job_type):
     base_path = Path(__file__).parent
     base_path_binac = '/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_nitrate_monte_carlo'
     base_path_ws = Path('/beegfs/work/workspace/ws/fr_rs1092-workspace-0')
