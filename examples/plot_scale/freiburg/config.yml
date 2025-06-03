@@ -17,7 +17,7 @@ crop_rotation_scenarios:
 - winter-wheat_silage-corn_yellow-mustard
 - winter-wheat_soybean_winter-rape
 - silage-corn
-# - silage-corn_yellow-mustard
+- silage-corn_yellow-mustard
 # - summer-barley
 # - summer-barley_yellow-mustard
 # - clover

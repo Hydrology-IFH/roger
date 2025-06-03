@@ -11,3 +11,4 @@ python svat_crop_nitrate.py -b jax -d cpu --soil-compaction-scenario no_compacti
 python svat_crop_nitrate.py -b jax -d cpu --soil-compaction-scenario no_compaction --irrigation-scenario no_irrigation --crop-rotation-scenario winter-wheat_silage-corn_yellow-mustard
 python svat_crop_nitrate.py -b jax -d cpu --soil-compaction-scenario no_compaction --irrigation-scenario no_irrigation --crop-rotation-scenario winter-wheat_soybean_winter-rape
 python svat_crop_nitrate.py -b jax -d cpu --soil-compaction-scenario no_compaction --irrigation-scenario no_irrigation --crop-rotation-scenario silage-corn
+python svat_crop_nitrate.py -b jax -d cpu --soil-compaction-scenario no_compaction --irrigation-scenario no_irrigation --crop-rotation-scenario silage-corn_yellow-mustard
