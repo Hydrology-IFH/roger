@@ -211,9 +211,6 @@ def calc_inf_mat(state):
         npx.where(vs.inf_mat[2:-2, 2:-2] < 0, 0, vs.inf_mat[2:-2, 2:-2]) * vs.maskCatch[2:-2, 2:-2],
     )
 
-    # if (vs.prec[2, 2, vs.tau] > 0) & (vs.inf_mat[2, 2] <= 0) & (vs.ta[2, 2, 1] > 10):
-    #     print("Breaking infiltration")
-
     # update cumulated infiltration while event
     vs.inf_mat_event_csum = update_add(
         vs.inf_mat_event_csum,
