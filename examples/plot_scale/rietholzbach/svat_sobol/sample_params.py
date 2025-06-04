@@ -2,7 +2,7 @@ from pathlib import Path
 import h5netcdf
 import datetime
 import yaml
-from SALib.sample import saltelli
+from SALib.sample import sobol
 import numpy as onp
 import click
 
@@ -37,7 +37,7 @@ def main(nsamples, tmp_dir):
         bounds = yaml.safe_load(file)
 
     # initialize parameter file
-    params_file = base_path / "params_saltelli.nc"
+    params_file = base_path / "params_sobol.nc"
     with h5netcdf.File(params_file, 'w', decode_vlen_strings=False) as f:
         f.attrs.update(
             date_created=datetime.datetime.today().isoformat(),
@@ -49,7 +49,7 @@ def main(nsamples, tmp_dir):
 
     transport_models = list(bounds.keys())
     for tm in transport_models:
-        params = saltelli.sample(bounds[tm], nsamples, calc_second_order=False)
+        params = sobol.sample(bounds[tm], nsamples, calc_second_order=False)
         nrows = params.shape[0]
 
         # write sampled parameters to file

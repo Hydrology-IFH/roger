@@ -114,7 +114,7 @@ def main(transport_model_structure, tmp_dir):
             settings.identifier = f"SVAT_for_{transport_model_structure}"
 
             settings.nx, settings.ny = (
-                self._get_nx(self._base_path, "params_saltelli.nc", group=transport_model_structure.replace("_", " ")),
+                self._get_nx(self._base_path, "params_sobol.nc", group=transport_model_structure.replace("_", " ")),
                 1,
             )
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
@@ -190,28 +190,28 @@ def main(transport_model_structure, tmp_dir):
                 vs.c1_mak,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "c1_mak", self._base_path, "params_saltelli.nc", group=transport_model_structure.replace("_", " ")
+                    "c1_mak", self._base_path, "params_sobol.nc", group=transport_model_structure.replace("_", " ")
                 ),
             )
             vs.c2_mak = update(
                 vs.c2_mak,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "c2_mak", self._base_path, "params_saltelli.nc", group=transport_model_structure.replace("_", " ")
+                    "c2_mak", self._base_path, "params_sobol.nc", group=transport_model_structure.replace("_", " ")
                 ),
             )
             vs.dmpv = update(
                 vs.dmpv,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "dmpv", self._base_path, "params_saltelli.nc", group=transport_model_structure.replace("_", " ")
+                    "dmpv", self._base_path, "params_sobol.nc", group=transport_model_structure.replace("_", " ")
                 ),
             )
             vs.lmpv = update(
                 vs.lmpv,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "lmpv", self._base_path, "params_saltelli.nc", group=transport_model_structure.replace("_", " ")
+                    "lmpv", self._base_path, "params_sobol.nc", group=transport_model_structure.replace("_", " ")
                 ),
             )
             vs.theta_eff = update(
@@ -220,7 +220,7 @@ def main(transport_model_structure, tmp_dir):
                 self._read_var_from_nc(
                     "theta_eff",
                     self._base_path,
-                    "params_saltelli.nc",
+                    "params_sobol.nc",
                     group=transport_model_structure.replace("_", " "),
                 ),
             )
@@ -228,7 +228,7 @@ def main(transport_model_structure, tmp_dir):
                 vs.frac_lp,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "frac_lp", self._base_path, "params_saltelli.nc", group=transport_model_structure.replace("_", " ")
+                    "frac_lp", self._base_path, "params_sobol.nc", group=transport_model_structure.replace("_", " ")
                 ),
             )
             vs.frac_fp = update(vs.frac_fp, at[2:-2, 2:-2], 1 - vs.frac_lp[2:-2, 2:-2])
@@ -240,7 +240,7 @@ def main(transport_model_structure, tmp_dir):
                 self._read_var_from_nc(
                     "theta_pwp",
                     self._base_path,
-                    "params_saltelli.nc",
+                    "params_sobol.nc",
                     group=transport_model_structure.replace("_", " "),
                 ),
             )
@@ -248,7 +248,7 @@ def main(transport_model_structure, tmp_dir):
                 vs.ks,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "ks", self._base_path, "params_saltelli.nc", group=transport_model_structure.replace("_", " ")
+                    "ks", self._base_path, "params_sobol.nc", group=transport_model_structure.replace("_", " ")
                 ),
             )
             vs.kf = update(vs.kf, at[2:-2, 2:-2], 2500)
