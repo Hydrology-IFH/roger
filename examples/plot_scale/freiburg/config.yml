@@ -31,7 +31,7 @@ crop_rotation_scenarios:
 - strawberry
 - winter-wheat_clover
 - summer-wheat_winter-wheat
-- summer-wheat_clover_winter-wheat
+# - summer-wheat_clover_winter-wheat
 - winter-wheat_clover_silage-corn
 - winter-wheat_sugar-beet_silage-corn
 - summer-wheat_winter-wheat_silage-corn

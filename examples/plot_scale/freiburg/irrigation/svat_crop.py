@@ -379,17 +379,17 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                         )
                     # irrigate if sum of rainfall for the next 5 days is less than 1 mm
                     sum_rainfall_next5days = npx.sum(vs.PREC[vs.itt_forc:vs.itt_forc + 5 * 6 * 24])
-                    if sum_rainfall_next5days <= 1 and vs.month[1] in [4, 5] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
+                    if sum_rainfall_next5days <= 20 and vs.month[1] in [4, 5] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
                         mask_crops = npx.isin(vs.lu_id, npx.array([515, 550]))
                         vs.irrig = update(
                             vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
                         )
-                    elif sum_rainfall_next5days <= 1 and vs.month[1] in [4, 5, 6] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
+                    elif sum_rainfall_next5days <= 20 and vs.month[1] in [4, 5, 6] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
                         mask_crops = npx.isin(vs.lu_id, npx.array([541, 542, 543, 544, 546, 556, 557, 558, 559, 560, 579]))
                         vs.irrig = update(
                             vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
                         )
-                    elif sum_rainfall_next5days <= 1 and vs.month[1] in [4, 5, 6, 7] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
+                    elif sum_rainfall_next5days <= 20 and vs.month[1] in [4, 5, 6, 7] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
                         mask_crops = npx.isin(vs.lu_id, npx.array([525, 539, 575, 510]))
                         vs.irrig = update(
                             vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
@@ -398,7 +398,7 @@ def main(irrigation_scenario, crop_rotation_scenario, tmp_dir):
                         vs.irrig = update(
                             vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 40, vs.irrig[2:-2, 2:-2])
                         )
-                    elif sum_rainfall_next5days <= 1 and vs.month[1] in [4, 5, 6, 7, 8] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
+                    elif sum_rainfall_next5days <= 20 and vs.month[1] in [4, 5, 6, 7, 8] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
                         mask_crops = npx.isin(vs.lu_id, npx.array([513]))
                         vs.irrig = update(
                             vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, vs.irrig[2:-2, 2:-2])
