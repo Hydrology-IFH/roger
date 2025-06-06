@@ -5,26 +5,26 @@ irrigation_scenarios:
 - crop-specific
 
 crop_rotation_scenarios:
-- winter-wheat
-- grain-corn
-- grain-corn_winter-wheat_winter-rape
-- grain-corn_winter-wheat_winter-rape_yellow-mustard
-- summer-barley
-- potato
-- grain-corn_yellow-mustard
-- winter-wheat_winter-rape
-- winter-wheat_silage-corn
-- winter-wheat_silage-corn_yellow-mustard
-- winter-wheat_soybean_winter-rape
-- silage-corn
-- silage-corn_yellow-mustard
-- summer-barley
-- summer-barley_yellow-mustard
-- clover
-- winter-barley
-- winter-rape
-- faba-bean
-- potato-early
+# - winter-wheat
+# - grain-corn
+# - grain-corn_winter-wheat_winter-rape
+# - grain-corn_winter-wheat_winter-rape_yellow-mustard
+# - summer-barley
+# - potato
+# - grain-corn_yellow-mustard
+# - winter-wheat_winter-rape
+# - winter-wheat_silage-corn
+# - winter-wheat_silage-corn_yellow-mustard
+# - winter-wheat_soybean_winter-rape
+# - silage-corn
+# - silage-corn_yellow-mustard
+# - summer-barley
+# - summer-barley_yellow-mustard
+# - clover
+# - winter-barley
+# - winter-rape
+# - faba-bean
+# - potato-early
 - sugar-beet
 - sugar-beet_yellow-mustard
 - vegetables
