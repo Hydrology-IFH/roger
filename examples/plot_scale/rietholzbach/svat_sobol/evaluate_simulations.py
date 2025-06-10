@@ -156,8 +156,8 @@ def main(tmp_dir):
                         if var_sim in ["dS", "dS_s"]:
                             df_eval.loc["2000-01":"2000-06", :] = onp.nan
                             df_eval = df_eval.dropna()
-                            obs_vals = df_eval.loc[:, "obs"].values
-                            sim_vals = df_eval.loc[:, "sim"].values
+                            obs_vals = df_eval.loc[:, "obs"].values.astype(onp.float32)
+                            sim_vals = df_eval.loc[:, "sim"].values.astype(onp.float32)
                             key_kge = "KGE_" + var_sim + f"{sc1}"
                             df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
                             key_kge_alpha = "KGE_alpha_" + var_sim + f"{sc1}"
@@ -170,8 +170,8 @@ def main(tmp_dir):
                             # skip first 14 days for warmup
                             df_eval.loc[:"1997-01-14", :] = onp.nan
                             df_eval = df_eval.dropna()
-                            obs_vals = df_eval.loc[:, "obs"].values
-                            sim_vals = df_eval.loc[:, "sim"].values
+                            obs_vals = df_eval.loc[:, "obs"].values.astype(onp.float32)
+                            sim_vals = df_eval.loc[:, "sim"].values.astype(onp.float32)
                             key_kge = "KGE_" + var_sim + f"{sc1}"
                             df_params_metrics.loc[nrow, key_kge] = eval_utils.calc_kge(obs_vals, sim_vals)
                             key_kge_alpha = "KGE_alpha_" + var_sim + f"{sc1}"
