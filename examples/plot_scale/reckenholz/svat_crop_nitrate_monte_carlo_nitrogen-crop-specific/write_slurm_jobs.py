@@ -41,7 +41,6 @@ def main():
             lines.append('module load lib/hdf5/1.12-gnu-14.2-openmpi-4.1\n')
             lines.append('export OMP_NUM_THREADS=1\n')
             lines.append('export OMPI_MCA_btl="^uct,ofi"\n')
-            lines.append('export OMPI_MCA_pml="ucx"\n')
             lines.append('export OMPI_MCA_mtl="^ofi"\n')
             lines.append('eval "$(conda shell.bash hook)"\n')
             lines.append('conda activate roger-mpi\n')
