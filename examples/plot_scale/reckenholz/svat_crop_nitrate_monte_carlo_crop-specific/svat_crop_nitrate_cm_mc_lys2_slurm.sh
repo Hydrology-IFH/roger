@@ -12,6 +12,10 @@
 # load module dependencies
 module load devel/miniforge
 module load lib/hdf5/1.12-gnu-14.2-openmpi-4.1
+export OMP_NUM_THREADS=1
+export OMPI_MCA_btl="^uct,ofi"
+export OMPI_MCA_pml="ucx"
+export OMPI_MCA_mtl="^ofi"
 eval "$(conda shell.bash hook)"
 conda activate roger-mpi
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/reckenholz/svat_crop_nitrate_monte_carlo_crop-specific
