@@ -30,7 +30,7 @@ def main():
             lines.append(f'#SBATCH --job-name={script_name}\n')
             lines.append('#SBATCH --nodes=1\n')
             lines.append('#SBATCH --ntasks=25\n')
-            lines.append('#SBATCH --mem=100000mb\n')
+            lines.append('#SBATCH --mem=200000mb\n')
             lines.append('#SBATCH --mail-type=FAIL\n')
             lines.append('#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n')
             lines.append('#SBATCH --export=ALL\n')

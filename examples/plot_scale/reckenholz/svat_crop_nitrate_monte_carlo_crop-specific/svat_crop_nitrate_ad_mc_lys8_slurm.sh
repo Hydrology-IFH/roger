@@ -3,7 +3,7 @@
 #SBATCH --job-name=svat_crop_nitrate_ad_mc_lys8
 #SBATCH --nodes=1
 #SBATCH --ntasks=25
-#SBATCH --mem=100000mb
+#SBATCH --mem=200000mb
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --export=ALL
