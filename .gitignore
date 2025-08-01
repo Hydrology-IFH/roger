@@ -12,6 +12,15 @@ conda-environment-doc.yml
 !doc/_data/*.nc
 *.h5
 
+# GIS files
+*.gpkg
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.qmd
+
 # documentation and profiler output
 #*.html
 
