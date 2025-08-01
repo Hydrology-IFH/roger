@@ -86,6 +86,7 @@ def read_meteo(path_to_dir: Path):
     )
     df_ta.index = pd.to_datetime(dict(year=df_ta.YYYY, month=df_ta.MM, day=df_ta.DD, hour=df_ta.hh, minute=df_ta.mm))
     df_ta = df_ta.loc[:, "TA":]
+    df_ta = df_ta.interpolate(method='linear', limit_direction='forward', axis=0)
     df_ta.index = df_ta.index.rename("Index")
 
     # reset index of precipitation time series
