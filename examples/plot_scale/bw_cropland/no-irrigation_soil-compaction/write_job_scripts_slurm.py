@@ -38,6 +38,7 @@ def main():
             lines.append(f"#SBATCH --error={script_name}_err.out\n")
             lines.append("#SBATCH --export=ALL\n")
             lines.append(" \n")
+            lines.append('module load devel/miniforge\n')
             lines.append('eval "$(conda shell.bash hook)"\n')
             lines.append("conda activate roger\n")
             lines.append(f"cd {base_path_bwhpc}/{dir_name}\n")

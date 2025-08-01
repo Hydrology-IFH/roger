@@ -11,6 +11,7 @@
 #SBATCH --error=svat_crop_lahr_winter-wheat_soybean_winter-rape_no-irrigation_soil-compaction_err.out
 #SBATCH --export=ALL
  
+module load devel/miniforge
 eval "$(conda shell.bash hook)"
 conda activate roger
 cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/bw_cropland//no-irrigation_soil-compaction
