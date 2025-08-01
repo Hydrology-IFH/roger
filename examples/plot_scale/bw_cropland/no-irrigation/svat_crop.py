@@ -14,7 +14,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                "rheinau-memprechtshofen", "muellheim", "rheinstetten", 
                                                "weingarten", "wutoeschingen-ofteringen", "singen", "grosserlach-mannenweiler",
                                                "altheim", "ulm", "stoetten", "notzingen"]), 
-                                               default="lahr")
+                                               default="pfullendorf")
 @click.option("--crop-rotation-scenario", type=click.Choice(["grain-corn",
                                                              "grain-corn_yellow-mustard",
                                                              "silage-corn",

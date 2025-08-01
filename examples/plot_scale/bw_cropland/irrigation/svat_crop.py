@@ -14,7 +14,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                "rheinau-memprechtshofen", "muellheim", "rheinstetten", 
                                                "weingarten", "wutoeschingen-ofteringen", "singen", "grosserlach-mannenweiler",
                                                "altheim", "ulm", "stoetten", "notzingen"]), 
-                                               default="lahr")
+                                               default="elztal-rittersbach")
 @click.option("--irrigation-scenario", type=click.Choice(["20-ufc",
                                                           "35-ufc",
                                                           "50-ufc",
