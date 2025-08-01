@@ -28,7 +28,7 @@ def main():
                 output_path_ws = base_path_ws / "output" / dir_name / f"{irrigation_scenario}"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=4:00:00\n")
+                lines.append("#SBATCH --time=3:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")

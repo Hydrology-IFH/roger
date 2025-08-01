@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=6:00:00
+#SBATCH --time=3:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=2000
+#SBATCH --mem=1000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_crop_rheinau-memprechtshofen_summer-barley_yellow-mustard_no-irrigation_soil-compaction
