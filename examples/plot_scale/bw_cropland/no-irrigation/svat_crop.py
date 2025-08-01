@@ -255,8 +255,8 @@ def main(location, crop_rotation_scenario, tmp_dir):
             vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path.parent, "parameters.nc"))
             vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_nc("kf", self._base_path.parent, "parameters.nc"))
             vs.z_gw = update(
-                vs.z_gw, at[2:-2, 2:-2], self._read_var_from_nc("z_gw", self._base_path.parent, "parameters.nc")
-            )
+                    vs.z_gw, at[2:-2, 2:-2, :], self._read_var_from_nc("z_gw", self._base_path.parent, "parameters.nc")[:, :, npx.newaxis]
+                )
 
             vs.root_growth_scale = update(
                 vs.root_growth_scale,

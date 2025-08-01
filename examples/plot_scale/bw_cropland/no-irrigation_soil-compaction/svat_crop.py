@@ -14,7 +14,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                "rheinau-memprechtshofen", "muellheim", "rheinstetten", 
                                                "weingarten", "wutoeschingen-ofteringen", "singen", "grosserlach-mannenweiler",
                                                "altheim", "ulm", "stoetten", "notzingen"]), 
-                                               default="lahr")
+                                               default="wutoeschingen-ofteringen")
 @click.option("--crop-rotation-scenario", type=click.Choice(["grain-corn",
                                                              "grain-corn_yellow-mustard",
                                                              "silage-corn",
@@ -60,7 +60,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "winter-wheat",
                                                              "yellow-mustard",
                                                              "miscanthus",
-                                                             "bare-grass"]), default="summer-barley")
+                                                             "bare-grass"]), default="winter-wheat_winter-rape")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no-irrigation_soil-compaction")
 @roger_base_cli
 def main(location, crop_rotation_scenario, tmp_dir):
@@ -209,7 +209,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
                 "ks",
                 "ks_ss",
                 "kf",
-                "z_gw"
+                "z_gw",
                 "crop_type",
                 "z_root",
                 "z_root_crop",
@@ -275,7 +275,7 @@ def main(location, crop_rotation_scenario, tmp_dir):
             )
             vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_nc("kf", self._base_path.parent, "parameters.nc"))
             vs.z_gw = update(
-                vs.z_gw, at[2:-2, 2:-2], self._read_var_from_nc("z_gw", self._base_path.parent, "parameters.nc")
+                vs.z_gw, at[2:-2, 2:-2, :], self._read_var_from_nc("z_gw", self._base_path.parent, "parameters.nc")[:, :, npx.newaxis]
             )
 
             vs.root_growth_scale = update(

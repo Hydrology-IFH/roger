@@ -225,7 +225,7 @@ def main(location, irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 "ks",
                 "ks_ss",
                 "kf",
-                "z_gw"
+                "z_gw",
                 "crop_type",
                 "z_root",
                 "z_root_crop",
@@ -293,7 +293,7 @@ def main(location, irrigation_scenario, crop_rotation_scenario, tmp_dir):
             )
             vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_nc("kf", self._base_path.parent, "parameters.nc"))
             vs.z_gw = update(
-                vs.z_gw, at[2:-2, 2:-2], self._read_var_from_nc("z_gw", self._base_path.parent, "parameters.nc")
+                vs.z_gw, at[2:-2, 2:-2, :], self._read_var_from_nc("z_gw", self._base_path.parent, "parameters.nc")[:, :, npx.newaxis]
             )
 
             vs.root_growth_scale = update(
