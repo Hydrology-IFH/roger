@@ -24,7 +24,7 @@ def main():
     for location in locations:# --- jobs to calculate fluxes and states for each irrigation scenario -------------------------
         for irrigation_scenario in irrigation_scenarios:
             for crop_rotation_scenario in crop_rotation_scenarios:
-                script_name = f"svat_crop_{location}_{irrigation_scenario}_{crop_rotation_scenario}"
+                script_name = f"svat_crop_{location}_{crop_rotation_scenario}_{irrigation_scenario}-irrigation_soil-compaction"
                 output_path_ws = base_path_ws / "output" / dir_name / f"{irrigation_scenario}"
                 lines = []
                 lines.append("#!/bin/bash\n")
@@ -51,7 +51,7 @@ def main():
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
                 lines.append('mv "${TMPDIR}"/SVATCROP_*.nc %s\n' % (output_path_ws.as_posix()))
-                file_path = base_path / f"{location}_{irrigation_scenario}_{crop_rotation_scenario}.sh"
+                file_path = base_path / f"{script_name}.sh"
                 file = open(file_path, "w")
                 file.writelines(lines)
                 file.close()

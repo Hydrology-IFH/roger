@@ -159,9 +159,9 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
         def set_settings(self, state):
             settings = state.settings
             if soil_compaction_scenario == "no_compaction":
-                settings.identifier = f"SVATCROPNITRATE_{location}_{irrigation_scenario}_{crop_rotation_scenario}"
+                settings.identifier = f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{irrigation_scenario}-irrigation"
             else:
-                settings.identifier = f"SVATCROPNITRATE_{location}_{irrigation_scenario}_{crop_rotation_scenario}_soil-compaction"
+                settings.identifier = f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{irrigation_scenario}-irrigation_-soil-compaction"
             settings.sas_solver = "deterministic"
             settings.sas_solver_substeps = 8
 
