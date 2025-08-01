@@ -85,7 +85,7 @@ def main(location, irrigation_scenario, crop_rotation_scenario, tmp_dir):
         """A SVAT model including crop phenology/crop rotation."""
 
         _base_path = Path(__file__).parent
-        _input_dir = _base_path.parent / "input" / f"{location}"
+        _input_dir = _base_path.parent / "input" / location
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file

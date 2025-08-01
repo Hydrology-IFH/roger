@@ -43,6 +43,8 @@ def main():
     # load the parameters
     file = base_path / "parameters.csv"
     df_parameters = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
+    file = base_path / "output" / "areas.csv"
+    df_areas = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
     # normalise area_share
     df_parameters["area_share"] = df_parameters["area_share"] / df_parameters["area_share"].sum()
     file = base_path / "crop_water_stress.csv"

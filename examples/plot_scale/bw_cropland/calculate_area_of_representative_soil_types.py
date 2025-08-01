@@ -31,17 +31,6 @@ sns.plotting_context(
     },
 )
 
-_dict_locations = {
-    "freiburg": "freiburg",
-    "pfullendorf": "krauchenwies",
-    "lahr": "orschweier",
-    "bruchsal-heidelsheim": "kraichtal",
-    "nagold": "tailfingen",
-    "sachsenheim": "boennigheim",
-    "heidelberg": "ladenburg",
-    "bad-mergentheim": "boxberg",
-}
-
 _LABS_UNIT = {
     "z_soil": r"$z_{Boden}$ [mm]",
     "lmpv": r"$l_{mpv}$ [mm]",
@@ -140,7 +129,7 @@ if not file.exists():
             shp_ids = df_link_bk50_cluster_cropland.loc[cond, :].index.tolist()
             cond2 = gdf["SHP_ID"].isin(shp_ids)
             if cond2.any():
-                ll_locations.append(_dict_locations[location])
+                ll_locations.append(location)
                 ll_clust_ids.append(clust_id)
                 cond = (df_params["CLUST_ID"] == clust_id) & (df_params["CLUST_flag"] == 1)
                 ll_areas.append(gdf.loc[cond2, "area"].sum())
@@ -159,7 +148,7 @@ if not file.exists():
                     "theta_ac": ll_ac, "theta_ufc": ll_ufc, "theta_pwp": ll_pwp, "ks": ll_ks, "soil_fertility": ll_soil_fertility, "clay": ll_clay}, index=range(len(ll_locations)))
     df.loc[:, "area_share"] = 0.0
     for location in locations:
-        cond = (df["location"] == _dict_locations[location])
+        cond = (df["location"] == location)
         df_location = df.loc[cond, :]
         area = df_location["area"].sum()
         df.loc[cond, "area_share"] = df_location["area"] / area
