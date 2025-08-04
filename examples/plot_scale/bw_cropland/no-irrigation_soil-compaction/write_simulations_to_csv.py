@@ -8,7 +8,6 @@ import yaml
 import click
 
 _dict_locations = {
-    "freiburg": "freiburg",
     "pfullendorf": "krauchenwies",
     "lahr": "orschweier",
     "bruchsal-heidelsheim": "kraichtal",
@@ -16,6 +15,9 @@ _dict_locations = {
     "sachsenheim": "boennigheim",
     "heidelberg": "ladenburg",
     "mergentheim": "boxberg",
+    "grosserlach-mannenweiler": "kupferzell",
+    "wutoeschingen-ofteringen": "doeggingen", 
+    "freiburg": "freiburg",
     "rot-buch" : "rot-buch", 
     "elztal-rittersbach": "elztal-rittersbach",                                       
     "ellwangen-rindelbach": "ellwangen-rindelbach", 
@@ -25,9 +27,7 @@ _dict_locations = {
     "muellheim": "muellheim", 
     "rheinstetten": "rheinstetten", 
     "weingarten": "weingarten", 
-    "wutoeschingen-ofteringen": "doeggingen", 
     "singen": "singen", 
-    "grosserlach-mannenweiler": "kupferzell",
     "altheim": "altheim", 
     "ulm": "ulm", 
     "stoetten": "stoetten", 
