@@ -21,6 +21,7 @@ def main():
     irrigation_scenarios = config["irrigation_scenarios"]
     crop_rotation_scenarios = config["crop_rotation_scenarios"]
 
+    jobs = []
     for location in locations:# --- jobs to calculate fluxes and states for each irrigation scenario -------------------------
         for crop_rotation_scenario in crop_rotation_scenarios:
             for irrigation_scenario in irrigation_scenarios:
@@ -73,6 +74,7 @@ def main():
                 file.writelines(lines)
                 file.close()
                 subprocess.Popen(f"chmod +x {file_path}", shell=True)
+                jobs.append(f"{script_name}.sh")
 
                 script_name = f"svat_crop_nitrate_{location}_{crop_rotation_scenario}_{irrigation_scenario}-irrigation_soil-compaction"
                 input_path_ws = base_path_ws / "output" / "irrigation_soil-compaction" / f"{irrigation_scenario}"
@@ -123,6 +125,7 @@ def main():
                 file.writelines(lines)
                 file.close()
                 subprocess.Popen(f"chmod +x {file_path}", shell=True)
+                jobs.append(f"{script_name}.sh")
 
             script_name = f"svat_crop_nitrate_{location}_{crop_rotation_scenario}"
             input_path_ws = base_path_ws / "output" / "no-irrigation"
@@ -173,6 +176,7 @@ def main():
             file.writelines(lines)
             file.close()
             subprocess.Popen(f"chmod +x {file_path}", shell=True)
+            jobs.append(f"{script_name}.sh")
 
             script_name = f"svat_crop_nitrate_{location}_{crop_rotation_scenario}_soil-compaction"
             input_path_ws = base_path_ws / "output" / "no-irrigation_soil-compaction"
@@ -224,6 +228,15 @@ def main():
             file.writelines(lines)
             file.close()
             subprocess.Popen(f"chmod +x {file_path}", shell=True)
+            jobs.append(f"{script_name}.sh")
+
+    file_path = base_path / "submit_jobs.sh"
+    with open(file_path, "w") as job_file:
+        job_file.write("#!/bin/bash\n")
+        job_file.write("\n")
+        for job in jobs:
+            job_file.write(f"sbatch -p compute {job}\n")
+    subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     return
 

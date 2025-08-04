@@ -5,7 +5,7 @@ import geopandas as gpd
 
 base_path = Path(__file__).parent
 
-file = base_path / "input" / "lsv_locations.gpkg"
+file = base_path / "input" / "BK50_lsv_locations.gpkg"
 gdf = gpd.read_file(file)
 
 param_names = ["lsv_location", "z_soil", "dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "soil_fertility", "clay", "z_gw"]

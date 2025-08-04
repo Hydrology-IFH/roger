@@ -19,18 +19,18 @@ def main():
     # identifiers of the simulations
     locations = config["locations"]
     crop_rotation_scenarios = config["crop_rotation_scenarios"]
-
+    jobs = []
     for location in locations:# --- jobs to calculate fluxes and states for each irrigation scenario -------------------------
         for crop_rotation_scenario in crop_rotation_scenarios:
             script_name = f"svat_crop_{location}_{crop_rotation_scenario}_no-irrigation"
             output_path_ws = base_path_ws / "output" / dir_name
             lines = []
             lines.append("#!/bin/bash\n")
-            lines.append("#SBATCH --time=3:00:00\n")
+            lines.append("#SBATCH --time=8:00:00\n")
             lines.append("#SBATCH --nodes=1\n")
             lines.append("#SBATCH --ntasks=1\n")
             lines.append("#SBATCH --cpus-per-task=1\n")
-            lines.append("#SBATCH --mem=1000\n")
+            lines.append("#SBATCH --mem=2000\n")
             lines.append("#SBATCH --mail-type=FAIL\n")
             lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
             lines.append(f"#SBATCH --job-name={script_name}\n")
@@ -55,6 +55,15 @@ def main():
             file.writelines(lines)
             file.close()
             subprocess.Popen(f"chmod +x {file_path}", shell=True)
+            jobs.append(f"{script_name}.sh")
+
+    file_path = base_path / "submit_jobs.sh"
+    with open(file_path, "w") as job_file:
+        job_file.write("#!/bin/bash\n")
+        job_file.write("\n")
+        for job in jobs:
+            job_file.write(f"sbatch -p compute {job}\n")
+    subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     return
 
