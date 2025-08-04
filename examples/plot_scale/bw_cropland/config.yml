@@ -1,5 +1,4 @@
 locations: 
-- freiburg
 - lahr
 - bruchsal-heidelsheim
 - pfullendorf
@@ -8,22 +7,23 @@ locations:
 - heidelberg
 - mergentheim
 - nagold
-- rot-buch
-- elztal-rittersbach
-- ellwangen-rindelbach
-- klippeneck
-- hechingen
-- rheinau-memprechtshofen
-- muellheim
-- rheinstetten
-- weingarten
-- wutoeschingen-ofteringen
-- singen
 - grosserlach-mannenweiler
-- altheim
-- ulm
-- stoetten
-- notzingen
+- wutoeschingen-ofteringen
+# - freiburg
+# - rot-buch
+# - elztal-rittersbach
+# - ellwangen-rindelbach
+# - klippeneck
+# - hechingen
+# - rheinau-memprechtshofen
+# - muellheim
+# - rheinstetten
+# - weingarten
+# - singen
+# - altheim
+# - ulm
+# - stoetten
+# - notzingen
 
 irrigation_scenarios:
 # - 20-ufc
