@@ -274,8 +274,10 @@ def main(tmp_dir):
 
     df_per_crop_rotation = pd.concat(ll_dfs, axis=0)
     df_per_crop_rotation = df_per_crop_rotation.fillna(-9999)
+    df_per_crop_rotation["crop_rotation"] = df_per_crop_rotation.index
+    df_per_crop_rotation = df_per_crop_rotation.loc[:, ["subregion", "crop_rotation", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
     file = base_path_output / "data_nitrate_leaching" / "avg_nitrate_leaching_values_per_crop_rotation_and_subregion.csv"
-    df_per_crop_rotation.to_csv(file, sep=";", index=True, header=True)
+    df_per_crop_rotation.to_csv(file, sep=";", index=False, header=True)
 
     ll_dfs = []
     for subregion in subregions:
@@ -333,8 +335,10 @@ def main(tmp_dir):
     df_per_crop_rotation = pd.concat(ll_dfs, axis=0)
 
     df_per_crop_rotation = df_per_crop_rotation.fillna(-9999)
+    df_per_crop_rotation["crop_rotation"] = df_per_crop_rotation.index
+    df_per_crop_rotation = df_per_crop_rotation.loc[:, ["subregion", "crop_rotation", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
     file = base_path_output / "data_nitrate_leaching" / "max_nitrate_leaching_values_per_crop_rotation_and_subregion.csv"
-    df_per_crop_rotation.to_csv(file, sep=";", index=True, header=True)
+    df_per_crop_rotation.to_csv(file, sep=";", index=False, header=True)
 
     ll_dfs = []
     for subregion in subregions:
@@ -362,8 +366,10 @@ def main(tmp_dir):
 
     df_per_crop_rotation = pd.concat(ll_dfs, axis=0)
     df_per_crop_rotation = df_per_crop_rotation.fillna(-9999)
+    df_per_crop_rotation["crop_rotation"] = df_per_crop_rotation.index
+    df_per_crop_rotation = df_per_crop_rotation.loc[:, ["subregion", "crop_rotation", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
     file = base_path_output / "data_nitrate_leaching" / "avg_nitrate_leaching_values_per_crop_rotation_and_subregion_mustard.csv"
-    df_per_crop_rotation.to_csv(file, sep=";", index=True, header=True)
+    df_per_crop_rotation.to_csv(file, sep=";", index=False, header=True)
 
 
     ll_dfs = []
@@ -392,8 +398,10 @@ def main(tmp_dir):
 
     df_per_crop_rotation = pd.concat(ll_dfs, axis=0)
     df_per_crop_rotation = df_per_crop_rotation.fillna(-9999)
+    df_per_crop_rotation["crop_rotation"] = df_per_crop_rotation.index
+    df_per_crop_rotation = df_per_crop_rotation.loc[:, ["subregion", "crop_rotation", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
     file = base_path_output / "data_nitrate_leaching" / "min_nitrate_leaching_values_per_crop_rotation_and_subregion_mustard.csv"
-    df_per_crop_rotation.to_csv(file, sep=";", index=True, header=True)
+    df_per_crop_rotation.to_csv(file, sep=";", index=False, header=True)
 
     ll_dfs = []
     for subregion in subregions:
@@ -421,8 +429,10 @@ def main(tmp_dir):
 
     df_per_crop_rotation = pd.concat(ll_dfs, axis=0)
     df_per_crop_rotation = df_per_crop_rotation.fillna(-9999)
+    df_per_crop_rotation["crop_rotation"] = df_per_crop_rotation.index
+    df_per_crop_rotation = df_per_crop_rotation.loc[:, ["subregion", "crop_rotation", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
     file = base_path_output / "data_nitrate_leaching" / "max_nitrate_leaching_values_per_crop_rotation_and_subregion_mustard.csv"
-    df_per_crop_rotation.to_csv(file, sep=";", index=True, header=True)
+    df_per_crop_rotation.to_csv(file, sep=";", index=False, header=True)
 
 if __name__ == "__main__":
     main()
