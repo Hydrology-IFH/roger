@@ -143,7 +143,7 @@ if not file.exists():
                 ll_soil_fertility.append(df_params.loc[cond, "soil_fertility"].values[0])
                 ll_clay.append(df_params.loc[cond, "clay"].values[0])
 
-    df = pd.DataFrame({"location": ll_locations, "clust_id": ll_clust_ids,
+    df = pd.DataFrame({"location": ll_locations, "CLUST_ID": ll_clust_ids,
                     "area": ll_areas, "z_soil": ll_z_soil, "dmpv": ll_dmpv, "lmpv": ll_lmpv, 
                     "theta_ac": ll_ac, "theta_ufc": ll_ufc, "theta_pwp": ll_pwp, "ks": ll_ks, "soil_fertility": ll_soil_fertility, "clay": ll_clay}, index=range(len(ll_locations)))
     df.loc[:, "area_share"] = 0.0
@@ -156,21 +156,21 @@ if not file.exists():
     df.to_csv(file, sep=";", index=False)
 
 df = pd.read_csv(base_path / "output" / "areas.csv", sep=";")
-df["clust_id"] = [int(x.split("-")[-1]) for x in df["clust_id"].values]
+df["CLUST_ID"] = [int(x.split("-")[-1]) for x in df["CLUST_ID"].values]
 
 df_soil_types = df.iloc[:, 2:]
-df_soil_types["clust_id"] = df.iloc[:, 1]
-df_soil_types.index = df_soil_types["clust_id"]
+df_soil_types["CLUST_ID"] = df.iloc[:, 1]
+df_soil_types.index = df_soil_types["CLUST_ID"]
 df_soil_types = df_soil_types.sort_index(inplace=False)
-df_soil_types["area"] = df.groupby(["clust_id"]).sum()["area"]
+df_soil_types["area"] = df.groupby(["CLUST_ID"]).sum()["area"]
 df_soil_types["area_share"] = (df_soil_types["area"]/df_soil_types["area"].sum()) * 100
 
 
 columns = ['location', 'clust_id', 'z_soil', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks',
        'soil_fertility', 'clay', 'area_share']
-df_region = df.loc[:, columns].groupby(["location", "clust_id"]).mean()
+df_region = df.loc[:, columns].groupby(["location", "CLUST_ID"]).mean()
 columns = ['location', 'clust_id', 'area_share']
-df_region.loc[:, "area_share"] = df.loc[:, columns].groupby(["location", "clust_id"]).sum()
+df_region.loc[:, "area_share"] = df.loc[:, columns].groupby(["location", "CLUST_ID"]).sum()
 df_region.loc[:, "area_share"] = (df_region.loc[:, "area_share"].values / 3) * 100
 df_region["location1"] = df_region.index.get_level_values(0)
 
@@ -228,7 +228,7 @@ for i, param in enumerate(ll_params):
     if i == 0 or i == 2:
         axes.set_axis_off()
     else:
-        g = sns.barplot(data=df_soil_types, x="clust_id", y=param, hue="clust_id", ax=axes, errorbar=None, palette="Oranges")
+        g = sns.barplot(data=df_soil_types, x="CLUST_ID", y=param, hue="CLUST_ID", ax=axes, errorbar=None, palette="Oranges")
         axes.set_ylabel(_LABS_UNIT[param])
         g.legend().set_visible(False)
         axes.tick_params(axis='x', labelrotation=90)

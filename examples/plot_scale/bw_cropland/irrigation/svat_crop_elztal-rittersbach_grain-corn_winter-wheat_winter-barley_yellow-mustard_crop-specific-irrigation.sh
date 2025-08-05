@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=8:00:00
+#SBATCH --time=4:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=2000
+#SBATCH --mem=1000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=svat_crop_elztal-rittersbach_grain-corn_winter-wheat_winter-barley_yellow-mustard_crop-specific-irrigation

@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=3:00:00
+#SBATCH --time=4:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
@@ -14,10 +14,10 @@
 module load devel/miniforge
 eval "$(conda shell.bash hook)"
 conda activate roger
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/bw_cropland//no-irrigation_soil-compaction
+cd /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland//no-irrigation_soil-compaction
  
 python svat_crop.py -b numpy -d cpu --location weingarten --crop-rotation-scenario clover -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /pfs/10/work/fr_rs1092-workspace/bw_cropland/output/no-irrigation_soil-compaction"
-mkdir -p /pfs/10/work/fr_rs1092-workspace/bw_cropland/output/no-irrigation_soil-compaction
-mv "${TMPDIR}"/SVATCROP_*.nc /pfs/10/work/fr_rs1092-workspace/bw_cropland/output/no-irrigation_soil-compaction
+echo "Move output to /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/output/no-irrigation_soil-compaction"
+mkdir -p /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/output/no-irrigation_soil-compaction
+mv "${TMPDIR}"/SVATCROP_*.nc /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/output/no-irrigation_soil-compaction

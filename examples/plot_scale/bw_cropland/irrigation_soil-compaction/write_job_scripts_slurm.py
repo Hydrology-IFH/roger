@@ -9,8 +9,8 @@ import click
 def main():
     base_path = Path(__file__).parent
     dir_name = os.path.basename(str(Path(__file__).parent))
-    base_path_bwhpc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/bw_cropland/"
-    base_path_ws = Path("/pfs/10/work/fr_rs1092-workspace/bw_cropland")
+    base_path_bwhpc = "/pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/"
+    base_path_ws = Path("/pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland")
 
     # load the configuration file
     with open(base_path.parent / "config.yml", "r") as file:
@@ -29,11 +29,11 @@ def main():
                 output_path_ws = base_path_ws / "output" / dir_name / f"{irrigation_scenario}"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=12:00:00\n")
+                lines.append("#SBATCH --time=4:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
-                lines.append("#SBATCH --mem=2000\n")
+                lines.append("#SBATCH --mem=1000\n")
                 lines.append("#SBATCH --mail-type=FAIL\n")
                 lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                 lines.append(f"#SBATCH --job-name={script_name}\n")
