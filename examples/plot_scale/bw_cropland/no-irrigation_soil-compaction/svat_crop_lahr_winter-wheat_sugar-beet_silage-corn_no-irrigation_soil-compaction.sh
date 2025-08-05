@@ -14,10 +14,10 @@
 module load devel/miniforge
 eval "$(conda shell.bash hook)"
 conda activate roger
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/bw_cropland//no-irrigation_soil-compaction
+cd /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland//no-irrigation_soil-compaction
  
 python svat_crop.py -b numpy -d cpu --location lahr --crop-rotation-scenario winter-wheat_sugar-beet_silage-corn -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /pfs/10/work/fr_rs1092-workspace/bw_cropland/output/no-irrigation_soil-compaction"
-mkdir -p /pfs/10/work/fr_rs1092-workspace/bw_cropland/output/no-irrigation_soil-compaction
-mv "${TMPDIR}"/SVATCROP_*.nc /pfs/10/work/fr_rs1092-workspace/bw_cropland/output/no-irrigation_soil-compaction
+echo "Move output to /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/output/no-irrigation_soil-compaction"
+mkdir -p /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/output/no-irrigation_soil-compaction
+mv "${TMPDIR}"/SVATCROP_*.nc /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/output/no-irrigation_soil-compaction
