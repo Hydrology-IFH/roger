@@ -29,11 +29,11 @@ def main():
                 output_path_ws = base_path_ws / "output" / dir_name / f"{irrigation_scenario}"
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=12:00:00\n")
+                lines.append("#SBATCH --time=4:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")
-                lines.append("#SBATCH --mem=2000\n")
+                lines.append("#SBATCH --mem=1000\n")
                 lines.append("#SBATCH --mail-type=FAIL\n")
                 lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                 lines.append(f"#SBATCH --job-name={script_name}\n")
