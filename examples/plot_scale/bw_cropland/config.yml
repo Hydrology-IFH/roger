@@ -10,19 +10,19 @@ locations:
 - wutoeschingen-ofteringen
 - ulm
 - freiburg
-- rot-buch
-- elztal-rittersbach
-- ellwangen-rindelbach
-- klippeneck
-- hechingen
-- rheinau-memprechtshofen
-- muellheim
-- rheinstetten
-- weingarten
-- singen
-- altheim
-- stoetten
-- notzingen
+# - rot-buch
+# - elztal-rittersbach
+# - ellwangen-rindelbach
+# - klippeneck
+# - hechingen
+# - rheinau-memprechtshofen
+# - muellheim
+# - rheinstetten
+# - weingarten
+# - singen
+# - altheim
+# - stoetten
+# - notzingen
 
 irrigation_scenarios:
 # - 20-ufc
