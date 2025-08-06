@@ -62,7 +62,7 @@ def main():
             elif irrigation_demand_scenario == "50-ufc":
                 c_irr = 0.50
             if not os.path.exists(str(base_path / "output" / dir_name / irrigation_demand_scenario / _location)):
-                os.makedirs(base_path / "output" / dir_name / irrigation_demand_scenario)
+                os.makedirs(base_path / "output" / dir_name / irrigation_demand_scenario / _location)
             for crop_rotation_scenario in crop_rotation_scenarios:
                 roger_file = (
                     base_path

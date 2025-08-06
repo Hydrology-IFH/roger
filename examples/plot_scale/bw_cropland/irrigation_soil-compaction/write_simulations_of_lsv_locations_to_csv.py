@@ -60,7 +60,7 @@ def main():
                 c_irr = 0.30
             elif irrigation_scenario == "50-ufc":
                 c_irr = 0.50
-            if os.path.exists(str(base_path / "output" / dir_name / irrigation_scenario / _location)):
+            if os.path.exists(str(base_path / "output" / dir_name / irrigation_scenario)):
                 for crop_rotation_scenario in crop_rotation_scenarios:
                     roger_file = (
                         base_path
@@ -80,7 +80,7 @@ def main():
                             only_use_cftime_datetimes=False,
                         )
                         ds = ds.assign_coords(Time=("Time", date))
-                        dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / _location / crop_rotation_scenario
+                        dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / crop_rotation_scenario / _location
                         if not os.path.exists(dir_csv_files):
                             os.makedirs(dir_csv_files)
                         for x, soil_type in enumerate(soil_types):
