@@ -17,4 +17,4 @@ conda activate roger
 cd /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland//no-irrigation
  
 python write_simulations_of_lsv-stations_to_csv.py
-python write_simulations_to_csv.py
+# python write_simulations_to_csv.py
