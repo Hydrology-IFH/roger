@@ -7,33 +7,6 @@ import pandas as pd
 import yaml
 import click
 
-_dict_locations = {
-    "freiburg": "freiburg",
-    "pfullendorf": "krauchenwies",
-    "lahr": "orschweier",
-    "bruchsal-heidelsheim": "kraichtal",
-    "nagold": "tailfingen",
-    "sachsenheim": "boennigheim",
-    "heidelberg": "ladenburg",
-    "mergentheim": "boxberg",
-    "rot-buch" : "rot-buch", 
-    "elztal-rittersbach": "elztal-rittersbach",                                       
-    "ellwangen-rindelbach": "ellwangen-rindelbach", 
-    "klippeneck": "klippeneck", 
-    "hechingen": "hechingen",
-    "rheinau-memprechtshofen": "rheinau-memprechtshofen", 
-    "muellheim": "muellheim", 
-    "rheinstetten": "rheinstetten", 
-    "weingarten": "weingarten", 
-    "wutoeschingen-ofteringen": "wutoeschingen-ofteringen", 
-    "singen": "singen", 
-    "grosserlach-mannenweiler": "grosserlach-mannenweiler",
-    "altheim": "altheim", 
-    "ulm": "ulm", 
-    "stoetten": "stoetten", 
-    "notzingen": "notzingen"
-}
-
 
 @click.command("main")
 def main():
@@ -43,8 +16,11 @@ def main():
     # load the parameters
     file = base_path / "parameters.csv"
     df_parameters = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
-    # normalise area_share
-    df_parameters["area_share"] = df_parameters["area_share"] / df_parameters["area_share"].sum()
+    df_parameters.index = df_parameters.loc[:, "CLUST_ID"]
+    df_parameters = df_parameters.drop(columns=["CLUST_ID"]).iloc[:20, :]
+    file = base_path / "output" / "areas.csv"
+    df_areas = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
+    
     file = base_path / "crop_water_stress.csv"
     df_crop_water_stress = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
     df_crop_water_stress["crop_type"] = df_crop_water_stress.index
@@ -68,7 +44,12 @@ def main():
     crop_rotation_scenarios = config["crop_rotation_scenarios"]
     soil_types = df_parameters.index.to_list()
     for location in locations:
-        _location = _dict_locations[location]
+        cond_location = (df_areas["location"] == location)
+        df_areas_location = df_areas[cond_location]
+        df_areas_location.index = df_areas_location.loc[:, "CLUST_ID"]
+        df_areas_location["area"] * df_areas_location["area"].sum()
+        df_areas_location["area_share"] = df_areas_location["area"] / df_areas_location["area"].sum()
+        df_parameters = df_parameters.join(df_areas_location[["area_share"]], how="left")
         for irrigation_scenario in irrigation_scenarios:
             if irrigation_scenario == "20-ufc":
                 c_irr = 0.2
@@ -76,14 +57,14 @@ def main():
                 c_irr = 0.30
             elif irrigation_scenario == "50-ufc":
                 c_irr = 0.50
-            if os.path.exists(str(base_path / "output" / dir_name / irrigation_scenario / _location)):
+            if os.path.exists(str(base_path / "output" / dir_name / irrigation_scenario / location)):
                 for crop_rotation_scenario in crop_rotation_scenarios:
                     roger_file = (
                         base_path
                         / "output" 
                         / dir_name 
                         / irrigation_scenario
-                        / f"SVATCROP_{_location}_{crop_rotation_scenario}.nc"
+                        / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                     )
                     if os.path.exists(roger_file):
                         ds = xr.open_dataset(roger_file, engine="h5netcdf")
@@ -96,12 +77,12 @@ def main():
                             only_use_cftime_datetimes=False,
                         )
                         ds = ds.assign_coords(Time=("Time", date))
-                        dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / _location / crop_rotation_scenario
+                        dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / location / crop_rotation_scenario
                         if not os.path.exists(dir_csv_files):
                             os.makedirs(dir_csv_files)
                         ll_area_weighted = []
                         for x, soil_type in enumerate(soil_types):
-                            dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / _location / crop_rotation_scenario / soil_type
+                            dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / location / crop_rotation_scenario / soil_type
                             if not os.path.exists(dir_csv_files):
                                 os.makedirs(dir_csv_files)
                             # write simulation to csv
@@ -175,7 +156,7 @@ def main():
                     df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
                                             ["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]]
 
-                    dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / _location / crop_rotation_scenario / "area_weighted"
+                    dir_csv_files = base_path / "output" / dir_name / irrigation_scenario / location / crop_rotation_scenario / "area_weighted"
                     if not os.path.exists(dir_csv_files):
                         os.makedirs(dir_csv_files)
                     df_simulation.to_csv(

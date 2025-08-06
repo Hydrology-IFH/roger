@@ -9,8 +9,8 @@ import click
 def main():
     base_path = Path(__file__).parent
     dir_name = os.path.basename(str(Path(__file__).parent))
-    base_path_bwhpc = "/home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/bw_cropland/"
-    base_path_ws = Path("/pfs/10/work/fr_rs1092-workspace/bw_cropland")
+    base_path_bwhpc = "/pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/"
+    base_path_ws = Path("/pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland")
 
     # load the configuration file
     with open(base_path.parent / "config.yml", "r") as file:
