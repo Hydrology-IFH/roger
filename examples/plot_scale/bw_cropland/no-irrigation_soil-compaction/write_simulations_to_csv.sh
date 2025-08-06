@@ -16,5 +16,5 @@ eval "$(conda shell.bash hook)"
 conda activate roger
 cd /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/no-irrigation_soil-compaction
  
-python write_simulations_of_lsv_stations_to_csv.py
+python write_simulations_of_lsv_locations_to_csv.py
 # python write_simulations_to_csv.py
