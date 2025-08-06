@@ -69,7 +69,7 @@ def main():
                         / "output" 
                         / dir_name 
                         / irrigation_scenario
-                        / f"SVATCROP_{_location}_{crop_rotation_scenario}.nc"
+                        / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                     )
                     if os.path.exists(roger_file):
                         ds = xr.open_dataset(roger_file, engine="h5netcdf")
