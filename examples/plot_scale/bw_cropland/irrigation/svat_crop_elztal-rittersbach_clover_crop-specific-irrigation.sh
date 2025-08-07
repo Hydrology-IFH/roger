@@ -14,10 +14,10 @@
 module load devel/miniforge
 eval "$(conda shell.bash hook)"
 conda activate roger
-cd /home/fr/fr_fr/fr_rs1092/roger/examples/plot_scale/bw_cropland//irrigation
+cd /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland//irrigation
  
 python svat_crop.py -b numpy -d cpu --location elztal-rittersbach --irrigation-scenario crop-specific --crop-rotation-scenario clover -td "${TMPDIR}"
 # Move output from local SSD to global workspace
-echo "Move output to /pfs/10/work/fr_rs1092-workspace/bw_cropland/output/irrigation/crop-specific"
-mkdir -p /pfs/10/work/fr_rs1092-workspace/bw_cropland/output/irrigation/crop-specific
-mv "${TMPDIR}"/SVATCROP_*.nc /pfs/10/work/fr_rs1092-workspace/bw_cropland/output/irrigation/crop-specific
+echo "Move output to /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/output/irrigation/crop-specific"
+mkdir -p /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/output/irrigation/crop-specific
+mv "${TMPDIR}"/SVATCROP_*.nc /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/output/irrigation/crop-specific
