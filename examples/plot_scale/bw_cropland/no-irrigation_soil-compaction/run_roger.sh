@@ -25,8 +25,6 @@ python svat_crop.py -b numpy -d cpu --crop-rotation-scenario vegetables
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario strawberry
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario winter-wheat_clover
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario summer-wheat_winter-wheat
-python svat_crop.py -b numpy -d cpu --crop-rotation-scenario summer-wheat_clover_winter-wheat
-python svat_crop.py -b numpy -d cpu --crop-rotation-scenario winter-wheat_clover_silage-corn
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario winter-wheat_sugar-beet_silage-corn
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario summer-wheat_winter-wheat_silage-corn
 python svat_crop.py -b numpy -d cpu --crop-rotation-scenario summer-wheat_winter-wheat_winter-rape
