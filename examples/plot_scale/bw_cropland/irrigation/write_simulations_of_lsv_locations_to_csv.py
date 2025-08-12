@@ -21,7 +21,6 @@ _dict_locations = {
     }
 
 
-
 @click.command("main")
 def main():
     base_path = Path(__file__).parent.parent
