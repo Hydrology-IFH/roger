@@ -96,7 +96,15 @@ crop_rotation_scenarios = ["winter-wheat_clover",
                            "grain-corn_winter-wheat_winter-barley",
                            "grain-corn_winter-wheat_clover",
                            "miscanthus",
-                           "bare-grass"]
+                           "bare-grass",
+                           "winter-wheat_silage-corn_yellow-mustard",
+                           "summer-wheat_winter-wheat_yellow-mustard",
+                           "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
+                           "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
+                           "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
+                           "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
+                           "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
+                           "grain-corn_winter-wheat_winter-barley_yellow-mustard"]
 
 crop_rotation_scenarios_without_mustard = ["winter-wheat_silage-corn",
                                            "summer-wheat_winter-wheat",
@@ -248,6 +256,100 @@ def main(tmp_dir):
                   "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
                   "ehingen-kirchen", "merklingen", "hayingen",
                   "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
+    
+    ll_dfs = []
+    for subregion in subregions:
+        df_per_crop_rotation = pd.DataFrame(index=crop_rotation_scenarios, columns=["subregion", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"])
+        df_per_crop_rotation.index.name = "crop_rotation"
+        cond = (df_areas["location"] == subregion)
+        df_areas_subregion = df_areas.loc[cond, :]
+        df_areas_subregion.index = df_areas_subregion["clust_id"]
+        df_areas_subregion = df_areas_subregion.sort_index(ascending=True)
+        df_areas_subregion["area_share"] = df_areas_subregion["area"] / df_areas_subregion["area"].sum()
+        for key in crop_rotation_scenarios:
+            df1 = df.copy()
+            cond = (df1["FFID"] == _dict_ffid[key]) & (df1["stationsna"] == subregion)
+            df1 = df1.loc[cond, :]
+            df2 = df1.loc[:, ["SID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]].groupby(["SID"]).mean()
+            df2 = df2.sort_index(ascending=True)
+
+            df_per_crop_rotation.loc[key, "subregion"] = subregion
+
+            cond = df2.index.isin(df_areas_subregion.index)
+            for key1 in ["QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]:
+                df_per_crop_rotation.loc[key, key1] = onp.sum(df2[key1][cond] * df_areas_subregion["area_share"].values)
+
+        ll_dfs.append(df_per_crop_rotation)
+
+    df_per_crop_rotation = pd.concat(ll_dfs, axis=0)
+    df_per_crop_rotation = df_per_crop_rotation.fillna(-9999)
+    df_per_crop_rotation["crop_rotation"] = df_per_crop_rotation.index
+    df_per_crop_rotation = df_per_crop_rotation.loc[:, ["subregion", "crop_rotation", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
+    file = base_path_output / "data_nitrate_leaching" / "avg_nitrate_leaching_values_per_crop_rotation_and_subregion_alldata.csv"
+    df_per_crop_rotation.to_csv(file, sep=";", index=False, header=True)
+
+    ll_dfs = []
+    for subregion in subregions:
+        df_per_crop_rotation = pd.DataFrame(index=crop_rotation_scenarios, columns=["subregion", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"])
+        df_per_crop_rotation.index.name = "crop_rotation"
+        cond = (df_areas["location"] == subregion)
+        df_areas_subregion = df_areas.loc[cond, :]
+        df_areas_subregion.index = df_areas_subregion["clust_id"]
+        df_areas_subregion = df_areas_subregion.sort_index(ascending=True)
+        df_areas_subregion["area_share"] = df_areas_subregion["area"] / df_areas_subregion["area"].sum()
+        for key in crop_rotation_scenarios:
+            df1 = df.copy()
+            cond = (df1["FFID"] == _dict_ffid[key]) & (df1["stationsna"] == subregion)
+            df1 = df1.loc[cond, :]
+            df2 = df1.loc[:, ["SID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]].groupby(["SID"]).mean()
+            df2 = df2.sort_index(ascending=True)
+
+            df_per_crop_rotation.loc[key, "subregion"] = subregion
+
+            cond = df2.index.isin(df_areas_subregion.index)
+            for key1 in ["QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]:
+                df_per_crop_rotation.loc[key, key1] = onp.nanmin(df2[key1][cond])
+
+        ll_dfs.append(df_per_crop_rotation)
+
+    df_per_crop_rotation = pd.concat(ll_dfs, axis=0)
+    df_per_crop_rotation = df_per_crop_rotation.fillna(-9999)
+    file = base_path_output / "data_nitrate_leaching" / "min_nitrate_leaching_values_per_crop_rotation_and_subregio_alldata.csv"
+    df_per_crop_rotation.to_csv(file, sep=";", index=True, header=True)
+
+    ll_dfs = []
+    for subregion in subregions:
+        df_per_crop_rotation = pd.DataFrame(index=crop_rotation_scenarios, columns=["subregion", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"])
+        df_per_crop_rotation.index.name = "crop_rotation"
+        cond = (df_areas["location"] == subregion)
+        df_areas_subregion = df_areas.loc[cond, :]
+        df_areas_subregion.index = df_areas_subregion["clust_id"]
+        df_areas_subregion = df_areas_subregion.sort_index(ascending=True)
+        df_areas_subregion["area_share"] = df_areas_subregion["area"] / df_areas_subregion["area"].sum()
+        for key in crop_rotation_scenarios:
+            df1 = df.copy()
+            cond = (df1["FFID"] == _dict_ffid[key]) & (df1["stationsna"] == subregion)
+            df1 = df1.loc[cond, :]
+            df2 = df1.loc[:, ["SID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]].groupby(["SID"]).mean()
+            df2 = df2.sort_index(ascending=True)
+
+            df_per_crop_rotation.loc[key, "subregion"] = subregion
+
+            cond = df2.index.isin(df_areas_subregion.index)
+            for key1 in ["QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]:
+                df_per_crop_rotation.loc[key, key1] = onp.max(df2[key1][cond])
+
+        ll_dfs.append(df_per_crop_rotation)
+
+    df_per_crop_rotation = pd.concat(ll_dfs, axis=0)
+
+    df_per_crop_rotation = df_per_crop_rotation.fillna(-9999)
+    df_per_crop_rotation["crop_rotation"] = df_per_crop_rotation.index
+    df_per_crop_rotation = df_per_crop_rotation.loc[:, ["subregion", "crop_rotation", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]]
+    file = base_path_output / "data_nitrate_leaching" / "max_nitrate_leaching_values_per_crop_rotation_and_subregion_alldata.csv"
+    df_per_crop_rotation.to_csv(file, sep=";", index=False, header=True)
+
+
     ll_dfs = []
     for subregion in subregions:
         df_per_crop_rotation = pd.DataFrame(index=crop_rotation_scenarios_without_mustard, columns=["subregion", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"])
