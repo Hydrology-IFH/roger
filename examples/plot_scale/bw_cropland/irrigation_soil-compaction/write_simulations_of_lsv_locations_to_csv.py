@@ -137,6 +137,7 @@ def main():
                                 df_simulation.to_csv(
                                     dir_csv_files / "simulation.csv", sep=";"
                                 )
+                                print(str(dir_csv_files / "simulation.csv") + " written")
 
     return
 
