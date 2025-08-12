@@ -84,7 +84,7 @@ def main():
                         if not os.path.exists(dir_csv_files):
                             os.makedirs(dir_csv_files)
                         for x, soil_type in enumerate(soil_types):
-                            if soil_type.lower == _location:
+                            if soil_type.lower() == _location:
                                 # write simulation to csv
                                 df_simulation = pd.DataFrame(
                                     index=date, columns=["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]
