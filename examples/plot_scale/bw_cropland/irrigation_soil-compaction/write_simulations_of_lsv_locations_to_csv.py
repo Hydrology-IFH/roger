@@ -69,6 +69,7 @@ def main():
                         / irrigation_scenario
                         / f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
                     )
+                    print(roger_file)
                     if os.path.exists(roger_file):
                         ds = xr.open_dataset(roger_file, engine="h5netcdf")
                         # assign date
