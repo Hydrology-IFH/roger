@@ -278,3 +278,4 @@ examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed/parameters.cs
 examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed/parameters.nc
 examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed/input/forcing.nc
 examples/plot_scale/boadkh/svat_crop/test_matrix_acker_base.csv
+batch_*/

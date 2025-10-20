@@ -1,4 +1,4 @@
-# Crop irrigation management at district level of Freiburg, Germany
+# Crop irrigation demand and the impact of irrigation on groundwater recharge and nitrate leaching in Baden-Wuerttemberg, Germany
 
 This modelling experiment investigates the impact of crop irrigation on groundwater recharge and nitrate leaching. The impact is systematically investigated using a combination of soil types, irrigation demand rules and crop rotation scenarios.
 
