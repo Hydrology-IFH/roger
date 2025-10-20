@@ -109,7 +109,7 @@ class SVATSetup(RogerSetup):
         settings = state.settings
 
         # catchment mask (bool)
-        z_soil = self._read_var_from_csv("z_soil", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny)
+        z_soil = self._read_var_from_csv("z_soil", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny)
         vs.maskCatch = update(
             vs.maskCatch,
             at[2:-2, 2:-2],
@@ -124,67 +124,67 @@ class SVATSetup(RogerSetup):
         vs.lu_id = update(
             vs.lu_id,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("lu_id", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("lu_id", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.sealing = update(
             vs.sealing,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("sealing", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("sealing", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.z_soil = update(
             vs.z_soil,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("z_soil", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("z_soil", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.dmpv = update(
             vs.dmpv,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("dmpv", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("dmpv", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.lmpv = update(
             vs.lmpv,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("lmpv", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("lmpv", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.theta_ac = update(
             vs.theta_ac,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("theta_ac", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("theta_ac", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.theta_ufc = update(
             vs.theta_ufc,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("theta_ufc", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("theta_ufc", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.theta_pwp = update(
             vs.theta_pwp,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("theta_pwp", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("theta_pwp", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.ks = update(
             vs.ks,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("ks", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("ks", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.kf = update(
             vs.kf,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("kf", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("kf", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.ta_offset = update(
             vs.ta_offset,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("ta_offset", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("ta_offset", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.pet_weight = update(
             vs.pet_weight,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("pet_weight", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("pet_weight", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
         vs.prec_weight = update(
             vs.prec_weight,
             at[2:-2, 2:-2],
-            self._read_var_from_csv("prec_weight", self._base_path, "parameters.csv").reshape(settings.nx, settings.ny),
+            self._read_var_from_csv("prec_weight", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
 
     @roger_routine
