@@ -18,7 +18,7 @@ class SVATSetup(RogerSetup):
         self._base_path = base_path
         self._input_dir = base_path / "input"
         self._output_dir = base_path / "output"
-        self._file_config = base_path / "config.yml"
+        self._file_config = base_path / "config_roger.yml"
         self._config = None
         self.enable_groundwater_boundary=enable_groundwater_boundary
 

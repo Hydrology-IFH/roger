@@ -89,7 +89,7 @@ def main():
                         if soil_type.lower() == _location:
                             # write simulation to csv
                             df_simulation = pd.DataFrame(
-                                index=date, columns=["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]
+                                index=date, columns=["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrigation_demand", "root_ventilation", "ta", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]
                             )
                             cond_bare = (ds["lu_id"].isel(x=x, y=0).values == 599)
                             df_simulation.loc[:, "precip"] = ds["prec"].isel(x=x, y=0).values
@@ -107,6 +107,7 @@ def main():
                             df_simulation.loc[:, "transp"] = ds["transp"].isel(x=x, y=0).values
                             df_simulation.loc[:, "evap_soil"] = ds["evap_soil"].isel(x=x, y=0).values
                             df_simulation.loc[:, "perc"] = ds["q_ss"].isel(x=x, y=0).values
+                            df_simulation.loc[:, "ta"] = ds["ta"].isel(x=x, y=0).values
                             df_simulation.loc[:, "ta_max"] = ds["ta_max"].isel(x=x, y=0).values
                             # calculate heat stress of crops
                             df_simulation.loc[:, "heat_stress"] = 0
@@ -142,8 +143,8 @@ def main():
                                 irr_demand[cond_bare] = 0
                                 df_simulation.loc[:, "irrigation_demand"] = irr_demand
                             df_simulation.loc[:, "inf"] = ds["inf_mat_rz"].isel(x=x, y=0).values + ds["inf_mp_rz"].isel(x=x, y=0).values + ds["inf_sc_rz"].isel(x=x, y=0).values + ds["inf_ss"].isel(x=x, y=0).values
-                            df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm]", "[%]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", "", "[mm/day]"],
-                                                    ["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrigation_demand", "root_ventilation", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type", "inf"]]
+                            df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm]", "[%]", "[degC]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", "", "[mm/day]"],
+                                                    ["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrigation_demand", "root_ventilation", "ta", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type", "inf"]]
                             df_simulation = df_simulation.iloc[1:, :] # remove initial values
                             df_simulation.to_csv(
                                 dir_csv_files / "simulation.csv", sep=";"
