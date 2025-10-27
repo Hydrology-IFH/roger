@@ -90,7 +90,10 @@ def main(tmp_dir):
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
             settings.runlen = 3 * 365 * 24 * 60 * 60
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, 'forcing.nc'))
-            settings.nstations = 7
+            station_ids = onp.unique(self._read_var_from_nc_xr("STAT_ID", self._base_path, "parameters.nc"))
+            station_ids = station_ids[~onp.isnan(station_ids)]
+            station_ids = station_ids[station_ids != -9999]
+            settings.nstations = len(station_ids)
 
             # spatial discretization (in meters)
             settings.dx = self._config["dx"]

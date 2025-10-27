@@ -1,6 +1,7 @@
 from pathlib import Path
 import h5netcdf
 import pandas as pd
+import os
 
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput, runtime_settings
 from roger.variables import allocate
@@ -10,10 +11,10 @@ import roger.lookuptables as lut
 import numpy as onp
 
 
-class SVATCROPSetup(RogerSetup):
+class SVATDISTCROPSetup(RogerSetup):
     """A SVAT model including crop phenology/crop rotation."""
 
-    def __init__(self, base_path=Path(), enable_groundwater_boundary=False, enable_soil_compaction=False):
+    def __init__(self, base_path=Path(), enable_groundwater_boundary=False, enable_soil_compaction=False, enable_irrigation=False):
         super().__init__()
         self._base_path = base_path
         self._input_dir = base_path / "input"
@@ -22,6 +23,7 @@ class SVATCROPSetup(RogerSetup):
         self._config = None
         self.enable_groundwater_boundary=enable_groundwater_boundary
         self.enable_soil_compaction=enable_soil_compaction
+        self.enable_irrigation=enable_irrigation
 
     # custom helper functions
     def _read_var_from_nc(self, var, path_dir, file):
@@ -64,6 +66,10 @@ class SVATCROPSetup(RogerSetup):
         # derive total number of time steps from forcing
         settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
         settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
+        station_ids = onp.unique(self._read_var_from_csv("STAT_ID", self._base_path, "parameters_roger.csv"))
+        station_ids = station_ids[~onp.isnan(station_ids)]
+        station_ids = station_ids[station_ids != -9999]
+        settings.nstations = len(station_ids)
 
         # spatial discretization (in meters)
         settings.dx = self._config["dx"]
@@ -82,8 +88,13 @@ class SVATCROPSetup(RogerSetup):
         settings.enable_crop_rotation = True
         settings.enable_macropore_lower_boundary_condition = False
         settings.enable_adaptive_time_stepping = True
+        settings.enable_distributed_input = True
         settings.enable_soil_compaction = self.enable_soil_compaction
         settings.enable_groundwater_boundary = self.enable_groundwater_boundary
+        settings.enable_irrigation = self.enable_irrigation
+        if settings.enable_irrigation:
+            settings.enable_net_irrigation = True
+            settings.enable_crop_specific_irrigation_demand = True
 
         if settings.enable_crop_rotation:
             settings.ncrops = 3
@@ -197,6 +208,19 @@ class SVATCROPSetup(RogerSetup):
             at[2:-2, 2:-2],
             self._read_var_from_csv("prec_weight", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
+        # identifier of meteorological station
+        vs.station_id = update(
+            vs.station_id,
+            at[2:-2, 2:-2],
+            self._read_var_from_csv("STAT_ID", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
+        )
+
+        station_ids = [int(item) for item in os.listdir(self._base_path / "input" / "meteo_stations") if item != ".DS_Store"]
+        vs.station_ids = update(
+            vs.station_ids,
+            at[:],
+            station_ids,
+        )
         if settings.enable_soil_compaction:
             # represent soil compaction by reducing ks and air capacity of subsoil
             vs.ks_ss = update(vs.ks_ss, at[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * 0.2)  # reduce ks by an order of magnitude
@@ -250,60 +274,95 @@ class SVATCROPSetup(RogerSetup):
 
     @roger_routine(
         dist_safe=False,
-        local_variables=["PREC", 
-                         "TA", 
-                         "TA_MIN", 
-                         "TA_MAX", 
-                         "PET"],
+        local_variables=[
+            "PREC_DIST",
+            "TA_DIST",
+            "TA_MIN_DIST",
+            "TA_MAX_DIST",
+            "PET_DIST",
+            "YEAR",
+            "MONTH",
+            "DOY",
+        ],
     )
     def set_forcing_setup(self, state):
         vs = state.variables
 
-        vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[0, 0, :])
-        vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[0, 0, :])
-        vs.TA_MIN = update(
-            vs.TA_MIN, at[:], self._read_var_from_nc("TA_min", self._input_dir, "forcing.nc")[0, 0, :]
+        vs.PREC_DIST = update(vs.PREC_DIST, at[:, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
+        vs.TA_DIST = update(vs.TA_DIST, at[:, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
+        vs.TA_MIN_DIST = update(vs.TA_MIN_DIST, at[:, :], self._read_var_from_nc("TA_min", self._input_dir, 'forcing.nc'))
+        vs.TA_MAX_DIST = update(vs.TA_MAX_DIST, at[:, :], self._read_var_from_nc("TA_max", self._input_dir, 'forcing.nc'))
+        vs.PET_DIST = update(vs.PET_DIST, at[:, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
+        vs.YEAR = update(
+            vs.YEAR, at[:], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")
         )
-        vs.TA_MAX = update(
-            vs.TA_MAX, at[:], self._read_var_from_nc("TA_max", self._input_dir, "forcing.nc")[0, 0, :]
+        vs.MONTH = update(
+            vs.MONTH, at[:], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc")
         )
-        vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
+        vs.DOY = update(
+            vs.DOY, at[:], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")
+        )
 
     @roger_routine
     def set_forcing(self, state):
         vs = state.variables
         settings = state.settings
 
+        if settings.enable_irrigation:
+            vs.irrig = update(vs.irrig, at[2:-2, 2:-2], 0)
+
         condt = vs.time % (24 * 60 * 60) == 0
         if condt:
+            precip = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+            ta = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+            ta_min = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+            ta_max = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+            pet = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+            for i, ii in enumerate(vs.station_ids):
+                mask = (vs.station_id == ii)
+                _precip = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+                _precip = update(_precip, at[:, :, :], vs.PREC_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
+                precip = update(precip, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _precip, precip))
+                _ta = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+                _ta = update(_ta, at[:, :, :], vs.TA_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
+                ta = update(ta, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _ta, ta))
+                _ta_min = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+                _ta_min = update(_ta_min, at[:, :, :], vs.TA_MIN_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
+                ta_min = update(ta_min, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _ta_min, ta_min))
+                _ta_max = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+                _ta_max = update(_ta_max, at[:, :, :], vs.TA_MAX_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
+                ta_max = update(ta_max, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _ta_max, ta_max))
+                _pet = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+                _pet = update(_pet, at[:, :, :], vs.PET_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
+                pet = update(pet, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _pet, pet))
+
             vs.itt_day = 0
             vs.year = update(
-                vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")[vs.itt_forc]
+                vs.year, at[1], vs.YEAR[vs.itt_forc]
             )
             vs.month = update(
-                vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc")[vs.itt_forc]
+                vs.month, at[1], vs.MONTH[vs.itt_forc]
             )
             vs.doy = update(
-                vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc]
+                vs.doy, at[1], vs.DOY[vs.itt_forc]
             )
             vs.prec_day = update(
-                vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                vs.prec_day,
+                at[2:-2, 2:-2, :],
+                precip[2:-2, 2:-2, :]
+                * vs.prec_weight[2:-2, 2:-2, npx.newaxis],
             )
             vs.ta_day = update(
-                vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-            )
-            vs.ta_min = update(
-                vs.ta_min,
-                at[:, :],
-                npx.min(vs.TA_MIN[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24], axis=-1),
-            )
-            vs.ta_max = update(
-                vs.ta_max,
-                at[:, :],
-                npx.max(vs.TA_MAX[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24], axis=-1),
+                vs.ta_day,
+                at[2:-2, 2:-2, :],
+                ta[2:-2, 2:-2, :]
+                + vs.ta_offset[2:-2, 2:-2, npx.newaxis],
             )
             vs.pet_day = update(
-                vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+                vs.pet_day,
+                at[2:-2, 2:-2, :],
+                pet[2:-2, 2:-2, :]
+                * vs.pet_weight[2:-2, 2:-2, npx.newaxis],
             )
             vs.itt_forc = vs.itt_forc + 6 * 24
 

@@ -1,6 +1,7 @@
 from pathlib import Path
 import h5netcdf
 import pandas as pd
+import os
 
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput, runtime_settings
 from roger.variables import allocate
@@ -10,8 +11,8 @@ import roger.lookuptables as lut
 import numpy as onp
 
 
-class ONEDSetup(RogerSetup):
-    """A ONED model."""
+class SVATDISTSetup(RogerSetup):
+    """A SVAT model."""
 
     def __init__(self, base_path=Path(), enable_groundwater_boundary=False):
         super().__init__()
@@ -21,7 +22,6 @@ class ONEDSetup(RogerSetup):
         self._file_config = base_path / "config_roger.yml"
         self._config = None
         self.enable_groundwater_boundary=enable_groundwater_boundary
-
 
     # custom helper functions
     def _read_var_from_nc(self, var, path_dir, file):
@@ -64,6 +64,10 @@ class ONEDSetup(RogerSetup):
         # derive total number of time steps from forcing
         settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
         settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
+        station_ids = onp.unique(self._read_var_from_csv("STAT_ID", self._base_path, "parameters_roger.csv"))
+        station_ids = station_ids[~onp.isnan(station_ids)]
+        station_ids = station_ids[station_ids != -9999]
+        settings.nstations = len(station_ids)
 
         # spatial discretization (in meters)
         settings.dx = self._config["dx"]
@@ -76,9 +80,9 @@ class ONEDSetup(RogerSetup):
         settings.time_origin = self._get_time_origin(self._input_dir, "forcing.nc")
 
         # enable specific processes
-        settings.enable_groundwater_boundary = False
-        settings.enable_lateral_flow = True
+        settings.enable_macropore_lower_boundary_condition = False
         settings.enable_adaptive_time_stepping = True
+        settings.enable_distributed_input = True
         settings.enable_groundwater_boundary = self.enable_groundwater_boundary
 
     @roger_routine
@@ -138,17 +142,6 @@ class ONEDSetup(RogerSetup):
             at[2:-2, 2:-2],
             self._read_var_from_csv("z_soil", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
-        vs.slope = update(
-            vs.slope,
-            at[2:-2, 2:-2],
-            self._read_var_from_csv("slope", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
-        )
-        vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], vs.slope[2:-2, 2:-2] * 100)
-        vs.dmph = update(
-            vs.dmph,
-            at[2:-2, 2:-2],
-            self._read_var_from_csv("dmph", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
-        )
         vs.dmpv = update(
             vs.dmpv,
             at[2:-2, 2:-2],
@@ -199,6 +192,19 @@ class ONEDSetup(RogerSetup):
             at[2:-2, 2:-2],
             self._read_var_from_csv("prec_weight", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
+        # identifier of meteorological station
+        vs.station_id = update(
+            vs.station_id,
+            at[2:-2, 2:-2],
+            self._read_var_from_csv("STAT_ID", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
+        )
+
+        station_ids = [int(item) for item in os.listdir(self._base_path / "input" / "meteo_stations") if item != ".DS_Store"]
+        vs.station_ids = update(
+            vs.station_ids,
+            at[:],
+            station_ids,
+        )
 
     @roger_routine
     def set_parameters(self, state):
@@ -237,17 +243,29 @@ class ONEDSetup(RogerSetup):
     @roger_routine(
         dist_safe=False,
         local_variables=[
-            "PREC",
-            "TA",
-            "PET",
+            "PREC_DIST",
+            "TA_DIST",
+            "PET_DIST",
+            "YEAR",
+            "MONTH",
+            "DOY",
         ],
     )
     def set_forcing_setup(self, state):
         vs = state.variables
 
-        vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[0, 0, :])
-        vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[0, 0, :])
-        vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
+        vs.PREC_DIST = update(vs.PREC_DIST, at[:, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
+        vs.TA_DIST = update(vs.TA_DIST, at[:, :], self._read_var_from_nc("TA", self._input_dir, 'forcing.nc'))
+        vs.PET_DIST = update(vs.PET_DIST, at[:, :], self._read_var_from_nc("PET", self._input_dir, 'forcing.nc'))
+        vs.YEAR = update(
+            vs.YEAR, at[:], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")
+        )
+        vs.MONTH = update(
+            vs.MONTH, at[:], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc")
+        )
+        vs.DOY = update(
+            vs.DOY, at[:], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")
+        )
 
     @roger_routine
     def set_forcing(self, state):
@@ -255,29 +273,51 @@ class ONEDSetup(RogerSetup):
 
         condt = vs.time % (24 * 60 * 60) == 0
         if condt:
+            precip = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+            ta = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+            pet = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+            for i, ii in enumerate(vs.station_ids):
+                mask = (vs.station_id == ii)
+                _precip = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+                _precip = update(_precip, at[:, :, :], vs.PREC_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
+                precip = update(precip, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _precip, precip))
+                _ta = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+                _ta = update(_ta, at[:, :, :], vs.TA_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
+                ta = update(ta, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _ta, ta))
+                _pet = allocate(state.dimensions, ("x", "y", "timesteps_day"))
+                _pet = update(_pet, at[:, :, :], vs.PET_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
+                pet = update(pet, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _pet, pet))
+
             vs.itt_day = 0
-            vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")[vs.itt_forc])
-            vs.month = update(
-                vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc")[vs.itt_forc]
+            vs.year = update(
+                vs.year, at[1], vs.YEAR[vs.itt_forc]
             )
-            vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc])
+            vs.month = update(
+                vs.month, at[1], vs.MONTH[vs.itt_forc]
+            )
+            vs.doy = update(
+                vs.doy, at[1], vs.DOY[vs.itt_forc]
+            )
             vs.prec_day = update(
                 vs.prec_day,
-                at[:, :, :],
-                vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                * vs.prec_weight[:, :, npx.newaxis],
+                at[2:-2, 2:-2, :],
+                precip[2:-2, 2:-2, :]
+                * vs.prec_weight[2:-2, 2:-2, npx.newaxis],
             )
             vs.ta_day = update(
                 vs.ta_day,
-                at[:, :, :],
-                vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] + vs.ta_offset[:, :, npx.newaxis],
+                at[2:-2, 2:-2, :],
+                ta[2:-2, 2:-2, :]
+                + vs.ta_offset[2:-2, 2:-2, npx.newaxis],
             )
             vs.pet_day = update(
                 vs.pet_day,
-                at[:, :, :],
-                vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.pet_weight[:, :, npx.newaxis],
+                at[2:-2, 2:-2, :],
+                pet[2:-2, 2:-2, :]
+                * vs.pet_weight[2:-2, 2:-2, npx.newaxis],
             )
             vs.itt_forc = vs.itt_forc + 6 * 24
+
 
     @roger_routine
     def set_diagnostics(self, state):

@@ -13,7 +13,6 @@ import datetime
 from datetime import timedelta
 
 import scipy.interpolate
-import scipy.spatial
 
 
 def read_tracer_input(path_to_dir: Path, tracer: str):

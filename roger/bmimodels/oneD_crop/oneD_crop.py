@@ -4,7 +4,7 @@ import pandas as pd
 
 from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput, runtime_settings
 from roger.variables import allocate
-from roger.core.operators import numpy as npx, update, at
+from roger.core.operators import numpy as npx, update, update_add, at
 from roger.core.surface import calc_parameters_surface_kernel
 import roger.lookuptables as lut
 import numpy as onp
@@ -13,14 +13,15 @@ import numpy as onp
 class ONEDCROPSetup(RogerSetup):
     """A 1D-model including crop phenology/crop rotation."""
 
-    def __init__(self, base_path=Path(), enable_groundwater_boundary=False):
+    def __init__(self, base_path=Path(), enable_groundwater_boundary=False, enable_soil_compaction=False):
         super().__init__()
         self._base_path = base_path
         self._input_dir = base_path / "input"
         self._output_dir = base_path / "output"
-        self._file_config = base_path / "config.yml"
+        self._file_config = base_path / "config_roger.yml"
         self._config = None
         self.enable_groundwater_boundary=enable_groundwater_boundary
+        self.enable_soil_compaction=enable_soil_compaction
 
     # custom helper functions
     def _read_var_from_nc(self, var, path_dir, file):
@@ -83,6 +84,7 @@ class ONEDCROPSetup(RogerSetup):
         settings.enable_macropore_lower_boundary_condition = False
         settings.enable_adaptive_time_stepping = True
         settings.enable_groundwater_boundary = self.enable_groundwater_boundary
+        settings.enable_soil_compaction = self.enable_soil_compaction
 
         if settings.enable_crop_rotation:
             settings.ncrops = 3
@@ -207,6 +209,20 @@ class ONEDCROPSetup(RogerSetup):
             at[2:-2, 2:-2],
             self._read_var_from_csv("prec_weight", self._base_path, "parameters_roger.csv").reshape(settings.nx, settings.ny),
         )
+        if settings.enable_soil_compaction:
+            # represent soil compaction by reducing ks and air capacity of subsoil
+            vs.ks_ss = update(vs.ks_ss, at[2:-2, 2:-2], vs.ks[2:-2, 2:-2] * 0.2)  # reduce ks by an order of magnitude
+            # reduce air capacity of subsoil to represent soil compaction
+            # Mossadeghi-Björklund et al. (2019) Equation in Figure 3
+            vs.theta_ac_ss = update(
+                vs.theta_ac_ss, at[2:-2, 2:-2], (npx.log(vs.ks_ss[2:-2, 2:-2]/10)+0.61)/13.92
+            )
+            vs.theta_ac_ss = update(
+                vs.theta_ac_ss, at[2:-2, 2:-2], npx.where(vs.theta_ac_ss[2:-2, 2:-2] > vs.theta_ac[2:-2, 2:-2], vs.theta_ac[2:-2, 2:-2], vs.theta_ac_ss[2:-2, 2:-2])
+            )
+            vs.theta_ac_ss = update(
+                vs.theta_ac_ss, at[2:-2, 2:-2], npx.where(vs.theta_ac_ss[2:-2, 2:-2] <= 0, 0.02, vs.theta_ac_ss[2:-2, 2:-2])
+            )
 
     @roger_routine
     def set_parameters(self, state):
@@ -246,48 +262,103 @@ class ONEDCROPSetup(RogerSetup):
 
     @roger_routine(
         dist_safe=False,
-        local_variables=[
-            "PREC",
-            "TA",
-            "PET",
-        ],
+        local_variables=["PREC", 
+                         "TA", 
+                         "TA_MIN", 
+                         "TA_MAX", 
+                         "PET"],
     )
     def set_forcing_setup(self, state):
         vs = state.variables
 
         vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, "forcing.nc")[0, 0, :])
         vs.TA = update(vs.TA, at[:], self._read_var_from_nc("TA", self._input_dir, "forcing.nc")[0, 0, :])
+        vs.TA_MIN = update(
+            vs.TA_MIN, at[:], self._read_var_from_nc("TA_min", self._input_dir, "forcing.nc")[0, 0, :]
+        )
+        vs.TA_MAX = update(
+            vs.TA_MAX, at[:], self._read_var_from_nc("TA_max", self._input_dir, "forcing.nc")[0, 0, :]
+        )
         vs.PET = update(vs.PET, at[:], self._read_var_from_nc("PET", self._input_dir, "forcing.nc")[0, 0, :])
 
     @roger_routine
     def set_forcing(self, state):
         vs = state.variables
+        settings = state.settings
 
         condt = vs.time % (24 * 60 * 60) == 0
         if condt:
             vs.itt_day = 0
-            vs.year = update(vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")[vs.itt_forc])
+            vs.year = update(
+                vs.year, at[1], self._read_var_from_nc("YEAR", self._input_dir, "forcing.nc")[vs.itt_forc]
+            )
             vs.month = update(
                 vs.month, at[1], self._read_var_from_nc("MONTH", self._input_dir, "forcing.nc")[vs.itt_forc]
             )
-            vs.doy = update(vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc])
+            vs.doy = update(
+                vs.doy, at[1], self._read_var_from_nc("DOY", self._input_dir, "forcing.nc")[vs.itt_forc]
+            )
             vs.prec_day = update(
-                vs.prec_day,
-                at[:, :, :],
-                vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
-                * vs.prec_weight[:, :, npx.newaxis],
+                vs.prec_day, at[:, :, :], vs.PREC[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
             )
             vs.ta_day = update(
-                vs.ta_day,
-                at[:, :, :],
-                vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] + vs.ta_offset[:, :, npx.newaxis],
+                vs.ta_day, at[:, :, :], vs.TA[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
+            )
+            vs.ta_min = update(
+                vs.ta_min,
+                at[:, :],
+                npx.min(vs.TA_MIN[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24], axis=-1),
+            )
+            vs.ta_max = update(
+                vs.ta_max,
+                at[:, :],
+                npx.max(vs.TA_MAX[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24], axis=-1),
             )
             vs.pet_day = update(
-                vs.pet_day,
-                at[:, :, :],
-                vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24] * vs.pet_weight[:, :, npx.newaxis],
+                vs.pet_day, at[:, :, :], vs.PET[npx.newaxis, npx.newaxis, vs.itt_forc : vs.itt_forc + 6 * 24]
             )
             vs.itt_forc = vs.itt_forc + 6 * 24
+
+            if settings.enable_irrigation:
+                if vs.itt_forc < (settings.nitt_forc - 5 * 6 * 24):
+                    vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], 0
+                        )
+                    # irrigate if sum of rainfall for the next 5 days is less than 1 mm
+                    sum_rainfall_next5days = npx.sum(vs.PREC[vs.itt_forc:vs.itt_forc + 5 * 6 * 24])
+                    if sum_rainfall_next5days <= 20 and vs.month[1] in [4, 5] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
+                        mask_crops = npx.isin(vs.lu_id, npx.array([515, 550]))
+                        vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
+                        )
+                    elif sum_rainfall_next5days <= 20 and vs.month[1] in [4, 5, 6] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
+                        mask_crops = npx.isin(vs.lu_id, npx.array([541, 542, 543, 544, 546, 556, 557, 558, 559, 560, 579]))
+                        vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
+                        )
+                    elif sum_rainfall_next5days <= 20 and vs.month[1] in [4, 5, 6, 7] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
+                        mask_crops = npx.isin(vs.lu_id, npx.array([525, 539, 575, 510]))
+                        vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
+                        )
+                        mask_crops = npx.isin(vs.lu_id, npx.array([563]))
+                        vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 40, vs.irrig[2:-2, 2:-2])
+                        )
+                    elif sum_rainfall_next5days <= 20 and vs.month[1] in [4, 5, 6, 7, 8] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
+                        mask_crops = npx.isin(vs.lu_id, npx.array([513]))
+                        vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 20, vs.irrig[2:-2, 2:-2])
+                        )
+                        mask_crops = npx.isin(vs.lu_id, npx.array([567]))
+                        vs.irrig = update(
+                            vs.irrig, at[2:-2, 2:-2], npx.where((vs.irr_demand[2:-2, 2:-2] > 0) & mask_crops[2:-2, 2:-2], 30, vs.irrig[2:-2, 2:-2])
+                        )
+                    # irrigate for 4 hours from 06:00 to 10:00
+                    vs.prec_day = update_add(
+                        vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], vs.irrig[2:-2, 2:-2, npx.newaxis] / (6 * 4)
+                    )
+
 
     @roger_routine
     def set_diagnostics(self, state):
