@@ -1,15 +1,15 @@
 locations: 
-# - lahr
-# - bruchsal-heidelsheim
-# - pfullendorf
-# - nagold
-# - sachsenheim
-# - heidelberg
-# - mergentheim
-# - grosserlach-mannenweiler
-# - wutoeschingen-ofteringen
-# - ulm
-# - freiburg
+- lahr
+- bruchsal-heidelsheim
+- pfullendorf
+- nagold
+- sachsenheim
+- heidelberg
+- mergentheim
+- grosserlach-mannenweiler
+- wutoeschingen-ofteringen
+- ulm
+- freiburg
 - rot-buch
 - elztal-rittersbach
 - ellwangen-rindelbach

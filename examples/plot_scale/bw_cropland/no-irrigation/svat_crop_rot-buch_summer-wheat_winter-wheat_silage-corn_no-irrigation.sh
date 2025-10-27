@@ -14,7 +14,7 @@
 module load devel/miniforge
 eval "$(conda shell.bash hook)"
 conda activate roger
-cd /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland//no-irrigation
+cd /pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/no-irrigation
  
 python svat_crop.py -b numpy -d cpu --location rot-buch --crop-rotation-scenario summer-wheat_winter-wheat_silage-corn -td "${TMPDIR}"
 # Move output from local SSD to global workspace
