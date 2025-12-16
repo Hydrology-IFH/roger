@@ -1,0 +1,71 @@
+names:
+- 'dmpv' # density of vertical macropores (1/m2)
+- 'lmpv' # total length of vertical macropores (mm)
+- 'theta_eff' # effective porosity of soil (-)
+- 'frac_lp' # fraction of large pores (-)
+- 'theta_pwp' # permanent wilting point of soil (-)
+- 'ks' # saturated hydraulic conductivity (-)
+- 'c_root' # root growth coefficient (-)
+- 'c_canopy' # crop canopy coefficient (-)
+- 'k_transp'
+- 'k_q'
+- 'alpha_transp'
+- 'alpha_q'
+- 'km_denit'
+- 'km_nit'
+- 'kmin'
+- 'dmax_denit'
+- 'dmax_nit'
+
+bounds:
+-
+  - 10.0  # lower bound
+  - 300.0  # upper bound
+-
+  - 15.0
+  - 1200.0
+-
+  - 0.15
+  - 0.35
+-
+  - 0.1
+  - 0.7
+-
+  - 0.1
+  - 0.25
+-
+  - 0.01
+  - 50
+-
+  - 0.5
+  - 1.5
+-
+  - 0.5
+  - 1.5
+-
+  - 0.3
+  - 1.5
+-
+  - 0.3
+  - 5.0
+-
+  - 0.1
+  - 1.5
+-
+  - 0.1
+  - 1.0
+-
+  - 1.0
+  - 40.0
+-
+  - 1.0
+  - 40.0
+-
+  - 1.0
+  - 40.0
+-
+  - 1.0
+  - 100.0
+-
+  - 1.0
+  - 100.0

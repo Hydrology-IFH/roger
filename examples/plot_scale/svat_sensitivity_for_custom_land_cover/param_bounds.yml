@@ -1,0 +1,38 @@
+num_vars: 8
+
+names:
+- 'c_int'  # scale parameter of interception storage capacity (-)
+- 'c_root' # scale parameter of root depth (-)
+- 'dmpv' # density of vertical macropores (1/m2)
+- 'lmpv' # total length of vertical macropores (mm)
+- 'theta_eff' # effective porosity of soil (-)
+- 'frac_lp' # fraction of large pores (-)
+- 'theta_pwp' # permanent wilting point of soil (-)
+- 'ks' # saturated hydraulic conductivity (-)
+
+bounds:
+-
+  - 0.5  # lower boundary
+  - 1.5  # upper boundary
+-
+  - 0.5
+  - 2.3
+-
+  - 10
+  - 300
+-
+  - 15
+  - 800
+-
+  - 0.15
+  - 0.35
+-
+  - 0.1
+  - 0.7
+-
+  - 0.1
+  - 0.25
+-
+  - 5
+  - 150
+

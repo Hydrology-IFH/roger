@@ -1,0 +1,46 @@
+# --- Settings --------------------------------------------------------------
+# name of the model run; is used to name the output files
+identifier: SVAT
+# total number of samples
+nsamples: 256
+# spatial discretization in x-direction (in meters)
+dx: 1
+# spatial discretization in y-direction (in meters)
+dy: 1
+# origin of spatial grid
+x_origin: 0
+# origin of spatial grid
+y_origin: 0
+
+# --- Constant parameters -----------------------------------------------------
+# sland cover
+lu_id: 8
+# soil depth (in mm)
+z_soil: 1000
+# hydraulic conductivity of bedrock(in mm/hour)
+kf: 2500
+
+# --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 86400  # output frequency in seconds
+# simulated hydrologic fluxes
+OUTPUT_RATE:
+- "aet"  # actual evapotranspiration (mm/day)
+- "transp"  # transpiration (mm/day)
+- "evap_soil"  # soil evaporation (mm/day)
+- "evap_int"  # evaporation of interception storage (mm/day)
+- "inf_mat_rz"  # soil matrix infiltration into root zone (mm/day)
+- "inf_mp_rz"  # macropore infiltration into root zone (mm/day)
+- "inf_sc_rz"  # shrinkage crack infiltration into root zone (mm/day)
+- "inf_ss"  # infiltration into subsoil (mm/day)
+- "q_rz"  # percolation of root zone (mm/day)
+- "q_ss"  # percolation of subsoil (mm/day)
+- "cpr_rz" # capillary rise of subsoil into root zone (mm/day)
+- "dS"  # change of storage volume (mm/day)
+
+# simulated hydrologic storages
+OUTPUT_COLLECT:
+- "S_rz"  # storage volume of root zone (mm)
+- "S_ss"  # storage volume of subsoil (mm)
+- "theta_rz"  # soil water content of root zone (-)
+- "theta_ss"  # soil water content of subsoil (-)
+- "theta"  # soil water content (-)

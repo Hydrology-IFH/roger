@@ -1,0 +1,32 @@
+
+name: Build documentation
+
+on:
+  pull_request:
+
+  push:
+    branches:
+      - main
+
+jobs:
+  build-docs:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      # make sure tags are fetched so we can get a version
+      - run: |
+          git fetch --prune --unshallow --tags
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          # make sure to use the same version as in .readthedocs.yml
+          python-version: "3.11"
+
+      - name: Install requirements
+        run: pip install -r doc/requirements.txt
+
+      - name: Build docs
+        run: make -C doc html SPHINXOPTS="-W --keep-going"

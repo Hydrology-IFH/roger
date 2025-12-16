@@ -1,0 +1,4 @@
+Stations_ID;Stationsname;Geo. Laenge [Grad];Geo. Breite [Grad];Stationshoehe [m];Geberhoehe ueber Grund [m];Von_Datum;Bis_Datum;Geraetetyp Name;Messverfahren;eor;
+6260;Ingelfingen-Stachenhausen;9.7;49.33;385;1;20021201;20190715;PLUVIO;Niederschlagsmenge, elektr.;eor;
+6260;Ingelfingen-Stachenhausen;9.7;49.33;385;1;20190716;20220322;rain[e]H3, Wägetechnologie;Niederschlagsmenge, elektr.;eor;
+generiert: 30.03.2022 --  Deutscher Wetterdienst  --

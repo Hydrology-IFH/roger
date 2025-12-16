@@ -1,0 +1,284 @@
+# debugging
+debug_snippets.py
+roger/look_up_tables/add_name_of_crop_types.py
+roger/look_up_tables/_crop_parameters.csv
+roger/look_up_tables/_crop_parameters.xlsx
+roger/look_up_tables/README.md
+*_debug*
+conda-environment-doc.yml
+
+# binary files
+*.nc
+!doc/_data/*.nc
+*.h5
+
+# GIS files
+*.gpkg
+*.gpkg*
+*.shp
+*.shx
+*.dbf
+*.prj
+*.cpg
+*.qmd
+
+# documentation and profiler output
+#*.html
+
+# benchmark jobs and output
+benchmark_*.json
+timing_files_*.json
+benchmarks/job.sh
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.c
+*.cpp
+*.so
+*.dll
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+.pytest_cache
+test/mpi/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff
+*.log
+local_settings.py
+
+# Flask stuff
+instance/
+.webassets-cache
+
+# Scrapy stuff
+.scrapy
+
+# Sphinx documentation
+doc/_build/
+doc/_generated/
+
+# PyBuilder
+target/
+
+# IPython Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# celery beat schedule file
+celerybeat-schedule
+
+# dotenv
+.env
+
+# virtualenv
+venv/
+ENV/
+
+# Spyder project settings
+.spyderproject
+startup.py
+
+# Rope project settings
+.ropeproject
+
+# MacOS X file that stores custom attributes of its containing folder
+*.DS_Store
+
+# VS Code
+.vscode/
+.vs/
+
+# EXCEL
+*.xlsx
+
+# Examples
+examples/*/*/output/*
+examples/*/*/results/
+examples/*/*/figures/
+examples/*/*/*/output/*
+examples/*/*/*/results/
+examples/*/*/*/figures/
+examples/*/*/test_*
+examples/*/*/jordan_*
+EVENTS.txt
+examples/*/*/deterministic/
+examples/*/*/*/deterministic/
+examples/*/*/Euler/
+examples/*/*/*/Euler/
+examples/*/*/RK4/
+examples/*/*/*/RK4/
+examples/*/*/hydrus_benchmark/*.txt
+examples/*/*/hydrus_benchmark/*.py
+input_examples/
+examples/plot_scale/reckenholz/svat_bromide
+examples/plot_scale/reckenholz/svat_crop_bromide
+examples/plot_scale/reckenholz/svat_crop_bromide_sobol
+examples/plot_scale/reckenholz/svat_crop_bromide_monte_carlo
+examples/plot_scale/reckenholz/input
+examples/plot_scale/reckenholz/output
+examples/plot_scale/reckenholz/observations
+examples/plot_scale/reckenholz/README.md
+examples/plot_scale/reckenholz_film/
+examples/plot_scale/stgallen/
+examples/plot_scale/freiburg_altheim_kupferzell/climate_projections
+examples/plot_scale/boadkh/input/
+examples/plot_scale/boadkh/climate_projections/
+examples/plot_scale/boadkh/soil_temperature.py
+examples/plot_scale/boadkh/find_clust_id.py
+examples/plot_scale/boadkh/plot_single_time_series.py
+examples/plot_scale/boadkh/_plot_nitrate_leaching.py
+examples/plot_scale/boadkh/merge_NO3_polygons.py
+examples/plot_scale/boadkh/submit_shapefile_jobs.sh
+gpu_memory_profiling/
+*_2016-*.sh
+debug_setup/
+examples/catchment_scale/StressRes/Moehlin/input/
+examples/plot_scale/freiburg_altheim_kupferzell/rename_output.py
+*_per_year.py
+*_2006_2007.py
+*_new.py
+*_new/
+*_old/
+*_debug*/
+*.gpkg
+*.shp
+open_jobs.txt
+figures/
+*.pdf
+crop*.csv
+*crop*.csv
+
+
+# Slides or Word
+*.key
+*.docx
+
+# VS Code environments
+*.code-workspace
+
+# SLURM
+*.out
+
+# MOAB
+*.o1*
+*.e1*
+*.sh.o1*
+*.sh.e1*
+
+# Anaconda
+conda_build.sh
+build.sh
+meta.yaml
+
+# local development
+write_shapefiles_jobs.sh
+
+
+# ignore large files
+# find . -size +100M | sed 's|^./||g'
+examples/plot_scale/reckenholz/output/svat_crop_nitrate/SVATCROPNITRATE_complete-mixing_lys3.nc
+examples/plot_scale/reckenholz/output/svat_crop_nitrate/SVATCROPNITRATE_advection-dispersion-power_lys3.nc
+examples/plot_scale/reckenholz/output/svat_crop_nitrate/SVATCROPNITRATE_time-variant_advection-dispersion-power_lys3.nc
+examples/plot_scale/reckenholz/output/svat_crop_nitrate_reference/SVATCROPNITRATE_advection-dispersion-power_lys3.nc
+examples/plot_scale/boadkh/input/lahr/forcing.nc
+examples/plot_scale/boadkh/input/freiburg/forcing.nc
+examples/plot_scale/boadkh/input/bretten/forcing.nc
+examples/plot_scale/boadkh/climate_projections/uncorrected/pr_hourly_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_259.csv
+examples/plot_scale/boadkh/climate_projections/uncorrected/pr_hourly_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_4881.csv
+examples/plot_scale/boadkh/climate_projections/uncorrected/pr_hourly_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_2072.csv
+examples/plot_scale/boadkh/climate_projections/uncorrected/pr_hourly_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_3418.csv
+examples/plot_scale/boadkh/climate_projections/uncorrected/pr_hourly_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_3761.csv
+examples/plot_scale/boadkh/climate_projections/uncorrected/pr_hourly_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_5206.csv
+examples/plot_scale/boadkh/climate_projections/uncorrected/pr_hourly_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_2814.csv
+examples/plot_scale/boadkh/climate_projections/uncorrected/pr_hourly_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_4094.csv
+examples/plot_scale/rietholzbach_old/svat_oxygen18_monte_carlo/input/states_hm10_bootstrap.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_monte_carlo/output/states_hm_for_tm_mc.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_monte_carlo/output/states_preferential-power_monte_carlo.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_monte_carlo/output/states_time-variant_advection-dispersion-power_monte_carlo.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_monte_carlo/output/states_advection-dispersion-kumaraswamy_monte_carlo.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_monte_carlo/output/states_advection-dispersion-power_monte_carlo.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_monte_carlo/output/states_older-preference-power_monte_carlo.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_monte_carlo/output/states_time-variant_advection-dispersion-kumaraswamy_monte_carlo.nc
+examples/plot_scale/rietholzbach_old/svat_monte_carlo/output/states_hm_monte_carlo.nc
+examples/plot_scale/rietholzbach_old/svat_monte_carlo/output/states_hm100_bootstrap_for_deterministic.nc
+examples/plot_scale/rietholzbach_old/svat_monte_carlo/output/states_hm100_bootstrap.nc
+examples/plot_scale/rietholzbach_old/svat_monte_carlo/output/states_hm10_bootstrap_for_deterministic.nc
+examples/plot_scale/rietholzbach_old/svat_monte_carlo/figures/params_metrics.txt
+examples/plot_scale/rietholzbach_old/hydrus_benchmark/states_hydrus_18O_inv.nc
+examples/plot_scale/rietholzbach_old/hydrus_benchmark/states_hydrus_tt.nc
+examples/plot_scale/rietholzbach_old/svat_sensitivity/output/states_hm_saltelli_for_time-variant_advection-dispersion-power.nc
+examples/plot_scale/rietholzbach_old/svat_sensitivity/output/states_hm_saltelli_for_piston.nc
+examples/plot_scale/rietholzbach_old/svat_sensitivity/output/states_hm_saltelli_for_complete-mixing.nc
+examples/plot_scale/rietholzbach_old/svat_sensitivity/output/states_hm_saltelli_for_advection-dispersion-power.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_sensitivity/output/states_piston_saltelli.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_sensitivity/output/states_advection-dispersion-power_saltelli.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_sensitivity/output/states_complete-mixing_saltelli.nc
+examples/plot_scale/rietholzbach_old/svat_oxygen18_sensitivity/output/states_time-variant_advection-dispersion-power_saltelli.nc
+examples/plot_scale/svat_for_continous_development/output/SVAT.nc
+examples/plot_scale/freiburg_altheim_kupferzell/climate_projections/subdaily/pr_subdaily_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_2787_new.csv
+examples/plot_scale/freiburg_altheim_kupferzell/climate_projections/subdaily/pr_subdaily_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_4189.csv
+examples/plot_scale/freiburg_altheim_kupferzell/climate_projections/subdaily/pr_subdaily_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_4189_new.csv
+examples/plot_scale/freiburg_altheim_kupferzell/climate_projections/subdaily/pr_subdaily_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_1443_new.csv
+examples/plot_scale/freiburg_altheim_kupferzell/climate_projections/subdaily/pr_subdaily_FullTs_MPI-M-MPI-ESM-LR_RCA4_station-DWD_2787.csv
+examples/plot_scale/rietholzbach/svat_monte_carlo/output/SVAT.nc
+examples/plot_scale/rietholzbach/svat_monte_carlo/output/SVAT_best100_bootstrap.nc
+examples/plot_scale/rietholzbach/hydrus_benchmark/hydrus_tt.nc
+examples/plot_scale/rietholzbach/hydrus_benchmark/hydrus_18O_inv.nc
+examples/catchment_scale/moehlin/oneD/parameters_5.nc
+examples/catchment_scale/dreisam_moehlin_neumagen/svat_crop_distributed/parameters.csv
+examples/catchment_scale/dreisam_moehlin_neumagen/svat_crop_distributed/parameters.nc
+examples/catchment_scale/dreisam_moehlin_neumagen/svat_crop_distributed/input/forcing.nc
+examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed_irrigation/parameters.csv
+examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed_irrigation/parameters.nc
+examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed_irrigation/input/forcing.nc
+examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed/parameters.csv
+examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed/parameters.nc
+examples/catchment_scale/dreisam_moehlin_neumagen/svat_distributed/input/forcing.nc
+examples/plot_scale/boadkh/svat_crop/test_matrix_acker_base.csv
+batch_*/

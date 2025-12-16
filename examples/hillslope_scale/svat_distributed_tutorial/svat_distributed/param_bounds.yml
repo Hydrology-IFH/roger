@@ -1,0 +1,28 @@
+# soil depth (mm)
+z_soil:
+- 1000  # lower boundary
+- 1200  # upper boundary
+# density of vertical macropores (1/m2)
+dmpv:
+- 50
+- 100
+# total length of vertical macropores (mm)
+lmpv:
+- 200
+- 500
+# air capacity of soil (-)
+theta_ac:
+- 0.08
+- 0.12
+# usable field capacity of soil (-)
+theta_ufc:
+- 0.08
+- 0.12
+# permanent wilting point of soil (-)
+theta_pwp:
+- 0.18
+- 0.22
+# saturated hydraulic conductivity (mm/hour)
+ks:
+- 5
+- 15

@@ -1,0 +1,30 @@
+num_vars: 6
+
+names:
+- 'dmpv' # density of vertical macropores (1/m2)
+- 'lmpv' # total length of vertical macropores (mm)
+- 'theta_eff' # effective porosity of soil (-)
+- 'frac_lp' # fraction of large pores (-)
+- 'theta_pwp' # permanent wilting point of soil (-)
+- 'ks' # saturated hydraulic conductivity (-)
+
+bounds:
+-
+  - 10  # lower bound
+  - 300  # upper bound
+-
+  - 15
+  - 800
+-
+  - 0.15
+  - 0.35
+-
+  - 0.1
+  - 0.7
+-
+  - 0.1
+  - 0.25
+-
+  - 5
+  - 150
+

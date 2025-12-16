@@ -1,0 +1,25 @@
+name: roger
+
+channels:
+    - conda-forge
+
+dependencies:
+    - python=3.12
+    - pip
+    - click
+    - pyyaml
+    - entrypoints
+    - numpy
+    - scipy
+    - pandas
+    - loguru
+    - tqdm
+    - cython
+    - h5netcdf
+    - h5py
+    - matplotlib
+    - seaborn
+    - cftime
+    - bmipy
+    - pip:
+        - jax

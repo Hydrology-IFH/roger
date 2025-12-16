@@ -1,0 +1,80 @@
+# density of vertical macropores (1/m2)
+dmpv:
+- 10
+- 200
+# total length of vertical macropores (mm)
+lmpv:
+- 10
+- 800
+# effective porosity of soil (-)
+theta_eff:
+- 0.15
+- 0.30
+# fraction of large pores (-)
+frac_lp:
+- 0.1
+- 0.5
+# permanent wilting point of soil (-)
+theta_pwp:
+- 0.1
+- 0.25
+# saturated hydraulic conductivity (mm/h)
+ks:
+- 1
+- 20
+# scale parameter of crop root growth (-)
+c_root_sugarbeet:
+- 0.7
+- 1.3
+# scale parameter of crop canopy growth (-)
+c_canopy_sugarbeet:
+- 1.0
+- 2.0
+# scale parameter of crop root growth (-)
+c_root_winter-wheat:
+- 0.7
+- 1.3
+# scale parameter of crop canopy growth (-)
+c_canopy_winter-wheat:
+- 1.0
+- 2.0
+# scale parameter of crop root growth (-)
+c_root_winter-rape:
+- 0.7
+- 1.3
+# scale parameter of crop canopy growth (-)
+c_canopy_winter-rape:
+- 1.0
+- 2.0
+# scale parameter of crop root growth (-)
+c_root_winter-triticale:
+- 0.7
+- 1.3
+# scale parameter of crop canopy growth (-)
+c_canopy_winter-triticale:
+- 1.0
+- 2.0
+# scale parameter of crop root growth (-)
+c_root_silage-corn:
+- 0.7
+- 1.3
+# scale parameter of crop canopy growth (-)
+c_canopy_silage-corn:
+- 1.0
+- 2.0
+# scale parameter of crop root growth (-)
+c_root_winter-barley:
+- 0.7
+- 1.3
+# scale parameter of crop canopy growth (-)
+c_canopy_winter-barley:
+- 1.0
+- 2.0
+# scale parameter of crop root growth (-)
+c_root_green-manure:
+- 0.7
+- 1.3
+# scale parameter of crop canopy growth (-)
+c_canopy_green-manure:
+- 0.5
+- 1.5

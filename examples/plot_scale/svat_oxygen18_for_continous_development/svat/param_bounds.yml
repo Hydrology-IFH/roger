@@ -1,0 +1,38 @@
+# land us ID
+lu_id:
+- 8
+# soil depth (mm)
+z_soil:
+- 2000  # lower boundary
+- 2000  # upper boundary
+- 1  # number of samples
+# density of vertical macropores (1/m2)
+dmpv:
+- 100
+- 100
+- 1
+# total length of vertical macropores (mm)
+lmpv:
+- 1000
+- 1000
+- 1
+# effective porosity of soil (-)
+theta_ac:
+- 0.1
+- 0.1
+- 1
+# fraction of large pores (-)
+theta_ufc:
+- 0.1
+- 0.1
+- 1
+# permanent wilting point of soil (-)
+theta_pwp:
+- 0.2
+- 0.2
+- 1
+# saturated hydraulic conductivity (mm/h)
+ks:
+- 100
+- 100
+- 1

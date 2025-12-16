@@ -1,0 +1,24 @@
+# density of vertical macropores (1/m2)
+dmpv:
+- 10
+- 200
+# total length of vertical macropores (mm)
+lmpv:
+- 10
+- 800
+# effective porosity of soil (-)
+theta_eff:
+- 0.15
+- 0.30
+# fraction of large pores (-)
+frac_lp:
+- 0.1
+- 0.5
+# permanent wilting point of soil (-)
+theta_pwp:
+- 0.1
+- 0.25
+# saturated hydraulic conductivity (mm/h)
+ks:
+- 1
+- 20

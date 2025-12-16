@@ -1,0 +1,82 @@
+# --- Settings --------------------------------------------------------------
+# name of the model run; is used to name the output files
+identifier: SVATCROP
+# number of grid cells in x-direction
+nx: 1
+# number of grid cells in y-direction
+ny: 1
+# spatial discretization in x-direction (in meters)
+dx: 1
+# spatial discretization in y-direction (in meters)
+dy: 1
+# origin of spatial grid
+x_origin: 0
+# origin of spatial grid
+y_origin: 0
+
+# --- Parameters ---------------------------------------------------------------
+# land use ID (see README for description)
+LU_ID: 599
+# degree of sealing (-)
+SEALING: 0
+# soil depth (mm)
+Z_SOIL: 1200
+# density of vertical macropores (1/m2)
+DMPV: 50
+# total length of vertical macropores (mm)
+LMPV: 1000
+# air capacity (-)
+THETA_AC: 0.1
+# usable field capacity (-)
+THETA_UFC: 0.1
+# permanent wilting point (-)
+THETA_PWP: 0.2
+# saturated hydraulic conductivity (mm/h)
+KS: 25
+# hydraulic conductivity of bedrock/saturated zone (mm/h)
+KF: 2500
+
+# --- Initial conditions -------------------------------------------------------
+# soil water content of root zone/upper soil layer (-)
+THETA_RZ: 0.3
+# soil water content of subsoil/lower soil layer (-)
+THETA_SS: 0.3
+
+# --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 86400  # output frequency in seconds
+# simulated hydrologic fluxes
+OUTPUT_RATE:
+- "prec"
+- "aet"  # actual evapotranspiration (mm/day)
+- "transp"  # transpiration (mm/day)
+- "evap_soil"  # soil evaporation (mm/day)
+- "inf_mat_rz"  # soil matrix infiltration into root zone (mm/day)
+- "inf_mp_rz"  # macropore infiltration into root zone (mm/day)
+- "inf_sc_rz"  # shrinkage crack infiltration into root zone (mm/day)
+- "inf_ss"  # infiltration into subsoil (mm/day)
+- "q_rz"  # percolation of root zone (mm/day)
+- "q_ss"  # percolation of subsoil (mm/day)
+- "cpr_rz" # capillary rise of subsoil into root zone (mm/day)
+- "dS"  # change of storage volume (mm/day)
+- "q_snow"  # snow melt (mm/day)
+- "re_rg"  # redistribution after root growth (mm/day)
+- "re_rl"  # redistribution after root loss (mm/day)
+
+# simulated hydrologic storages
+OUTPUT_COLLECT:
+- "S_rz"  # storage volume of root zone (mm)
+- "S_ss"  # storage volume of subsoil (mm)
+- "S_pwp_rz"  # storage volume at permanent wilting point of root zone (mm)
+- "S_fc_rz"  # storage volume at field capacity of root zone (mm)
+- "S_sat_rz"  # storage volume at saturation of root zone (mm)
+- "S_pwp_ss"  # storage volume at permanent wilting point of subsoil (mm)
+- "S_fc_ss"  # storage volume at field capacity of subsoil (mm)
+- "S_sat_ss"  # storage volume at saturation of subsoil (mm)
+- "theta_rz"  # soil water content of root zone (-)
+- "theta_ss"  # soil water content of subsoil (-)
+- "theta"  # soil water content (-)
+- "S_snow"  # storage volume snow cover (mm)
+- "ta"  # air temperature (degC)
+- "ground_cover"  # ground cover (-)
+- "z_root"  # root zone depth (mm)
+- "lu_id"  # land cover ID

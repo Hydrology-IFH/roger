@@ -1,0 +1,33 @@
+# --- Settings --------------------------------------------------------------
+# name of the model run; is used to name the output files
+identifier: SVATOXYGEN18
+# spatial discretization in x-direction (in meters)
+dx: 1
+# spatial discretization in y-direction (in meters)
+dy: 1
+# origin of spatial grid
+x_origin: 0
+# origin of spatial grid
+y_origin: 0
+# number of substeps per timestep
+SAS_SOLVER_SUBSTEPS: 6
+
+# --- Parameters ---------------------------------------------------------------
+SAS_SOLVER: 'RK4'
+TRANSPORT_MODEL_STRUCTURE: 'power'
+
+# --- Initial conditions -------------------------------------------------------
+# initial oxygen18 ratio of soil water in root zone/upper soil layer (-)
+d18O_RZ: -10
+# initial oxygen18 ratio of soil water in subsoil/lower soil layer (-)
+d18O_SS: -10
+
+# --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 86400  # output frequency in seconds
+OUTPUT_AVERAGE:
+- "C_iso_transp"
+- "C_iso_s"
+- "C_iso_q_ss"
+- "tt50_transp"
+- "rt50_s"
+- "tt50_q_ss"

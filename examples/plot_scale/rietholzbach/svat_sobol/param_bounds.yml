@@ -1,0 +1,191 @@
+complete-mixing:
+  num_vars: 8
+
+  names:
+  - 'c1_mak'  # Makkink coefficient (-)
+  - 'c2_mak'  # Makkink coefficient (-)
+  - 'dmpv'  # density of vertical macropores (1/m2)
+  - 'lmpv'  # total length of vertical macropores (mm)
+  - 'theta_eff'  # effective porosity of soil (-)
+  - 'frac_lp'  # fraction of large pores (-)
+  - 'theta_pwp'  # permanent wilting point of soil (-)
+  - 'ks'  # saturated hydraulic conductivity (-)
+
+  bounds:
+  -
+    - 0.5  # lower boundary
+    - 0.7  # upper boundary
+  -
+    - -0.4
+    - 0.2
+  -
+    - 10
+    - 300
+  -
+    - 15
+    - 2000
+  -
+    - 0.15
+    - 0.35
+  -
+    - 0.1
+    - 0.6
+  -
+    - 0.1
+    - 0.35
+  -
+    - 0.1
+    - 100
+
+piston:
+  num_vars: 8
+
+  names:
+  - 'c1_mak'  # Makkink coefficient (-)
+  - 'c2_mak'  # Makkink coefficient (-)
+  - 'dmpv'
+  - 'lmpv'
+  - 'theta_eff'
+  - 'frac_lp'
+  - 'theta_pwp'
+  - 'ks'
+
+  bounds:
+  -
+    - 0.5  # lower boundary
+    - 0.7  # upper boundary
+  -
+    - -0.4
+    - 0.2
+  -
+    - 10
+    - 300
+  -
+    - 15
+    - 2000
+  -
+    - 0.15
+    - 0.35
+  -
+    - 0.1
+    - 0.6
+  -
+    - 0.1
+    - 0.35
+  -
+    - 0.1
+    - 100
+
+advection-dispersion-power:
+  num_vars: 11
+
+  names:
+  - 'c1_mak'  # Makkink coefficient (-)
+  - 'c2_mak'  # Makkink coefficient (-)
+  - 'dmpv'
+  - 'lmpv'
+  - 'theta_eff'
+  - 'frac_lp'
+  - 'theta_pwp'
+  - 'ks'
+  - 'k_transp'  # SAS parameter of transpiration
+  - 'k_q_rz'  # SAS parameter of percolation from root zone
+  - 'k_q_ss'  # SAS parameter of percolation from subsoil
+
+  bounds:
+  -
+    - 0.5  # lower boundary
+    - 0.7  # upper boundary
+  -
+    - -0.4
+    - 0.2
+  -
+    - 10
+    - 300
+  -
+    - 15
+    - 2000
+  -
+    - 0.15
+    - 0.35
+  -
+    - 0.1
+    - 0.6
+  -
+    - 0.1
+    - 0.35
+  -
+    - 0.1
+    - 100
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+
+time-variant advection-dispersion-power:
+  num_vars: 14
+
+  names:
+  - 'c1_mak'  # Makkink coefficient (-)
+  - 'c2_mak'  # Makkink coefficient (-)
+  - 'dmpv'
+  - 'lmpv'
+  - 'theta_eff'
+  - 'frac_lp'
+  - 'theta_pwp'
+  - 'ks'
+  - 'c1_transp'  # SAS parameter of transpiration
+  - 'c2_transp'  # SAS parameter of transpiration
+  - 'c1_q_rz'  # SAS parameter of percolation from root zone
+  - 'c2_q_rz'  # SAS parameter of percolation from root zone
+  - 'c1_q_ss'  # SAS parameter of percolation from subsoil
+  - 'c2_q_ss'  # SAS parameter of percolation from subsoil
+
+  bounds:
+  -
+    - 0.5  # lower boundary
+    - 0.7  # upper boundary
+  -
+    - -0.4
+    - 0.2
+  -
+    - 10
+    - 300
+  -
+    - 15
+    - 2000
+  -
+    - 0.15
+    - 0.35
+  -
+    - 0.1
+    - 0.6
+  -
+    - 0.1
+    - 0.35
+  -
+    - 0.1
+    - 100
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5
+  -
+    - 0.1
+    - 5

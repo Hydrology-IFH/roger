@@ -1,0 +1,36 @@
+# density of vertical macropores (1/m2)
+z_soil:
+- 300
+- 2000
+# density of vertical macropores (1/m2)
+dmpv:
+- 10
+- 300
+# total length of vertical macropores (mm)
+c_lmpv:
+- 0.1
+- 0.9
+# effective porosity of soil (-)
+theta_eff:
+- 0.15
+- 0.35
+# fraction of large pores (-)
+frac_lp:
+- 0.1
+- 0.7
+# permanent wilting point of soil (-)
+theta_pwp:
+- 0.15
+- 0.25
+# saturated hydraulic conductivity (mm/h)
+ks:
+- 0.1
+- 100
+# scale parameter of crop root growth (-)
+c_root_growth:
+- 0.5
+- 1.5
+# scale parameter of crop canopy growth (-)
+c_canopy_growth:
+- 0.5
+- 1.5

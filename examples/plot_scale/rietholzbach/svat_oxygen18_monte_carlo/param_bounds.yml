@@ -1,0 +1,119 @@
+advection-dispersion-power:
+  # SAS parameter of transpiration
+  k_transp:
+  - 0.2
+  - 1
+  # SAS parameter of percolation from root zone
+  k_q_rz:
+  - 1
+  - 5
+  # SAS parameter of percolation from subsoil
+  k_q_ss:
+  - 1
+  - 5
+
+time-variant advection-dispersion-power:
+  # SAS parameter of transpiration
+  c1_transp:
+  - 0.1
+  - 0.5
+  c2_transp:
+  - 0.1
+  - 2
+  # SAS parameter of percolation from root zone
+  c1_q_rz:
+  - 1
+  - 2
+  c2_q_rz:
+  - 0.1
+  - 3
+  # SAS parameter of percolation from subsoil
+  c1_q_ss:
+  - 1
+  - 2
+  c2_q_ss:
+  - 0.1
+  - 5
+
+preferential-power:
+  # SAS parameter of transpiration
+  k_transp:
+  - 0.2  # lower boundary
+  - 1  # upper boundary
+  # SAS parameter of percolation from root zone
+  k_q_rz:
+  - 0.2
+  - 1
+  # SAS parameter of percolation from subsoil
+  k_q_ss:
+  - 0.2
+  - 1
+
+older-preference-power:
+  # SAS parameter of transpiration
+  k_transp:
+  - 1.5  # lower boundary
+  - 5  # upper boundary
+  # SAS parameter of percolation from root zone
+  k_q_rz:
+  - 1.5
+  - 5
+  # SAS parameter of percolation from subsoil
+  k_q_ss:
+  - 1.5
+  - 5
+
+advection-dispersion-kumaraswamy:
+  # SAS parameter of transpiration
+  a_transp:
+  - 1  # lower boundary
+  - 3  # upper boundary
+  b_transp:
+  - 3
+  - 30
+  # SAS parameter of percolation from root zone
+  a_q_rz:
+  - 2
+  - 30
+  b_q_rz:
+  - 1
+  - 10
+  # SAS parameter of percolation from subsoil
+  a_q_ss:
+  - 2
+  - 30
+  b_q_ss:
+  - 1
+  - 10
+
+time-variant advection-dispersion-kumaraswamy:
+  # SAS parameter of transpiration
+  a_transp:
+  - 1
+  - 3
+  c1_transp:
+  - 1
+  - 25
+  c2_transp:
+  - 1
+  - 25
+  # SAS parameter of percolation from root zone
+  b_q_rz:
+  - 1
+  - 10
+  c1_q_rz:
+  - 1
+  - 15
+  c2_q_rz:
+  - 1
+  - 15
+  # SAS parameter of percolation from subsoil
+  b_q_ss:
+  - 1
+  - 10
+  c1_q_ss:
+  - 1
+  - 15
+  c2_q_ss:
+  - 1
+  - 15
