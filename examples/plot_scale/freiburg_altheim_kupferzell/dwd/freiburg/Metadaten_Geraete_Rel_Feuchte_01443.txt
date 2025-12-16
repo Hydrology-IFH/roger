@@ -1,9 +1,0 @@
-Stations_ID;Stationsname;Geo. Laenge [Grad];Geo. Breite [Grad];Stationshoehe [m];Geberhoehe ueber Grund [m];Von_Datum;Bis_Datum;Geraetetyp Name;Messverfahren;eor;
-1443;Freiburg;;;;;18740101;19490430;Gerätetyp unbekannt;Feuchteregistrierung, konv.;eor;
-1443;Freiburg;7.86;48;267;2;19490501;19580831;Hygrograph nach Frankenberg;Feuchteregistrierung, konv.;eor;
-1443;Freiburg;7.83;48;252;2;19580901;19671116;Hygrograph nach Frankenberg;Feuchteregistrierung, konv.;eor;
-1443;Freiburg;7.85;48;269;2;19671117;19780930;Hygrograph nach Frankenberg;Feuchteregistrierung, konv.;eor;
-1443;Freiburg;7.85;48;269;2;19781001;20031031;Thermohygrograph;Temperatur- und Feuchtereg., konv.;eor;
-1443;Freiburg;7.83;48.02;236.46;2;20061123;20140910;Feuchtesonde HMP45D;Feuchtemessung, elektr.;eor;
-1443;Freiburg;7.83;48.02;236.46;2;20140911;20220322;EE33;Feuchtemessung, elektr.;eor;
-generiert: 30.03.2022 --  Deutscher Wetterdienst  --

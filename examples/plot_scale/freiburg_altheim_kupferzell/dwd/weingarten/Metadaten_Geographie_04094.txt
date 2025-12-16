@@ -1,9 +1,0 @@
-Stations_id;Stationshoehe;Geogr.Breite;Geogr.Laenge;von_datum;bis_datum;Stationsname
-  4094;  482.00; 47.7889;  9.5967;18920901;19180831;Weingarten, Kr. Ravensburg
-  4094;  462.00; 47.7858;  9.6208;19180901;19501231;Weingarten, Kr. Ravensburg
-  4094;  462.00; 47.7858;  9.6208;19510101;19600714;Weingarten, Kr. Ravensburg
-  4094;  457.00; 47.7866;  9.6192;19600715;19670921;Weingarten, Kr. Ravensburg
-  4094;  504.00; 47.7785;  9.6214;19670922;19760731;Weingarten, Kr. Ravensburg
-  4094;  435.00; 47.7958;  9.6214;19760801;19860930;Weingarten, Kr. Ravensburg
-  4094;  440.00; 47.8066;  9.6211;19900801;20040531;Weingarten, Kr. Ravensburg
-  4094;  440.50; 47.8062;  9.6206;20040601;        ;Weingarten, Kr. Ravensburg

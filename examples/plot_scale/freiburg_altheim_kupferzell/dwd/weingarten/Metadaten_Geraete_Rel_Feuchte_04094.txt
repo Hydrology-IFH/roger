@@ -1,8 +1,0 @@
-Stations_ID;Stationsname;Geo. Laenge [Grad];Geo. Breite [Grad];Stationshoehe [m];Geberhoehe ueber Grund [m];Von_Datum;Bis_Datum;Geraetetyp Name;Messverfahren;eor;
-4094;Ravensburg;9.62;47.79;457;2;19600715;19670921;Thermohygrograph;Temperatur- und Feuchtereg., konv.;eor;
-4094;Ravensburg;9.62;47.78;504;2;19670922;19760731;Thermohygrograph;Temperatur- und Feuchtereg., konv.;eor;
-4094;Ravensburg;9.62;47.8;435;2;19760801;19900731;Thermohygrograph;Temperatur- und Feuchtereg., konv.;eor;
-4094;Weingarten, Kr. Ravensburg;9.62;47.81;440;2;19900801;20040531;Thermohygrograph;Temperatur- und Feuchtereg., konv.;eor;
-4094;Weingarten, Kr. Ravensburg;9.62;47.81;440.5;2;20040601;20171015;Feuchtesonde HMP45D;Feuchtemessung, elektr.;eor;
-4094;Weingarten, Kr. Ravensburg;9.62;47.81;440.5;2;20171016;20220322;EE33;Feuchtemessung, elektr.;eor;
-generiert: 30.03.2022 --  Deutscher Wetterdienst  --

@@ -1,8 +1,0 @@
-Stations_ID;Stationsname;Geo. Laenge [Grad];Geo. Breite [Grad];Stationshoehe [m];Geberhoehe ueber Grund [m];Von_Datum;Bis_Datum;Geraetetyp Name;Messverfahren;eor;
-1443;Freiburg;7.86;48;267;25;19490501;19580817;Sonnenscheinschreiber nach Campbell-Stokes;Sonnenscheinregistrierung, konv.;eor;
-1443;Freiburg;7.86;48;267;13;19580818;19580831;Sonnenscheinschreiber nach Campbell-Stokes;Sonnenscheinregistrierung, konv.;eor;
-1443;Freiburg;7.83;48;252;13;19580901;19671116;Sonnenscheinschreiber nach Campbell-Stokes;Sonnenscheinregistrierung, konv.;eor;
-1443;Freiburg;7.85;48;269;34.5;19671117;19950118;Sonnenscheinschreiber nach Campbell-Stokes;Sonnenscheinregistrierung, konv.;eor;
-1443;Freiburg;7.85;48;269;38;19950119;20061122;SONIe Sonnenenergie-Sensor;Sonnenscheindauer, elektr.;eor;
-1443;Freiburg;7.83;48.02;236.46;6;20061123;20220322;SCAPP;Sonnenscheind/Strahlungsmessung, elektr.;eor;
-generiert: 30.03.2022 --  Deutscher Wetterdienst  --

@@ -1,2 +1,0 @@
-Stations_ID;Stationsname;Von_Datum;Bis_Datum
-  6260;Ingelfingen-Stachenhausen               ;20000508;

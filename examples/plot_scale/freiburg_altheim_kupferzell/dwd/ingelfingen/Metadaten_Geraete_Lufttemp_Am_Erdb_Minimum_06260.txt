@@ -1,3 +1,0 @@
-Stations_ID;Stationsname;Geo. Laenge [Grad];Geo. Breite [Grad];Stationshoehe [m];Geberhoehe ueber Grund [m];Von_Datum;Bis_Datum;Geraetetyp Name;Messverfahren;eor;
-6260;Ingelfingen-Stachenhausen;9.7;49.33;385;.05;20021201;20220322;PT 100 (Luft);Temperaturmessung, elektr.;eor;
-generiert: 30.03.2022 --  Deutscher Wetterdienst  --

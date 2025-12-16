@@ -1,5 +1,0 @@
-Stations_ID;Stationsname;Geo. Laenge [Grad];Geo. Breite [Grad];Stationshoehe [m];Barometerhoehe ueber NN [m];Von_Datum;Bis_Datum;Geraetetyp Name;Messverfahren;eor;
-4094;Ravensburg;9.62;47.79;462;463.5;19460101;19600714;Stationsbarometer;Luftdruckmessung, konv.;eor;
-4094;Ravensburg;9.62;47.79;457;460.5;19600715;19670921;Stationsbarometer;Luftdruckmessung, konv.;eor;
-4094;Ravensburg;9.62;47.78;504;;19670922;19671031;Stationsbarometer;Luftdruckmessung, konv.;eor;
-generiert: 30.03.2022 --  Deutscher Wetterdienst  --
