@@ -37,6 +37,9 @@ zgw[cond_zsoil0] = z_soil[cond_zsoil0] + 10.0
 zgw[zgw < 0] = z_soil[zgw < 0] + 10.0
 zgw[zgw <= z_soil] = z_soil[zgw <= z_soil] + 10.0
 ds_params['gwfa_gew'].values = zgw
+cond_zsoil0 = (ds_params['GRUND'].values <= 0) & cond_catch & onp.isin(ds_params['lanu'].values, [5, 6, 7, 8, 9, 10, 11, 12, 16])
+mask_zsoil = onp.zeros(ds_params['GRUND'].shape, dtype=onp.int16)
+ds_params['mask_zsoil'].values = mask_zsoil
 
 file = base_path / "parameters_roger.nc"
 ds_params.to_netcdf(file)

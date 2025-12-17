@@ -58,6 +58,17 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+!roger/look_up_tables/crop_parameters.csv
+!roger/look_up_tables/fertilization1.csv
+!roger/look_up_tables/fertilization2.csv
+!roger/look_up_tables/fertilization3.csv
+!roger/look_up_tables/horizontal_macropore_flow_velocities.csv
+!roger/look_up_tables/land_use_dependent_interception.csv
+!roger/look_up_tables/land_use_dependent_rooting_depth.csv
+!roger/look_up_tables/macropore_drainage_area.csv
+!roger/look_up_tables/nitrogen_uptake.csv
+!roger/look_up_tables/sealing_dependent_interception.csv
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

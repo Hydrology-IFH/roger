@@ -14,8 +14,8 @@ def main():
 
     # identifiers of the simulations
     stress_tests_meteo = ["base", "base_2000-2024", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]
-    stress_test_meteo_magnitudes = [1, 2]
-    stress_test_meteo_durations = [2, 3]
+    stress_test_meteo_magnitudes = [0, 1, 2]
+    stress_test_meteo_durations = [0, 2, 3]
     irrigation_scenarios = ["no-irrigation", "irrigation"]
     soil_compaction_scenarios = ["no-soil-compaction", "soil-compaction"]
     catch_crop_scenarios = ["no-yellow-mustard", "yellow-mustard"]
@@ -38,11 +38,11 @@ def main():
                         output_path_ws = base_path_ws / "output" / dir_name
                         lines = []
                         lines.append("#!/bin/bash\n")
-                        lines.append("#SBATCH --time=72:00:00\n")
+                        lines.append("#SBATCH --time=7-00:00:00\n")
                         lines.append("#SBATCH --nodes=1\n")
                         lines.append("#SBATCH --ntasks=1\n")
                         lines.append("#SBATCH --cpus-per-task=1\n")
-                        lines.append("#SBATCH --mem=16000\n")
+                        lines.append("#SBATCH --mem=32000\n")
                         lines.append("#SBATCH --mail-type=FAIL\n")
                         lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                         lines.append(f"#SBATCH --job-name={script_name}\n")
@@ -65,7 +65,7 @@ def main():
                         lines.append("cp -r %s/config.yml ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                         lines.append("cp -r %s/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                         lines.append('sleep 90\n')
-                        lines.append('python oneD_crop.py -b numpy -d cpu --stress-test-meteo %s %s %s %s -td\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
+                        lines.append('python oneD_crop.py -b jax -d cpu --stress-test-meteo %s %s %s %s -td\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
                         lines.append("# Move output from local SSD to global workspace\n")
                         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                         lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
@@ -85,11 +85,11 @@ def main():
                         output_path_ws = base_path_ws / "output" / dir_name
                         lines = []
                         lines.append("#!/bin/bash\n")
-                        lines.append("#SBATCH --time=72:00:00\n")
+                        lines.append("#SBATCH --time=7-00:00:00\n")
                         lines.append("#SBATCH --nodes=1\n")
                         lines.append("#SBATCH --ntasks=1\n")
                         lines.append("#SBATCH --cpus-per-task=1\n")
-                        lines.append("#SBATCH --mem=16000\n")
+                        lines.append("#SBATCH --mem=32000\n")
                         lines.append("#SBATCH --mail-type=FAIL\n")
                         lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                         lines.append(f"#SBATCH --job-name={script_name}\n")
@@ -112,7 +112,7 @@ def main():
                         lines.append("cp -r %s/config.yml ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                         lines.append("cp -r %s/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                         lines.append('sleep 90\n')
-                        lines.append('python oneD_crop.py -b numpy -d cpu --stress-test-meteo %s %s %s %s -td\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
+                        lines.append('python oneD_crop.py -b jax -d cpu --stress-test-meteo %s %s %s %s -td\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
                         lines.append("# Move output from local SSD to global workspace\n")
                         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                         lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
@@ -135,11 +135,11 @@ def main():
                                 output_path_ws = base_path_ws / "output" / dir_name
                                 lines = []
                                 lines.append("#!/bin/bash\n")
-                                lines.append("#SBATCH --time=72:00:00\n")
+                                lines.append("#SBATCH --time=7-00:00:00\n")
                                 lines.append("#SBATCH --nodes=1\n")
                                 lines.append("#SBATCH --ntasks=1\n")
                                 lines.append("#SBATCH --cpus-per-task=1\n")
-                                lines.append("#SBATCH --mem=16000\n")
+                                lines.append("#SBATCH --mem=32000\n")
                                 lines.append("#SBATCH --mail-type=FAIL\n")
                                 lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
                                 lines.append(f"#SBATCH --job-name={script_name}\n")
@@ -162,7 +162,7 @@ def main():
                                 lines.append("cp -r %s/config.yml ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                                 lines.append("cp -r %s/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                                 lines.append('sleep 90\n')
-                                lines.append('python oneD_crop.py -b numpy -d cpu --stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s %s %s %s -td\n' % (stress_test_meteo, magnitude, duration, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
+                                lines.append('python oneD_crop.py -b jax -d cpu --stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s %s %s %s -td\n' % (stress_test_meteo, magnitude, duration, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
                                 lines.append("# Move output from local SSD to global workspace\n")
                                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                                 lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
