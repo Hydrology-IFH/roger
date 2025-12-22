@@ -110,6 +110,10 @@ def main(tmp_dir):
             settings.enable_adaptive_time_stepping = True
             settings.enable_distributed_input = True
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

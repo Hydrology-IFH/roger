@@ -170,6 +170,10 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                 settings.ncrops = 3
                 settings.ncr = self._ncr
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

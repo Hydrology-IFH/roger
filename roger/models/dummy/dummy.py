@@ -21,6 +21,10 @@ class DUMMYSetup(RogerSetup):
         settings.y_origin = 0.0
 
     @roger_routine
+    def read_data(self, state):
+        pass
+
+    @roger_routine
     def set_grid(self, state):
         pass
 

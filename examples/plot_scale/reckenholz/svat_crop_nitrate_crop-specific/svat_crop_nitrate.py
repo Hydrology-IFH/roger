@@ -100,6 +100,10 @@ def main(lys_experiment, transport_model_structure, tmp_dir):
             settings.enable_crop_optimization = True
             settings.ncrops_to_optimize = 8
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

@@ -99,6 +99,10 @@ def main(tmp_dir):
                 settings.ncrops = 3
                 settings.ncr = self._get_ncr(self._input_dir, "crop_rotation.nc")
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

@@ -165,6 +165,10 @@ def main(location, irrigation_scenario, crop_rotation_scenario, tmp_dir):
                 settings.ncrops = 3
                 settings.ncr = self._get_ncr(self._input_dir, f"{crop_rotation_scenario}.nc")
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

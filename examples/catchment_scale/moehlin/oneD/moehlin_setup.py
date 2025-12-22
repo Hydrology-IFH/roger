@@ -74,6 +74,10 @@ def main(temp_dir):
             settings.enable_adaptive_time_stepping = True
             settings.enable_groundwater_boundary = True
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

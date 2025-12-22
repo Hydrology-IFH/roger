@@ -60,6 +60,20 @@ class RogerSetup(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
+    def read_data(self, state):
+        """To be implemented by subclass.
+
+        Called before every time step to read the external forcing, e.g. every month or year.
+
+        Example:
+          >>> @roger_method
+          >>> def load_forcing(self, state):
+          >>>     vs = state.variables
+          >>>     vs.PREC_DIST = update(vs.PREC_DIST, at[:, :], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[:, :settings.nitt_forc])
+        """
+        pass
+
+    @abc.abstractmethod
     def set_look_up_tables(self, state):
         """To be implemented by subclass.
 
@@ -372,6 +386,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
 
         with state.timers["main"]:
             if not settings.enable_offline_transport:
+                with state.timers["read data"]:
+                    self.read_data(state)
                 with state.timers["boundary conditions"]:
                     self.set_boundary_conditions(state)
                 with state.timers["forcing"]:
@@ -451,6 +467,8 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     vs.time = vs.time + vs.dt_secs
 
                 with state.timers["main transport"]:
+                    with state.timers["read data"]:
+                        self.read_data(state)
                     with state.timers["boundary conditions"]:
                         self.set_boundary_conditions(state)
                     with state.timers["forcing"]:
@@ -569,6 +587,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     "---",
                     " setup time                 = {:.2f}s".format(self.state.timers["setup"].total_time),
                     " main loop time             = {:.2f}s".format(self.state.timers["main"].total_time),
+                    "   read data                = {:.2f}s".format(self.state.timers["read data"].total_time),
                     "   boundary conditions      = {:.2f}s".format(self.state.timers["boundary conditions"].total_time),
                     "   forcing                  = {:.2f}s".format(self.state.timers["forcing"].total_time),
                     "   time-variant parameters  = {:.2f}s".format(
@@ -602,6 +621,9 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     ),
                     " main loop time                                  = {:.2f}s".format(
                         self.state.timers["main transport"].total_time
+                    ),
+                    "   read data                           = {:.2f}s".format(
+                        self.state.timers["read data"].total_time
                     ),
                     "   boundary conditions                           = {:.2f}s".format(
                         self.state.timers["boundary conditions"].total_time

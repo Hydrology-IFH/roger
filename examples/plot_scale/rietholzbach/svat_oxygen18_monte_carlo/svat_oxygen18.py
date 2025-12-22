@@ -102,6 +102,10 @@ def main(nsamples, transport_model_structure, sas_solver, tmp_dir):
             settings.d18O_min = -19.3
             settings.d18O_max = -0.9
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

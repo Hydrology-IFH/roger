@@ -724,7 +724,7 @@ def write_forcing_distributed(
             except BlockingIOError:
                 _lock = True
                 logger.debug("Wait for input files. Files might be used by some other process")
-                time.wait(10)
+                time.wait(20)
 
         validate(df_PREC)
         validate(df_TA)

@@ -84,6 +84,10 @@ def main(tmp_dir):
             # enable soil nitrogen cycle
             settings.enable_nitrate = True
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

@@ -80,6 +80,10 @@ def main(location, land_cover_scenario, climate_scenario, period, tmp_dir):
             settings.enable_virtualtracer = True
             settings.enable_age_statistics = True
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

@@ -117,6 +117,10 @@ def main(tmp_dir):
                 settings.ncrops = 3
                 settings.ncr = 9
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

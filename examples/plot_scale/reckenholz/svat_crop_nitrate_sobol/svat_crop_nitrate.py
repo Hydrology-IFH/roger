@@ -88,6 +88,10 @@ def main(lys_experiment, tmp_dir):
             settings.enable_nitrate = True
             settings.enable_age_statistics = True
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

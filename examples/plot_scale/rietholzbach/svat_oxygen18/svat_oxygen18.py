@@ -85,6 +85,10 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             settings.d18O_max = -0.9
 
         @roger_routine
+        def read_data(self, state):
+            pass
+
+        @roger_routine
         def set_grid(self, state):
             vs = state.variables
             settings = state.settings

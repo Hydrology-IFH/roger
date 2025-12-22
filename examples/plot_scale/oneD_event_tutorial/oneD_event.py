@@ -78,6 +78,10 @@ def main(tmp_dir):
             settings.enable_groundwater_boundary = False
             settings.enable_lateral_flow = True
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

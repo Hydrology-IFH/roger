@@ -191,6 +191,10 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
             settings.enable_nitrate = True
             settings.enable_age_statistics = True
 
+        @roger_routine
+        def read_data(self, state):
+            pass
+
         @roger_routine(
             dist_safe=False,
             local_variables=[

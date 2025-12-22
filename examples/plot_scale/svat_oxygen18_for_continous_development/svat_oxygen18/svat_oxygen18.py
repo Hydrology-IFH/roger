@@ -90,6 +90,10 @@ def main(transport_model_structure, sas_solver, tmp_dir):
             settings.tm_structure = transport_model_structure
 
         @roger_routine
+        def read_data(self, state):
+            pass
+
+        @roger_routine
         def set_grid(self, state):
             vs = state.variables
             settings = state.settings

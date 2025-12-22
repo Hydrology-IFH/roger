@@ -92,6 +92,10 @@ def main(tmp_dir):
             settings.tm_structure = self._tm_structure
 
         @roger_routine
+        def read_data(self, state):
+            pass
+
+        @roger_routine
         def set_grid(self, state):
             vs = state.variables
             settings = state.settings

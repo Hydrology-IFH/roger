@@ -87,6 +87,10 @@ class ONEDCROPSetup(RogerSetup):
             settings.ncrops = 3
             settings.ncr = 3
 
+    @roger_routine
+    def read_data(self, state):
+        pass
+
     @roger_routine(
         dist_safe=False,
         local_variables=[

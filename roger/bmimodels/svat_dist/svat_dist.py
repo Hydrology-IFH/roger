@@ -86,6 +86,10 @@ class SVATDISTSetup(RogerSetup):
         settings.enable_groundwater_boundary = self.enable_groundwater_boundary
 
     @roger_routine
+    def read_data(self, state):
+        pass
+
+    @roger_routine
     def set_grid(self, state):
         vs = state.variables
         settings = state.settings
