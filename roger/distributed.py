@@ -502,6 +502,10 @@ def gather(arr, dimensions, var_grid):
     if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and not d2:
         # neither x nor y dependent, nothing to do
         return arr
+    
+    if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1]:
+        # neither x nor y dependent, nothing to do
+        return arr
 
     if d1 in SCATTERED_DIMENSIONS[0] and not d2:
         # only x dependent

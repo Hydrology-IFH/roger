@@ -615,21 +615,11 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                 pet = allocate(state.dimensions, ("x", "y", "timesteps_day"))
                 for i, ii in enumerate(vs.station_ids):
                     mask = (vs.station_id == ii)
-                    _precip = allocate(state.dimensions, ("x", "y", "timesteps_day"))
-                    _precip = update(_precip, at[:, :, :], vs.PREC_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
-                    precip = update(precip, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _precip, precip))
-                    _ta = allocate(state.dimensions, ("x", "y", "timesteps_day"))
-                    _ta = update(_ta, at[:, :, :], vs.TA_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
-                    ta = update(ta, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _ta, ta))
-                    _ta_min = allocate(state.dimensions, ("x", "y", "timesteps_day"))
-                    _ta_min = update(_ta_min, at[:, :, :], vs.TA_MIN_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
-                    ta_min = update(ta_min, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _ta_min, ta_min))
-                    _ta_max = allocate(state.dimensions, ("x", "y", "timesteps_day"))
-                    _ta_max = update(_ta_max, at[:, :, :], vs.TA_MAX_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
-                    ta_max = update(ta_max, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _ta_max, ta_max))
-                    _pet = allocate(state.dimensions, ("x", "y", "timesteps_day"))
-                    _pet = update(_pet, at[:, :, :], vs.PET_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 6 * 24])
-                    pet = update(pet, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _pet, pet))
+                    precip = update(precip, at[:, :, :], npx.where(mask[:, :, npx.newaxis], vs.PREC_DIST[i, vs.itt_forc:vs.itt_forc + 6 * 24][npx.newaxis, npx.newaxis, :], precip))
+                    ta = update(ta, at[:, :, :], npx.where(mask[:, :, npx.newaxis], vs.TA_DIST[i, vs.itt_forc:vs.itt_forc + 6 * 24][npx.newaxis, npx.newaxis, :], ta))
+                    ta_min = update(ta_min, at[:, :, :], npx.where(mask[:, :, npx.newaxis], vs.TA_MIN_DIST[i, vs.itt_forc:vs.itt_forc + 6 * 24][npx.newaxis, npx.newaxis, :], ta_min))
+                    ta_max = update(ta_max, at[:, :, :], npx.where(mask[:, :, npx.newaxis], vs.TA_MAX_DIST[i, vs.itt_forc:vs.itt_forc + 6 * 24][npx.newaxis, npx.newaxis, :], ta_max))
+                    pet = update(pet, at[:, :, :], npx.where(mask[:, :, npx.newaxis], vs.PET_DIST[i, vs.itt_forc:vs.itt_forc + 6 * 24][npx.newaxis, npx.newaxis, :], pet))
 
                 vs.itt_day = 0
                 vs.year = update(
@@ -669,9 +659,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         precip_5days = allocate(state.dimensions, ("x", "y", "timesteps_5days"))
                         for i, ii in enumerate(vs.station_ids):
                             mask = (vs.station_id == ii)
-                            _precip_5days = allocate(state.dimensions, ("x", "y", "timesteps_5days"))
-                            _precip_5days = update(_precip_5days, at[:, :, :], vs.PREC_DIST[i, :][npx.newaxis, npx.newaxis, vs.itt_forc:vs.itt_forc + 5 * 6 * 24])
-                            precip_5days = update(precip_5days, at[:, :, :], npx.where(mask[:, :, npx.newaxis], _precip_5days, precip_5days))
+                            precip_5days = update(precip_5days, at[:, :, :], npx.where(mask[:, :, npx.newaxis], vs.PREC_DIST[i, vs.itt_forc:vs.itt_forc + 5 * 6 * 24][npx.newaxis, npx.newaxis, :], precip_5days))
                         # irrigate if sum of rainfall for the next 5 days is less than 1 mm
                         sum_rainfall_next5days = npx.sum(precip_5days, axis=-1)
                         if (sum_rainfall_next5days <= 20).any() and vs.month[1] in [4, 5] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
