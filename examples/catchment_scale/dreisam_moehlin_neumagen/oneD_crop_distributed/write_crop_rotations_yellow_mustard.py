@@ -48,7 +48,7 @@ lu_ids_2000_2023[-1, :, :] = lu_ids_2018_2022[0, :, :]
 
 # read crop rotations from csv file
 file = base_path / "input" / "crop_rotations_2018_2022.csv"
-df_crop_rotations = pd.read_csv(file, sep=";", header=1)
+df_crop_rotations = pd.read_csv(file, sep=";", header=0)
 
 _summer_crops = summer_crops.copy()
 _summer_crops.remove(525)

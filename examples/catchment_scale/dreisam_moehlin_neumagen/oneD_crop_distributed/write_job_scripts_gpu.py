@@ -41,12 +41,12 @@ def main():
             for irrigation_scenario in irrigation_scenarios:
                 for soil_compaction_scenario in soil_compaction_scenarios:
                     for catch_crop_scenario in catch_crop_scenarios:
-                        jobs.append('python oneD_crop.py -b jax -d gpu --stress-test-meteo %s %s %s %s&\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
+                        jobs.append('python oneD_crop.py -b jax -d gpu --stress-test-meteo %s %s %s %s\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
         elif stress_test_meteo == "base_2000-2024":
             for irrigation_scenario in irrigation_scenarios:
                 for soil_compaction_scenario in soil_compaction_scenarios:
                     for catch_crop_scenario in catch_crop_scenarios:
-                        jobs.append('python oneD_crop.py -b jax -d gpu --stress-test-meteo %s %s %s %s&\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
+                        jobs.append('python oneD_crop.py -b jax -d gpu --stress-test-meteo %s %s %s %s\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
 
 
         else:
@@ -55,7 +55,7 @@ def main():
                     for irrigation_scenario in irrigation_scenarios:
                         for soil_compaction_scenario in soil_compaction_scenarios:
                             for catch_crop_scenario in catch_crop_scenarios:
-                                jobs.append('python oneD_crop.py -b jax -d gpu --stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s %s %s %s&\n' % (stress_test_meteo, magnitude, duration, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
+                                jobs.append('python oneD_crop.py -b jax -d gpu --stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s %s %s %s\n' % (stress_test_meteo, magnitude, duration, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
 
     file_path = base_path / "gpu_jobs.sh"
     file = open(file_path, "w")
