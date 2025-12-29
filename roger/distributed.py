@@ -499,6 +499,10 @@ def gather(arr, dimensions, var_grid):
     else:
         d1, d2 = var_grid[:2]
 
+    if d1 == 'n_stations' and d2 == 't_forc':
+        # neither x nor y dependent, nothing to do
+        return arr
+
     if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and not d2:
         # neither x nor y dependent, nothing to do
         return arr
@@ -514,10 +518,6 @@ def gather(arr, dimensions, var_grid):
     elif d1 in SCATTERED_DIMENSIONS[0] and d2 in SCATTERED_DIMENSIONS[1]:
         # x and y dependent
         return _gather_xy(nx, ny, arr)
-    
-    elif d1 not in SCATTERED_DIMENSIONS[0] and d2 not in SCATTERED_DIMENSIONS[1]:
-        # neither x nor y dependent, nothing to do
-        return arr
 
     else:
         raise NotImplementedError()
@@ -606,6 +606,10 @@ def scatter(arr, dimensions, var_grid):
 
     arr = npx.asarray(arr)
 
+    if d1 == 'n_stations' and d2 == 't_forc':
+        # neither x nor y dependent
+        return _scatter_constant(arr)
+
     if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and not d2:
         # neither x nor y dependent
         return _scatter_constant(arr)
@@ -621,10 +625,6 @@ def scatter(arr, dimensions, var_grid):
     elif d1 in SCATTERED_DIMENSIONS[0] and d2 in SCATTERED_DIMENSIONS[1]:
         # x and y dependent
         return _scatter_xy(nx, ny, arr)
-    
-    elif d1 not in SCATTERED_DIMENSIONS[0] and d2 not in SCATTERED_DIMENSIONS[1]:
-        # neither x nor y dependent
-        return _scatter_constant(arr)
 
     else:
         raise NotImplementedError("unreachable")
