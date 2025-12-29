@@ -503,7 +503,7 @@ def gather(arr, dimensions, var_grid):
         # neither x nor y dependent, nothing to do
         return arr
     
-    if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1]:
+    elif d1 not in SCATTERED_DIMENSIONS[0] and d2 not in SCATTERED_DIMENSIONS[1]:
         # neither x nor y dependent, nothing to do
         return arr
 
@@ -610,7 +610,7 @@ def scatter(arr, dimensions, var_grid):
         # neither x nor y dependent
         return _scatter_constant(arr)
     
-    if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1]:
+    elif d1 not in SCATTERED_DIMENSIONS[0] and d2 not in SCATTERED_DIMENSIONS[1]:
         # neither x nor y dependent
         return _scatter_constant(arr)
 
