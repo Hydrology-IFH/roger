@@ -502,10 +502,6 @@ def gather(arr, dimensions, var_grid):
     if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and not d2:
         # neither x nor y dependent, nothing to do
         return arr
-    
-    elif d1 not in SCATTERED_DIMENSIONS[0] and d2 not in SCATTERED_DIMENSIONS[1]:
-        # neither x nor y dependent, nothing to do
-        return arr
 
     if d1 in SCATTERED_DIMENSIONS[0] and not d2:
         # only x dependent
@@ -518,6 +514,10 @@ def gather(arr, dimensions, var_grid):
     elif d1 in SCATTERED_DIMENSIONS[0] and d2 in SCATTERED_DIMENSIONS[1]:
         # x and y dependent
         return _gather_xy(nx, ny, arr)
+    
+    elif d1 not in SCATTERED_DIMENSIONS[0] and d2 not in SCATTERED_DIMENSIONS[1]:
+        # neither x nor y dependent, nothing to do
+        return arr
 
     else:
         raise NotImplementedError()
@@ -609,10 +609,6 @@ def scatter(arr, dimensions, var_grid):
     if d1 not in SCATTERED_DIMENSIONS[0] and d1 not in SCATTERED_DIMENSIONS[1] and not d2:
         # neither x nor y dependent
         return _scatter_constant(arr)
-    
-    elif d1 not in SCATTERED_DIMENSIONS[0] and d2 not in SCATTERED_DIMENSIONS[1]:
-        # neither x nor y dependent
-        return _scatter_constant(arr)
 
     if d1 in SCATTERED_DIMENSIONS[0] and not d2:
         # only x dependent
@@ -625,6 +621,10 @@ def scatter(arr, dimensions, var_grid):
     elif d1 in SCATTERED_DIMENSIONS[0] and d2 in SCATTERED_DIMENSIONS[1]:
         # x and y dependent
         return _scatter_xy(nx, ny, arr)
+    
+    elif d1 not in SCATTERED_DIMENSIONS[0] and d2 not in SCATTERED_DIMENSIONS[1]:
+        # neither x nor y dependent
+        return _scatter_constant(arr)
 
     else:
         raise NotImplementedError("unreachable")
