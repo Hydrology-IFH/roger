@@ -2112,6 +2112,8 @@ def calculate_crop_phenology(state):
     vs = state.variables
     settings = state.settings
 
+    print("Calculating crop phenology...")
+
     if not settings.enable_offline_transport:
         if (vs.year[vs.tau] > vs.year[vs.taum1]) & (vs.itt > 1):
             if settings.enable_crop_rotation:
