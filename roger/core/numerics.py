@@ -206,8 +206,6 @@ def calc_storage(state):
     vs = state.variables
     settings = state.settings
 
-    print("Calculating storage...")
-
     if not settings.enable_groundwater:
         vs.update(calc_storage_kernel(state))
     elif settings.enable_groundwater_boundary:
