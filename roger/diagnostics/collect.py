@@ -62,6 +62,8 @@ class Collect(RogerDiagnostic):
         vs = state.variables
         clc_vs = self.variables
 
+        print("Initializing collect diagnose...")
+
         for key in self.output_variables:
             if self._has_timestep_dim(state, key):
                 setattr(clc_vs, key, getattr(vs, key)[..., vs.tau])
@@ -82,3 +84,5 @@ class Collect(RogerDiagnostic):
             setattr(clc_vs, key, val)
 
         self.write_output(state)
+
+        print("Wrote collect diagnostic to file.")
