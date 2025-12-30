@@ -42,7 +42,7 @@ OUTPUT_COLLECT:
 # - "S_sat_ss"  # storage volume at saturation of subsoil (mm)
 # - "theta_rz"  # soil water content of root zone (-)
 # - "theta_ss"  # soil water content of subsoil (-)
-# - "theta"  # soil water content (-)
+- "theta"  # soil water content (-)
 # - "S_snow"  # storage volume snow cover (mm)
 # - "irr_demand"  # irrigation demand (mm/day)
 # - "lu_id"
