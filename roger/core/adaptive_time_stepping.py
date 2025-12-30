@@ -4,7 +4,32 @@ from roger.core.operators import numpy as npx, update, at
 from roger.variables import allocate
 
 
-@roger_routine
+@roger_routine(dist_safe=False, 
+               local_variables=[
+               "EVENTS", 
+               "event_id_counter", 
+               "event_id", 
+               "tau",
+               "taum1",
+               "PREC", 
+               "rain_event", 
+               "rain_event_csum", 
+               "rain_event_sum",
+               "prec_day",
+               "swe",
+               "swe_top",
+               "ta_day",
+               "prec",
+               "ta",
+               "dt_secs",
+               "time",
+               "time_event0",
+               "pet",
+               "pet_res",
+               "pet_day",
+               "dt",
+               "itt_day",
+               ])
 def adaptive_time_stepping(state):
     vs = state.variables
     settings = state.settings

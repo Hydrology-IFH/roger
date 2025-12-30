@@ -19,8 +19,8 @@ OUTPUT_FREQUENCY: 86400  # output frequency in seconds
 OUTPUT_RATE:
 # - "prec"
 # - "aet"  # actual evapotranspiration (mm/day)
-- "transp"  # transpiration (mm/day)
-- "evap_soil"  # soil evaporation (mm/day)
+# - "transp"  # transpiration (mm/day)
+# - "evap_soil"  # soil evaporation (mm/day)
 # - "inf_mat_rz"  # soil matrix infiltration into root zone (mm/day)
 # - "inf_mp_rz"  # macropore infiltration into root zone (mm/day)
 # - "inf_sc_rz"  # shrinkage crack infiltration into root zone (mm/day)
@@ -44,5 +44,5 @@ OUTPUT_COLLECT:
 # - "theta_ss"  # soil water content of subsoil (-)
 - "theta"  # soil water content (-)
 # - "S_snow"  # storage volume snow cover (mm)
-- "irr_demand"  # irrigation demand (mm/day)
-- "lu_id"
+# - "irr_demand"  # irrigation demand (mm/day)
+# - "lu_id"
