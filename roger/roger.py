@@ -374,6 +374,7 @@ class RogerSetup(metaclass=abc.ABCMeta):
             numerics,
             transport,
             adaptive_time_stepping,
+            adaptive_time_stepping_dist_safe,
         )
 
         self._ensure_setup_done()
@@ -394,7 +395,10 @@ class RogerSetup(metaclass=abc.ABCMeta):
                     self.set_forcing(state)
                 if settings.enable_adaptive_time_stepping:
                     with state.timers["adaptive time-stepping"]:
-                        adaptive_time_stepping.adaptive_time_stepping(state)
+                        if rs.mpi_comm:
+                            adaptive_time_stepping_dist_safe.adaptive_time_stepping(state)
+                        else:
+                            adaptive_time_stepping.adaptive_time_stepping(state)
                 with state.timers["time-variant parameters"]:
                     self.set_parameters(state)
                 if settings.enable_crop_phenology:

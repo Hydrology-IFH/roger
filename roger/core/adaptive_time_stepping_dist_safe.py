@@ -1,37 +1,30 @@
 from roger import roger_kernel, roger_routine, KernelOutput
-from roger.core.utilities import _get_first_row_no, _get_last_row_no
 from roger.core.operators import numpy as npx, update, at
 from roger.variables import allocate
 
 
-@roger_routine
-def adaptive_time_stepping_film_flow(state):
-    vs = state.variables
-
-    cond_event = (vs.EVENTS == vs.event_id_counter) & (vs.EVENTS > 0)
-    if cond_event.any():
-        t1 = _get_first_row_no(cond_event, vs.event_id[vs.tau])[0]
-        t2 = _get_last_row_no(cond_event, vs.event_id[vs.tau])[0]
-        prec_event = vs.PREC[t1:t2]
-        
-        vs.rain_event = update(vs.rain_event, at[2:-2, 2:-2, t1:t2], prec_event[npx.newaxis, npx.newaxis, :])
-        vs.rain_event_csum = update(vs.rain_event_csum, at[2:-2, 2:-2, t1:t2], npx.cumsum(prec_event, axis=-1))
-        vs.rain_event_sum = update(vs.rain_event_sum, at[2:-2, 2:-2], npx.sum(prec_event, axis=-1))
-
-
-@roger_routine
+@roger_routine(dist_safe=False, 
+               local_variables=[
+               "event_id_counter", 
+               "event_id", 
+               "tau",
+               "taum1",
+               "prec_day",
+               "swe",
+               "swe_top",
+               "ta_day",
+               "prec",
+               "ta",
+               "dt_secs",
+               "time",
+               "time_event0",
+               "pet",
+               "pet_res",
+               "pet_day",
+               "dt",
+               "itt_day",
+               ])
 def adaptive_time_stepping(state):
-    vs = state.variables
-    settings = state.settings
-
-    vs.update(adaptive_time_stepping_kernel(state))
-
-    if settings.enable_film_flow and not settings.enable_distributed_input:
-        adaptive_time_stepping_film_flow(state)
-
-
-@roger_kernel
-def adaptive_time_stepping_kernel(state):
     vs = state.variables
     settings = state.settings
 
@@ -123,9 +116,41 @@ def adaptive_time_stepping_kernel(state):
         npx.where(cond5[npx.newaxis, npx.newaxis], 1, 0),
     )
 
-    prec_daily, ta_daily, pet_daily = calc_prec_ta_pet_daily(state)
-    prec_hourly, ta_hourly, pet_hourly = calc_prec_ta_pet_hourly(state)
-    prec_10mins, ta_10mins, pet_10mins = calc_prec_ta_pet_10_minutes(state)
+    prec_daily = npx.sum(vs.prec_day, axis=-1)[2:-2, 2:-2]
+    ta_daily = npx.nanmean(vs.ta_day[2:-2, 2:-2, 0 : 24 * 6], axis=-1)
+    pet_daily = npx.sum(vs.pet_day[2:-2, 2:-2, 0 : 24 * 6], axis=-1)
+
+    idx = allocate(state.dimensions, ("x", "y", 6 * 24))
+    idx = update(
+        idx,
+        at[2:-2, 2:-2, :],
+        npx.arange(0, 6 * 24)[npx.newaxis, npx.newaxis, :],
+    )
+
+    prec_hourly = npx.sum(
+        npx.where(
+            (idx[2:-2, 2:-2, :] >= vs.itt_day) & (idx[2:-2, 2:-2, :] < vs.itt_day + 6), vs.prec_day[2:-2, 2:-2, :], 0
+        ),
+        axis=-1,
+    )
+    ta_hourly = npx.nanmean(
+        npx.where(
+            (idx[2:-2, 2:-2, :] >= vs.itt_day) & (idx[2:-2, 2:-2, :] < vs.itt_day + 6),
+            vs.ta_day[2:-2, 2:-2, :],
+            npx.nan,
+        ),
+        axis=-1,
+    )
+    pet_hourly = npx.sum(
+        npx.where(
+            (idx[2:-2, 2:-2, :] >= vs.itt_day) & (idx[2:-2, 2:-2, :] < vs.itt_day + 6), vs.pet_day[2:-2, 2:-2, :], 0
+        ),
+        axis=-1,
+    )
+
+    prec_10mins = vs.prec_day[2:-2, 2:-2, vs.itt_day]
+    ta_10mins = vs.ta_day[2:-2, 2:-2, vs.itt_day]
+    pet_10mins = vs.pet_day[2:-2, 2:-2, vs.itt_day]
 
     # no event or snowfall - daily time steps
     vs.prec = update(
@@ -366,72 +391,3 @@ def adaptive_time_stepping_kernel(state):
 
     # set residual PET
     vs.pet_res = update(vs.pet_res, at[2:-2, 2:-2], vs.pet[2:-2, 2:-2])
-
-    return KernelOutput(
-        prec=vs.prec,
-        ta=vs.ta,
-        pet=vs.pet,
-        pet_res=vs.pet_res,
-        dt=vs.dt,
-        dt_secs=vs.dt_secs,
-        itt_day=vs.itt_day,
-        event_id=vs.event_id,
-        time_event0=vs.time_event0,
-        event_id_counter=vs.event_id_counter,
-    )
-
-
-@roger_kernel
-def calc_prec_ta_pet_10_minutes(state):
-    vs = state.variables
-
-    prec = vs.prec_day[2:-2, 2:-2, vs.itt_day]
-    ta = vs.ta_day[2:-2, 2:-2, vs.itt_day]
-    pet = vs.pet_day[2:-2, 2:-2, vs.itt_day]
-
-    return prec, ta, pet
-
-
-@roger_kernel
-def calc_prec_ta_pet_hourly(state):
-    vs = state.variables
-    idx = allocate(state.dimensions, ("x", "y", 6 * 24))
-    idx = update(
-        idx,
-        at[2:-2, 2:-2, :],
-        npx.arange(0, 6 * 24)[npx.newaxis, npx.newaxis, :],
-    )
-
-    prec = npx.sum(
-        npx.where(
-            (idx[2:-2, 2:-2, :] >= vs.itt_day) & (idx[2:-2, 2:-2, :] < vs.itt_day + 6), vs.prec_day[2:-2, 2:-2, :], 0
-        ),
-        axis=-1,
-    )
-    ta = npx.nanmean(
-        npx.where(
-            (idx[2:-2, 2:-2, :] >= vs.itt_day) & (idx[2:-2, 2:-2, :] < vs.itt_day + 6),
-            vs.ta_day[2:-2, 2:-2, :],
-            npx.nan,
-        ),
-        axis=-1,
-    )
-    pet = npx.sum(
-        npx.where(
-            (idx[2:-2, 2:-2, :] >= vs.itt_day) & (idx[2:-2, 2:-2, :] < vs.itt_day + 6), vs.pet_day[2:-2, 2:-2, :], 0
-        ),
-        axis=-1,
-    )
-
-    return prec, ta, pet
-
-
-@roger_kernel
-def calc_prec_ta_pet_daily(state):
-    vs = state.variables
-
-    prec = npx.sum(vs.prec_day, axis=-1)[2:-2, 2:-2]
-    ta = npx.nanmean(vs.ta_day[2:-2, 2:-2, 0 : 24 * 6], axis=-1)
-    pet = npx.sum(vs.pet_day[2:-2, 2:-2, 0 : 24 * 6], axis=-1)
-
-    return prec, ta, pet
