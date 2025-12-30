@@ -6,15 +6,35 @@ from roger.variables import allocate
 
 @roger_routine(dist_safe=False, 
                local_variables=[
-               "EVENTS", 
+                "EVENTS",
+                "event_id_counter",
+                "event_id",
+                "tau",
+                "PREC",
+                "rain_event",
+                "rain_event_csum",
+                "rain_event_sum",
+               ])
+def adaptive_time_stepping_film_flow(state):
+    vs = state.variables
+
+    cond_event = (vs.EVENTS == vs.event_id_counter) & (vs.EVENTS > 0)
+    if cond_event.any():
+        t1 = _get_first_row_no(cond_event, vs.event_id[vs.tau])[0]
+        t2 = _get_last_row_no(cond_event, vs.event_id[vs.tau])[0]
+        prec_event = vs.PREC[t1:t2]
+        
+        vs.rain_event = update(vs.rain_event, at[2:-2, 2:-2, t1:t2], prec_event[npx.newaxis, npx.newaxis, :])
+        vs.rain_event_csum = update(vs.rain_event_csum, at[2:-2, 2:-2, t1:t2], npx.cumsum(prec_event, axis=-1))
+        vs.rain_event_sum = update(vs.rain_event_sum, at[2:-2, 2:-2], npx.sum(prec_event, axis=-1))
+
+
+@roger_routine(dist_safe=False, 
+               local_variables=[
                "event_id_counter", 
                "event_id", 
                "tau",
                "taum1",
-               "PREC", 
-               "rain_event", 
-               "rain_event_csum", 
-               "rain_event_sum",
                "prec_day",
                "swe",
                "swe_top",
@@ -36,16 +56,8 @@ def adaptive_time_stepping(state):
 
     vs.update(adaptive_time_stepping_kernel(state))
 
-    if settings.enable_film_flow:
-        cond_event = (vs.EVENTS == vs.event_id_counter) & (vs.EVENTS > 0)
-        if cond_event.any():
-            t1 = _get_first_row_no(cond_event, vs.event_id[vs.tau])[0]
-            t2 = _get_last_row_no(cond_event, vs.event_id[vs.tau])[0]
-            prec_event = vs.PREC[t1:t2]
-            
-            vs.rain_event = update(vs.rain_event, at[2:-2, 2:-2, t1:t2], prec_event[npx.newaxis, npx.newaxis, :])
-            vs.rain_event_csum = update(vs.rain_event_csum, at[2:-2, 2:-2, t1:t2], npx.cumsum(prec_event, axis=-1))
-            vs.rain_event_sum = update(vs.rain_event_sum, at[2:-2, 2:-2], npx.sum(prec_event, axis=-1))
+    if settings.enable_film_flow and not settings.enable_distributed_input:
+        adaptive_time_stepping_film_flow(state)
 
 
 @roger_kernel
