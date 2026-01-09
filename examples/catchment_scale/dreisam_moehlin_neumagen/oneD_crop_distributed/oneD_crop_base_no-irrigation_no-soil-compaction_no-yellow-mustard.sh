@@ -10,7 +10,8 @@
 #SBATCH --output=oneD_crop_base_no-irrigation_no-soil-compaction_no-yellow-mustard.out
 #SBATCH --error=oneD_crop_base_no-irrigation_no-soil-compaction_no-yellow-mustard_err.out
 #SBATCH --export=ALL
- 
+module load lib/hdf5/1.12-gnu-14.2-openmpi-4.1
+module load devel/cuda/12.6
 module load devel/miniforge
 conda activate roger-gpu
 cd /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/oneD_crop_distributed
