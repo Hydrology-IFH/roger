@@ -258,7 +258,7 @@ def calc_potential_lateral_subsurface_runoff(state):
     vs.q_sub_mat_pot = update(
         vs.q_sub_mat_pot,
         at[2:-2, 2:-2],
-        ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * settings.dx * 1000 * vs.dt) * 1e-6 * (1 / (settings.dx * vs.z_sat[2:-2, 2:-2, vs.tau])))
+        ((vs.ks[2:-2, 2:-2] * vs.slope[2:-2, 2:-2] * vs.z_sat[2:-2, 2:-2, vs.tau] * settings.dx * 1000 * vs.dt) * 1e-6 * (1 / (settings.dx * (vs.z_soil[2:-2, 2:-2]/1000))))
         * vs.maskCatch[2:-2, 2:-2],
     )
 
@@ -284,7 +284,7 @@ def calc_potential_lateral_subsurface_runoff(state):
                 + vs.z_sat_layer_7[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_7[2:-2, 2:-2] * vs.dt * settings.dx * 1000 * vs.dmph[2:-2, 2:-2] * 1e-6 * settings.r_mp**2 * settings.pi * 1e-6 
                 + vs.z_sat_layer_8[2:-2, 2:-2, vs.tau] * vs.v_mp_layer_8[2:-2, 2:-2] * vs.dt * settings.dx * 1000 * vs.dmph[2:-2, 2:-2] * 1e-6 * settings.r_mp**2 * settings.pi * 1e-6 
             )
-            * (1 / (settings.dx * vs.z_sat[2:-2, 2:-2, vs.tau]))
+            * (1 / (settings.dx * (vs.z_soil[2:-2, 2:-2]/1000)))
         )
         * vs.maskCatch[2:-2, 2:-2],
     )

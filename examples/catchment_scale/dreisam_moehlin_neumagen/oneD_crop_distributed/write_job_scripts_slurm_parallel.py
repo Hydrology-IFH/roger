@@ -35,7 +35,7 @@ def main():
                 for soil_compaction_scenario in soil_compaction_scenarios:
                     for catch_crop_scenario in catch_crop_scenarios:
                         script_name = f"oneD_crop_{stress_test_meteo}_{irrigation_scenario}_{soil_compaction_scenario}_{catch_crop_scenario}"
-                        output_path_ws = base_path_ws / "output" / dir_name
+                        output_path_ws = base_path_ws / "output"
                         lines = []
                         lines.append("#!/bin/bash\n")
                         lines.append("#SBATCH --time=72:00:00\n")
@@ -68,7 +68,7 @@ def main():
                         lines.append("cp -r %s/config.yml ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                         lines.append("cp -r %s/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                         lines.append('sleep 90\n')
-                        lines.append('mpirun --bind-to core:overload-allowed --map-by core -report-bindings python oneD_crop.py -b numpy -d cpu -n 6 2 --stress-test-meteo %s %s %s %s -td\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
+                        lines.append('mpirun --bind-to core:overload-allowed --map-by core -report-bindings python oneD_crop.py -b numpy -d cpu -n 6 2 --stress-test-meteo %s %s %s %s -td "${TMPDIR}"\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
                         lines.append("# Move output from local SSD to global workspace\n")
                         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                         lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
@@ -85,7 +85,7 @@ def main():
                 for soil_compaction_scenario in soil_compaction_scenarios:
                     for catch_crop_scenario in catch_crop_scenarios:
                         script_name = f"oneD_crop_{stress_test_meteo}_{irrigation_scenario}_{soil_compaction_scenario}_{catch_crop_scenario}"
-                        output_path_ws = base_path_ws / "output" / dir_name
+                        output_path_ws = base_path_ws / "output"
                         lines = []
                         lines.append("#!/bin/bash\n")
                         lines.append("#SBATCH --time=72:00:00\n")
@@ -118,7 +118,7 @@ def main():
                         lines.append("cp -r %s/config.yml ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                         lines.append("cp -r %s/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                         lines.append('sleep 90\n')
-                        lines.append('mpirun --bind-to core:overload-allowed --map-by core -report-bindings python oneD_crop.py -b numpy -d cpu -n 6 6 --stress-test-meteo %s %s %s %s -td\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
+                        lines.append('mpirun --bind-to core:overload-allowed --map-by core -report-bindings python oneD_crop.py -b numpy -d cpu -n 6 6 --stress-test-meteo %s %s %s %s -td "${TMPDIR}"\n' % (stress_test_meteo, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
                         lines.append("# Move output from local SSD to global workspace\n")
                         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                         lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
@@ -138,7 +138,7 @@ def main():
                         for soil_compaction_scenario in soil_compaction_scenarios:
                             for catch_crop_scenario in catch_crop_scenarios:
                                 script_name = f"oneD_crop_{stress_test_meteo}_magnitude{magnitude}_duration{duration}_{irrigation_scenario}_{soil_compaction_scenario}_{catch_crop_scenario}"
-                                output_path_ws = base_path_ws / "output" / dir_name
+                                output_path_ws = base_path_ws / "output"
                                 lines = []
                                 lines.append("#!/bin/bash\n")
                                 lines.append("#SBATCH --time=72:00:00\n")
@@ -171,7 +171,7 @@ def main():
                                 lines.append("cp -r %s/config.yml ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                                 lines.append("cp -r %s/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
                                 lines.append('sleep 90\n')
-                                lines.append('mpirun --bind-to core:overload-allowed --map-by core -report-bindings python oneD_crop.py -b numpy -d cpu -n 6 6 --stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s %s %s %s -td\n' % (stress_test_meteo, magnitude, duration, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
+                                lines.append('mpirun --bind-to core:overload-allowed --map-by core -report-bindings python oneD_crop.py -b numpy -d cpu -n 6 6 --stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s %s %s %s -td "${TMPDIR}"\n' % (stress_test_meteo, magnitude, duration, scenario_flags[irrigation_scenario], scenario_flags[soil_compaction_scenario], scenario_flags[catch_crop_scenario]))
                                 lines.append("# Move output from local SSD to global workspace\n")
                                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                                 lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))

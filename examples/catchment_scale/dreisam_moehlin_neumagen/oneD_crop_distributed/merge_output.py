@@ -1,6 +1,7 @@
 import os
 import glob
 import h5netcdf
+import xarray as xr
 import datetime
 from pathlib import Path
 import numpy as onp
@@ -12,16 +13,17 @@ import roger
 def main():
     base_path = Path(__file__).parent
     # directory of results
-    base_path_output = base_path / "output"
+    base_path_output = Path("/Volumes/LaCie/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed") / "output"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
 
-    irrigation_scenarios = ["no-irrigation", "irrigation"]
-    catch_crop_scenarios = ["no-yellow-mustard", "yellow-mustard"]
-    soil_compaction_scenarios = ["no-soil-compaction", "soil-compaction"]
-    meteo_stress = ["base", "base_2000-2024", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]
-    magnitudes = [1, 2]
-    durations = [2, 3]
+    irrigation_scenarios = ["no-irrigation"]
+    catch_crop_scenarios = ["no-yellow-mustard"]
+    soil_compaction_scenarios = ["no-soil-compaction"]
+    meteo_stress = ["base"]
+    magnitudes = [2]
+    durations = [0]
+
     meteo_stress_tests = []
     for meteo in meteo_stress:
         if meteo == "base" or meteo == "base_2000-2024":
@@ -48,7 +50,7 @@ def main():
                                     institution="University of Freiburg, Chair of Hydrology",
                                     references="",
                                     comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                                    model_structure="SVAT model with free drainage and explicit crop growth dynamics",
+                                    model_structure="ONED model with free drainage and explicit crop growth dynamics",
                                     roger_version=f"{roger.__version__}",
                                 )
                                 # collect dimensions
@@ -63,6 +65,7 @@ def main():
                                             }
                                             time = onp.array(df.variables.get("Time"))
                                 for dfs in diag_files:
+                                    print(f"Merging file {dfs}...")
                                     with h5netcdf.File(dfs, "r", decode_vlen_strings=False) as df:
                                         if not f.dimensions:
                                             f.dimensions = dict_dim
@@ -78,11 +81,13 @@ def main():
                                             var_obj = df.variables.get("Time")
                                             v.attrs.update(time_origin=var_obj.attrs["time_origin"], units=var_obj.attrs["units"])
                                             v[:] = time
+                                    with xr.open_dataset(dfs, engine="h5netcdf") as ds:
                                         for key in list(df.variables.keys()):
-                                            var_obj = df.variables.get(key)
+                                            var_obj = ds[key]
                                             if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
+                                                print(f"Merging variable {key}...")
                                                 v = f.create_variable(key, ("x", "y", "Time"), float, compression="gzip", compression_opts=1)
-                                                vals = onp.array(var_obj)
+                                                vals = var_obj.values
                                                 v[:, :, :] = vals.swapaxes(0, 2)
                                                 v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
     return

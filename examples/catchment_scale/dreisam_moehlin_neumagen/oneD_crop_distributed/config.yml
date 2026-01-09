@@ -17,10 +17,11 @@ y_origin: 5325918.5
 OUTPUT_FREQUENCY: 86400  # output frequency in seconds
 # simulated hydrological fluxes
 OUTPUT_RATE:
-# - "prec"
-# - "aet"  # actual evapotranspiration (mm/day)
-# - "transp"  # transpiration (mm/day)
-# - "evap_soil"  # soil evaporation (mm/day)
+- "prec" # precipitation (mm/day)
+- "aet"  # actual evapotranspiration (mm/day)
+- "transp"  # transpiration (mm/day)
+- "evap_soil"  # soil evaporation (mm/day)
+- "q_sur"  # surface runoff (mm/day)
 # - "inf_mat_rz"  # soil matrix infiltration into root zone (mm/day)
 # - "inf_mp_rz"  # macropore infiltration into root zone (mm/day)
 # - "inf_sc_rz"  # shrinkage crack infiltration into root zone (mm/day)
@@ -28,8 +29,10 @@ OUTPUT_RATE:
 # - "q_rz"  # percolation from root zone (mm/day)
 - "q_ss"  # percolation from subsoil (mm/day)
 # - "cpr_rz" # capillary rise from subsoil into root zone (mm/day)
-# - "dS"  # change of storage volume (mm/day)
-# - "q_snow"  # snow melt (mm/day)
+- "cpr_ss" # capillary rise from subsoil into root zone (mm/day)
+- "q_sub_rz"  # lateral subsurface runoff from root zone (mm/day)
+- "q_sub_ss"  # lateral subsurface runoff from subsoil (mm/day)
+
 
 # simulated hydrological storages
 OUTPUT_COLLECT:
@@ -40,9 +43,9 @@ OUTPUT_COLLECT:
 # - "S_pwp_ss"  # storage volume at permanent wilting point of subsoil (mm)
 # - "S_fc_ss"  # storage volume at field capacity of subsoil (mm)
 # - "S_sat_ss"  # storage volume at saturation of subsoil (mm)
-# - "theta_rz"  # soil water content of root zone (-)
+- "theta_rz"  # soil water content of root zone (-)
 # - "theta_ss"  # soil water content of subsoil (-)
 - "theta"  # soil water content (-)
 # - "S_snow"  # storage volume snow cover (mm)
 # - "irr_demand"  # irrigation demand (mm/day)
-# - "lu_id"
+- "lu_id"
