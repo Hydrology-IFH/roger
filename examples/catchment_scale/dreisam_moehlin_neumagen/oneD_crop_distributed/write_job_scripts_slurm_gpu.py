@@ -47,7 +47,7 @@ def main():
                         output_path_ws = base_path_ws / "output"
                         lines = []
                         lines.append("#!/bin/bash\n")
-                        lines.append("#SBATCH --time=6:00:00\n")
+                        lines.append("#SBATCH --time=8:00:00\n")
                         lines.append("#SBATCH --gres=gpu:a100:1\n")
                         lines.append("#SBATCH --ntasks=1\n")
                         lines.append("#SBATCH --cpus-per-task=1\n")
@@ -95,7 +95,7 @@ def main():
                         output_path_ws = base_path_ws / "output"
                         lines = []
                         lines.append("#!/bin/bash\n")
-                        lines.append("#SBATCH --time=6:00:00\n")
+                        lines.append("#SBATCH --time=8:00:00\n")
                         lines.append("#SBATCH --gres=gpu:a100:1\n")
                         lines.append("#SBATCH --ntasks=1\n")
                         lines.append("#SBATCH --cpus-per-task=1\n")
@@ -147,7 +147,7 @@ def main():
                                 output_path_ws = base_path_ws / "output"
                                 lines = []
                                 lines.append("#!/bin/bash\n")
-                                lines.append("#SBATCH --time=6:00:00\n")
+                                lines.append("#SBATCH --time=8:00:00\n")
                                 lines.append("#SBATCH --gres=gpu:a100:1\n")
                                 lines.append("#SBATCH --ntasks=1\n")
                                 lines.append("#SBATCH --cpus-per-task=1\n")
