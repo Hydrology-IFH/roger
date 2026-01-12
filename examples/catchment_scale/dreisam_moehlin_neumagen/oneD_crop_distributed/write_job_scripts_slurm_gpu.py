@@ -9,8 +9,8 @@ import click
 def main():
     base_path = Path(__file__).parent
     dir_name = os.path.basename(str(Path(__file__).parent))
-    base_path_bwhpc = "/pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed"
-    base_path_ws = Path("/pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed")
+    base_path_bwhpc = f"/pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/{dir_name}"
+    base_path_ws = Path(f"/pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/{dir_name}")
 
     # identifiers of the simulations
     # stress_tests_meteo = ["base", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]
@@ -62,7 +62,7 @@ def main():
                         lines.append("module load devel/cuda/12.6\n")
                         lines.append('module load devel/miniforge\n')
                         lines.append("conda activate roger-gpu\n")
-                        lines.append(f"cd {base_path_bwhpc}/{dir_name}\n")
+                        lines.append(f"cd {base_path_bwhpc}\n")
                         lines.append(" \n")
                         lines.append("mkdir ${TMPDIR}/roger\n")
                         lines.append("mkdir ${TMPDIR}/roger/examples\n")
