@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=8:00:00
+#SBATCH --time=12:00:00
 #SBATCH --gres=gpu:a100:1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=32000
+#SBATCH --mem=24000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=oneD_crop_spring-drought_magnitude2_duration3_no-irrigation_no-soil-compaction_no-yellow-mustard
