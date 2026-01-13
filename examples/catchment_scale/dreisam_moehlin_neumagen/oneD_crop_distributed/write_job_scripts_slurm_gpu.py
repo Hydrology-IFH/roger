@@ -48,7 +48,7 @@ def main():
                         lines = []
                         lines.append("#!/bin/bash\n")
                         lines.append("#SBATCH --time=12:00:00\n")
-                        lines.append("#SBATCH --gres=gpu:a30:1\n")
+                        lines.append("#SBATCH --gres=gpu:a100:1\n")
                         lines.append("#SBATCH --ntasks=1\n")
                         lines.append("#SBATCH --cpus-per-task=1\n")
                         lines.append("#SBATCH --mem=24000\n")
@@ -96,7 +96,7 @@ def main():
                         lines = []
                         lines.append("#!/bin/bash\n")
                         lines.append("#SBATCH --time=12:00:00\n")
-                        lines.append("#SBATCH --gres=gpu:a30:1\n")
+                        lines.append("#SBATCH --gres=gpu:a100:1\n")
                         lines.append("#SBATCH --ntasks=1\n")
                         lines.append("#SBATCH --cpus-per-task=1\n")
                         lines.append("#SBATCH --mem=24000\n")
@@ -148,7 +148,7 @@ def main():
                                 lines = []
                                 lines.append("#!/bin/bash\n")
                                 lines.append("#SBATCH --time=12:00:00\n")
-                                lines.append("#SBATCH --gres=gpu:a30:1\n")
+                                lines.append("#SBATCH --gres=gpu:a100:1\n")
                                 lines.append("#SBATCH --ntasks=1\n")
                                 lines.append("#SBATCH --cpus-per-task=1\n")
                                 lines.append("#SBATCH --mem=24000\n")
