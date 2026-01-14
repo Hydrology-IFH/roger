@@ -86,13 +86,13 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             with h5netcdf.File(nc_file, "r", decode_vlen_strings=False) as infile:
                 var_obj = infile.variables[var]
                 if var in ["lu_id"]:
-                    vals = npx.array(var_obj)
+                    vals = npx.array(var_obj).swapaxes(0, 1)
                     vals1 = npx.where(vals <= -9999, 999, vals)
                 elif var in ["dmph", "dmpv", "lmpv", "z_soil", "sealing", "prec_weight", "pet_weight", "ta_offset"]:
-                    vals = npx.array(var_obj)
+                    vals = npx.array(var_obj).swapaxes(0, 1)
                     vals1 = npx.where(vals <= -9999, 0, vals)
                 else:
-                    vals = npx.array(var_obj)
+                    vals = npx.array(var_obj).swapaxes(0, 1)
                     vals1 = npx.where(vals <= -9999, npx.nan, vals)
                 return vals1
             
@@ -101,13 +101,13 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             with xr.open_dataset(nc_file) as infile:
                 var_obj = infile.variables[var]
                 if var in ["lanu"]:
-                    vals = npx.array(var_obj)
+                    vals = npx.array(var_obj).swapaxes(0, 1)
                     vals1 = npx.where(vals <= -9999, 999, vals)
                 elif var in ["MPD_H", "MPD_V", "MPL_V", "GRUND", "vers", "F_n_h_y", "F_et", "F_t"]:
-                    vals = npx.array(var_obj)
+                    vals = npx.array(var_obj).swapaxes(0, 1)
                     vals1 = npx.where(vals <= -9999, 0, vals)
                 else:
-                    vals = npx.array(var_obj)
+                    vals = npx.array(var_obj).swapaxes(0, 1)
                     vals1 = npx.where(vals <= -9999, npx.nan, vals)
                 return vals1
 

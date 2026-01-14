@@ -6,11 +6,10 @@
 #SBATCH --mem=24000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=oneD_crop_spring-drought_magnitude2_duration3_no-irrigation_no-soil-compaction_no-yellow-mustard
-#SBATCH --output=oneD_crop_spring-drought_magnitude2_duration3_no-irrigation_no-soil-compaction_no-yellow-mustard.out
-#SBATCH --error=oneD_crop_spring-drought_magnitude2_duration3_no-irrigation_no-soil-compaction_no-yellow-mustard_err.out
+#SBATCH --job-name=oneD_crop_base_soil-compaction
+#SBATCH --output=oneD_crop_base_soil-compaction.out
+#SBATCH --error=oneD_crop_base_soil-compaction_err.out
 #SBATCH --export=ALL
-
 module load lib/hdf5/1.12-gnu-14.2-openmpi-4.1
 module load devel/cuda/12.6
 module load devel/miniforge
@@ -28,8 +27,7 @@ cp -r /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_mo
 cp -r /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
 sleep 120
 cd ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
-python oneD_crop.py -b jax -d gpu --stress-test-meteo spring-drought --stress-test-meteo-magnitude 2 --stress-test-meteo-duration 3   
-# Move output from local SSD to global workspace
+python oneD_crop.py -b jax -d gpu --stress-test-meteo base --soil-compaction -td "${TMPDIR}"# Move output from local SSD to global workspace
 echo "Move output to /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/output"
 mkdir -p /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/output
-mv "${TMPDIR}"/output/ONEDCROP_*.nc /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/output
+mv "${TMPDIR}"/roger/examples/catchment_scale/dreisam_moehlin_neumagen/output/ONEDCROP_*.nc /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/output

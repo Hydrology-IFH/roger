@@ -2,9 +2,9 @@
 # name of the model run; is used to name the output files
 identifier: ONEDCROP
 # number of grid cells in x-direction
-nx: 1242
+nx: 1554
 # number of grid cells in y-direction
-ny: 1554
+ny: 1242
 # spatial discretization in x-direction (in meters)
 dx: 25
 # spatial discretization in y-direction (in meters)
@@ -44,8 +44,8 @@ OUTPUT_COLLECT:
 # - "S_fc_ss"  # storage volume at field capacity of subsoil (mm)
 # - "S_sat_ss"  # storage volume at saturation of subsoil (mm)
 - "theta_rz"  # soil water content of root zone (-)
-# - "theta_ss"  # soil water content of subsoil (-)
+- "theta_ss"  # soil water content of subsoil (-)
 - "theta"  # soil water content (-)
 # - "S_snow"  # storage volume snow cover (mm)
-# - "irr_demand"  # irrigation demand (mm/day)
+- "irr_demand"  # irrigation demand (mm/day)
 - "lu_id"
