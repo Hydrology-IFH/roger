@@ -15,12 +15,13 @@ module load devel/cuda/12.6
 module load devel/miniforge
 conda activate roger-gpu
 cd /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
- 
+
 mkdir ${TMPDIR}/roger
 mkdir ${TMPDIR}/roger/examples
 mkdir ${TMPDIR}/roger/examples/catchment_scale
 mkdir ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen
-mkdir ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/output
+mkdir ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
+mkdir ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/output
 cp -r /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/oneD_crop.py ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
 cp -r /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/parameters_roger.nc ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
 cp -r /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/config.yml ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
