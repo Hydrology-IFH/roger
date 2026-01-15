@@ -107,7 +107,7 @@ def main():
         lines.append("# Move output from local SSD to global workspace\n")
         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
         lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
-        lines.append('mv "${TMPDIR}"/roger/examples/catchment_scale/dreisam_moehlin_neumagen/output/ONEDCROP_*.nc %s' % (output_path_ws.as_posix()))
+        lines.append('mv "${TMPDIR}"/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/output/ONEDCROP_*.nc %s' % (output_path_ws.as_posix()))
         file_path = base_path / f"{script_name}.sh"
         file = open(file_path, "w")
         file.writelines(lines)
