@@ -28,7 +28,7 @@ cp -r /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_mo
 cp -r /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
 sleep 120
 cd ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
-python oneD_crop.py -b jax -d gpu --stress-test-meteo base -td "${TMPDIR}"
+python oneD_crop.py -b jax -d gpu --stress-test-meteo base
 # Move output from local SSD to global workspace
 echo "Move output to /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/output"
 mkdir -p /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/output
