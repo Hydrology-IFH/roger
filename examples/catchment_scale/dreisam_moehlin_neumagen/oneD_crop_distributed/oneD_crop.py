@@ -153,6 +153,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         def set_settings(self, state):
             settings = state.settings
             settings.identifier = f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{self._irrig}_{self._yellow_mustard}_{self._soil_compaction}"
+            click.echo(f"Simulation ID: {settings.identifier}")
 
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = self._config["nx"], self._config["ny"]
