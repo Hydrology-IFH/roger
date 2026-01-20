@@ -106,7 +106,7 @@ def main():
         lines.append("cp -r %s/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
         lines.append('sleep 120\n')
         lines.append("cd ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n")
-        lines.append('python oneD_crop.py -b jax -d gpu %s"\n' % (scenario_flag))
+        lines.append('python oneD_crop.py -b jax -d gpu %s\n' % (scenario_flag))
         lines.append("# Move output from local SSD to global workspace\n")
         lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
         lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
