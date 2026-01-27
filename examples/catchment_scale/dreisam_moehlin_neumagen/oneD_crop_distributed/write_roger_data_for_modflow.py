@@ -1,10 +1,9 @@
 import os
-import glob
 import h5netcdf
-import xarray as xr
 import datetime
 from pathlib import Path
 import numpy as onp
+import pandas as pd
 import click
 import roger
 
@@ -26,6 +25,10 @@ def main():
 
     meteo_stress_tests = []
     for meteo in meteo_stress:
+        if meteo == "base":
+            time_origin = "1/1/2013"
+        elif meteo == "base_2000-2024":
+            time_origin = "1/1/2000"
         if meteo == "base" or meteo == "base_2000-2024":
             meteo_stress_tests.append(meteo_stress_tests.append(f"{meteo}-magnitude0-duration0"))
         else:
@@ -39,49 +42,51 @@ def main():
                 for soil_compaction_scenario in soil_compaction_scenarios:
                     # merge model output into single file
                     diag_file = str(base_path_output / f"ONEDCROP_{meteo_stress_test}_{irrigation_scenario}_{catch_crop_scenario}_{soil_compaction_scenario}.rate.nc")
+                    with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
+                        time = df.variables.get("Time")[:]
+                        date_time = pd.date_range(start=time_origin, periods=len(time), freq="D")
+                        # get unique years
+                        years = onp.unique(date_time.year).tolist()[:-1]
+                        nx = len(df.variables["x"])
+                        ny = len(df.variables["y"])
                     if os.path.exists(diag_file):
-                        output_file = base_path_output / f"recharge_{meteo_stress_test}_{irrigation_scenario}_{catch_crop_scenario}_{soil_compaction_scenario}.nc"
-                        if not os.path.exists(output_file):
-                            with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
-                                f.attrs.update(
-                                    date_created=datetime.datetime.today().isoformat(),
-                                    title="RoGeR recharge simulations for the Dreisam-Moehlin-Neumagen catchment",
-                                    institution="University of Freiburg, Chair of Hydrology",
-                                    references="",
-                                    comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                                    model_structure="ONED model with free drainage and explicit crop growth dynamics",
-                                    roger_version=f"{roger.__version__}",
-                                )
-                                # collect dimensions
-                                with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
+                        for year in years:
+                            output_file = base_path_output / f"recharge_{meteo_stress_test}_{irrigation_scenario}_{catch_crop_scenario}_{soil_compaction_scenario}_year{year}.nc"
+                            if not os.path.exists(output_file):
+                                with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
+                                    f.attrs.update(
+                                        date_created=datetime.datetime.today().isoformat(),
+                                        title=f"RoGeR recharge simulations for the Dreisam-Moehlin-Neumagen catchment - Year {year}",
+                                        institution="University of Freiburg, Chair of Hydrology",
+                                        references="",
+                                        comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
+                                        model_structure="ONED model with free drainage and explicit crop growth dynamics",
+                                        roger_version=f"{roger.__version__}",
+                                    )
                                     # set dimensions with a dictionary
                                     dict_dim = {
-                                        "x": len(df.variables["x"]),
-                                        "y": len(df.variables["y"]),
-                                        "Time": len(df.variables["Time"]),
+                                        "x": nx,
+                                        "y": ny,
+                                        "Time": len(onp.where(date_time.year == year)[0]),
                                     }
-                                    time = onp.array(df.variables.get("Time"))
-
-                                    if not f.dimensions:
-                                        f.dimensions = dict_dim
-                                        v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
-                                        v.attrs["long_name"] = "x"
-                                        v.attrs["units"] = "m"
-                                        v[:] = onp.arange(dict_dim["x"]) * 25
-                                        v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
-                                        v.attrs["long_name"] = "y"
-                                        v.attrs["units"] = "m"
-                                        v[:] = onp.arange(dict_dim["y"]) * 25
-                                        v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                                        var_obj = df.variables.get("Time")
-                                        v.attrs.update(time_origin=var_obj.attrs["time_origin"], units=var_obj.attrs["units"])
-                                        v[:] = time
-                                for key in ["q_ss"]:
+                                    f.dimensions = dict_dim
+                                    v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
+                                    v.attrs["long_name"] = "x"
+                                    v.attrs["units"] = "m"
+                                    v[:] = onp.arange(dict_dim["x"]) * 25
+                                    v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
+                                    v.attrs["long_name"] = "y"
+                                    v.attrs["units"] = "m"
+                                    v[:] = onp.arange(dict_dim["y"]) * 25
+                                    v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
+                                    v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                                    v[:] = range(dict_dim["Time"])
                                     with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
-                                        var_obj = df.variables.get(key)
-                                        v = f.create_variable(key, ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
-                                        v[:, :, :] = var_obj
-                                        v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+                                        time_indices = onp.where(date_time.year == year)[0]
+                                        v = f.create_variable("recharge", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
+                                        recharge_object = df.variables.get("q_ss")
+                                        v[:, :, :] = recharge_object[time_indices, :, :]
+                                        v.attrs.update(long_name=recharge_object.attrs["long_name"], units=recharge_object.attrs["units"])
     return
 
 

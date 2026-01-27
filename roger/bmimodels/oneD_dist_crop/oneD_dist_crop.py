@@ -392,6 +392,16 @@ class ONEDDISTCROPSetup(RogerSetup):
                 ta[2:-2, 2:-2, :]
                 + vs.ta_offset[2:-2, 2:-2, npx.newaxis],
             )
+            vs.ta_min = update(
+                vs.ta_min,
+                at[2:-2, 2:-2, vs.tau],
+                npx.min(ta_min[2:-2, 2:-2, :], axis=-1) + vs.ta_offset[2:-2, 2:-2],
+            )
+            vs.ta_max = update(
+                vs.ta_max,
+                at[2:-2, 2:-2],
+                npx.max(ta_max[2:-2, 2:-2, :], axis=-1) + vs.ta_offset[2:-2, 2:-2],
+            )
             vs.pet_day = update(
                 vs.pet_day,
                 at[2:-2, 2:-2, :],

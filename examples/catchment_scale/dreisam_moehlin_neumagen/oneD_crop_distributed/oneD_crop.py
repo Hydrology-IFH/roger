@@ -16,9 +16,10 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-irr", "--irrigation", type=bool, default=False, is_flag=True, help="Enable irrigation")
 @click.option("-ym", "--yellow-mustard", type=bool, default=False, is_flag=True, help="Enable catch crop using yellow mustard")
 @click.option("-sc", "--soil-compaction", type=bool, default=False, is_flag=True, help="Enable soil compaction")
+@click.option("-gco", "--grain-corn-only", type=bool, default=False, is_flag=True, help="Enable grain corn monoculture (no crop rotation)")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @roger_base_cli
-def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_duration, irrigation, yellow_mustard, soil_compaction, tmp_dir):
+def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_duration, irrigation, yellow_mustard, soil_compaction, grain_corn_only, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, at
@@ -52,12 +53,19 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         else:
             _soil_compaction = "no-soil-compaction"
 
+        if grain_corn_only:
+            _grain_corn_only = "_grain-corn-only"
+        else:
+            _grain_corn_only = ""
+
         if stress_test_meteo == "base":
             _meteo_dir = _base_path / "input" / "2013-2023"
         elif stress_test_meteo == "base_2000-2024":
             _meteo_dir = _base_path / "input" / "2000-2024"
-        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]:
+        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought"]:
             _meteo_dir = _base_path / "input" / "stress_tests_meteo" / stress_test_meteo / f"duration{stress_test_meteo_duration}_magnitude{stress_test_meteo_magnitude}"
+        elif stress_test_meteo == "spring-summer-wet":
+            _meteo_dir = _base_path / "input" / "stress_tests_meteo" / stress_test_meteo
 
         if stress_test_meteo == "base" and not yellow_mustard:
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2013-2023.nc"
@@ -152,7 +160,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{self._irrig}_{self._yellow_mustard}_{self._soil_compaction}"
+            settings.identifier = f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{self._irrig}_{self._yellow_mustard}_{self._soil_compaction}{self._grain_corn_only}"
             print(f"Simulation ID: {settings.identifier}")
 
             # total grid numbers in x- and y-direction
@@ -432,34 +440,31 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                 station_ids,
             )
 
-            # mask_crops = (vs.lu_id == 5)
-            # vs.crop_type = update(
-            #     vs.crop_type,
-            #     at[2:-2, 2:-2, 0],
-            #     npx.where(mask_crops[2:-2, 2:-2], 599, 598),
-            # )
-            # vs.crop_type = update(
-            #     vs.crop_type,
-            #     at[2:-2, 2:-2, 1],
-            #     npx.where(mask_crops[2:-2, 2:-2], 539, 598),
-            # )
-            # vs.crop_type = update(
-            #     vs.crop_type,
-            #     at[2:-2, 2:-2, 2],
-            #     npx.where(mask_crops[2:-2, 2:-2], 599, 598),
-            # )
+            if grain_corn_only:
+                for i, ii in zip(range(0, settings.ncr, 2), range(0, int(settings.ncr/2))):
+                    vs.CROP_TYPE = update(
+                        vs.CROP_TYPE,
+                        at[2:-2, 2:-2, i],
+                        525,
+                    )
+                    vs.CROP_TYPE = update(
+                        vs.CROP_TYPE,
+                        at[2:-2, 2:-2, i+1],
+                        599,
+                    )
 
-            for i, ii in zip(range(0, settings.ncr, 2), range(0, int(settings.ncr/2))):
-                vs.CROP_TYPE = update(
-                    vs.CROP_TYPE,
-                    at[2:-2, 2:-2, i],
-                    self._read_var_from_nc("summer_crops", self._input_dir, self._file_crop_rotations)[ii, :, :],
-                )
-                vs.CROP_TYPE = update(
-                    vs.CROP_TYPE,
-                    at[2:-2, 2:-2, i+1],
-                    self._read_var_from_nc("winter_crops", self._input_dir, self._file_crop_rotations)[ii, :, :],
-                )
+            else:
+                for i, ii in zip(range(0, settings.ncr, 2), range(0, int(settings.ncr/2))):
+                    vs.CROP_TYPE = update(
+                        vs.CROP_TYPE,
+                        at[2:-2, 2:-2, i],
+                        self._read_var_from_nc("summer_crops", self._input_dir, self._file_crop_rotations)[ii, :, :],
+                    )
+                    vs.CROP_TYPE = update(
+                        vs.CROP_TYPE,
+                        at[2:-2, 2:-2, i+1],
+                        self._read_var_from_nc("winter_crops", self._input_dir, self._file_crop_rotations)[ii, :, :],
+                    )
 
             vs.crop_type = update(
                 vs.crop_type,
@@ -664,6 +669,17 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                     ta[2:-2, 2:-2, :]
                     + vs.ta_offset[2:-2, 2:-2, npx.newaxis],
                 )
+                vs.ta_min = update(
+                    vs.ta_min,
+                    at[2:-2, 2:-2, vs.tau],
+                    npx.min(ta_min[2:-2, 2:-2, :], axis=-1) + vs.ta_offset[2:-2, 2:-2],
+                )
+                vs.ta_max = update(
+                    vs.ta_max,
+                    at[2:-2, 2:-2, vs.tau],
+                    npx.max(ta_max[2:-2, 2:-2, :], axis=-1) + vs.ta_offset[2:-2, 2:-2],
+                )
+
                 vs.pet_day = update(
                     vs.pet_day,
                     at[2:-2, 2:-2, :],
