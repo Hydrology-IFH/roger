@@ -88,7 +88,7 @@ def main():
                         script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
                         script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_grain-corn-only' % (stress_test_meteo, magnitude, duration))
     jobs = []
-    xx = [0, 1, 2, 3, 4, 5, 6, 70, 71, 72, 73, 74, 75, 76, 22, 23, 24, 25, 26, 27, 43, 44, 45, 46, 47, 48, 78, 79, 80, 81]
+    xx = [0, 1, 2, 3, 4, 5, 6, 70, 71, 72, 73, 74, 75, 76, 21, 22, 23, 24, 25, 26, 27, 42, 43, 44, 45, 46, 47, 48, 77, 78, 79, 80, 81]
     scenario_flags_ = [scenario_flags[i] for i in xx]
     script_names_ = [script_names[i] for i in xx]
     for scenario_flag, script_name in zip(scenario_flags_, script_names_):
