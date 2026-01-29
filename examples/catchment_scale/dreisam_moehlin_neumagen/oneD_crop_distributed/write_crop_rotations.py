@@ -436,7 +436,7 @@ ds["winter_crops"].attrs["long_name"] = "Winter crops encoded as lu_id from RoGe
 # create spatial reference
 ds = ds.geo.write_crs("EPSG:25832")
 ds.coords["spatial_ref"] = spatial_ref  # update spatial reference from parameters_modflow.nc
-file = base_path / "input" / "crop_rotations_2000-2023.nc"
+file = base_path / "input" / "crop_rotations_2000-2024.nc"
 comp = dict(zlib=True, complevel=1)  # compress data to save storage
 encoding = {var: comp for var in ds.data_vars}
 ds.to_netcdf(file, engine="h5netcdf", encoding=encoding)

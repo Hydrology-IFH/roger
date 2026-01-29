@@ -57,9 +57,9 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         elif stress_test_meteo == "base" and yellow_mustard == "yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2013-2023_yellow_mustard.nc"
         elif stress_test_meteo == "base_2000-2024" and yellow_mustard == "no-yellow-mustard":
-            _file_crop_rotations = _base_path / "input" / "crop_rotations_2000-2023.nc"
+            _file_crop_rotations = _base_path / "input" / "crop_rotations_2000-2024.nc"
         elif stress_test_meteo == "base_2000-2024" and yellow_mustard == "yellow-mustard":
-            _file_crop_rotations = _base_path / "input" / "crop_rotations_2000-2023_yellow_mustard.nc"
+            _file_crop_rotations = _base_path / "input" / "crop_rotations_2000-2024_yellow_mustard.nc"
         elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"] and yellow_mustard == "no-yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2013-2023.nc"
         elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"] and yellow_mustard == "yellow-mustard":
