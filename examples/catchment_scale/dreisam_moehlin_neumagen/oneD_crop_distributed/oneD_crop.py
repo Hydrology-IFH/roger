@@ -53,6 +53,8 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         else:
             _soil_compaction = "no-soil-compaction"
 
+        print(soil_compaction, _soil_compaction)
+
         if grain_corn_only:
             _grain_corn_only = "_grain-corn-only"
         else:
