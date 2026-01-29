@@ -15,7 +15,7 @@ base_path = Path(__file__).parent
 
 years_2018_2022 = onp.arange(2018, 2023)
 years_2013_2023 = onp.arange(2013, 2023)
-years_2000_2023 = onp.arange(2000, 2023)
+years_2000_2024 = onp.arange(2000, 2025)
 
 # get x and y coordinates from RoGeR parameter file
 params_file = base_path / "input" / "parameters_roger_25m__.nc"
@@ -39,12 +39,13 @@ lu_ids_2013_2023[0:5, :, :] = lu_ids_2018_2022
 lu_ids_2013_2023[5:10, :, :] = lu_ids_2018_2022
 lu_ids_2013_2023[-1, :, :] = lu_ids_2018_2022[0, :, :]
 
-lu_ids_2000_2023 = onp.zeros((len(years_2000_2023), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
-lu_ids_2000_2023[0:5, :, :] = lu_ids_2018_2022
-lu_ids_2000_2023[5:10, :, :] = lu_ids_2018_2022
-lu_ids_2000_2023[10:15, :, :] = lu_ids_2018_2022
-lu_ids_2000_2023[15:20, :, :] = lu_ids_2018_2022
-lu_ids_2000_2023[-1, :, :] = lu_ids_2018_2022[0, :, :]
+lu_ids_2000_2024 = onp.zeros((len(years_2000_2024), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
+lu_ids_2000_2024[0:3, :, :] = lu_ids_2018_2022[2:5, :, :]
+lu_ids_2000_2024[3:8, :, :] = lu_ids_2018_2022
+lu_ids_2000_2024[8:13, :, :] = lu_ids_2018_2022
+lu_ids_2000_2024[13:18, :, :] = lu_ids_2018_2022
+lu_ids_2000_2024[18:23, :, :] = lu_ids_2018_2022
+lu_ids_2000_2024[23:25, :, :] = lu_ids_2018_2022[0:2, :, :]
 
 # read crop rotations from csv file
 file = base_path / "input" / "crop_rotations_2018_2022.csv"
@@ -107,20 +108,22 @@ winter_crops_2013_2023_yellow_mustard [0:5, :, :] = winter_crops_2018_2022_yello
 winter_crops_2013_2023_yellow_mustard [5:10, :, :] = winter_crops_2018_2022_yellow_mustard 
 winter_crops_2013_2023_yellow_mustard [-1, :, :] = winter_crops_2018_2022_yellow_mustard [0, :, :]
 
-# extend crop rotations to years 2000-2023
-summer_crops_2000_2023_yellow_mustard  = onp.zeros((len(years_2000_2023), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
-summer_crops_2000_2023_yellow_mustard [0:5, :, :] = summer_crops_2018_2022_yellow_mustard 
-summer_crops_2000_2023_yellow_mustard [5:10, :, :] = summer_crops_2018_2022_yellow_mustard 
-summer_crops_2000_2023_yellow_mustard [10:15, :, :] = summer_crops_2018_2022_yellow_mustard 
-summer_crops_2000_2023_yellow_mustard [15:20, :, :] = summer_crops_2018_2022_yellow_mustard 
-summer_crops_2000_2023_yellow_mustard [-1, :, :] = summer_crops_2018_2022_yellow_mustard [0, :, :]
+# extend crop rotations to years 2000-2024
+summer_crops_2000_2024_yellow_mustard  = onp.zeros((len(years_2000_2024), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
+summer_crops_2000_2024_yellow_mustard [0:3, :, :] = summer_crops_2018_2022_yellow_mustard[2:5, :, :] 
+summer_crops_2000_2024_yellow_mustard [3:8, :, :] = summer_crops_2018_2022_yellow_mustard 
+summer_crops_2000_2024_yellow_mustard [8:13, :, :] = summer_crops_2018_2022_yellow_mustard 
+summer_crops_2000_2024_yellow_mustard [13:18, :, :] = summer_crops_2018_2022_yellow_mustard 
+summer_crops_2000_2024_yellow_mustard [18:23, :, :] = summer_crops_2018_2022_yellow_mustard 
+summer_crops_2000_2024_yellow_mustard [23:25, :, :] = summer_crops_2018_2022_yellow_mustard[0:2, :, :]
 
-winter_crops_2000_2023_yellow_mustard  = onp.zeros((len(years_2000_2023), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
-winter_crops_2000_2023_yellow_mustard [0:5, :, :] = winter_crops_2018_2022_yellow_mustard 
-winter_crops_2000_2023_yellow_mustard [5:10, :, :] = winter_crops_2018_2022_yellow_mustard 
-winter_crops_2000_2023_yellow_mustard [10:15, :, :] = winter_crops_2018_2022_yellow_mustard 
-winter_crops_2000_2023_yellow_mustard [15:20, :, :] = winter_crops_2018_2022_yellow_mustard 
-winter_crops_2000_2023_yellow_mustard [-1, :, :] = winter_crops_2018_2022_yellow_mustard [0, :, :]
+winter_crops_2000_2024_yellow_mustard  = onp.zeros((len(years_2000_2024), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
+winter_crops_2000_2024_yellow_mustard [0:3, :, :] = winter_crops_2018_2022_yellow_mustard[2:5, :, :] 
+winter_crops_2000_2024_yellow_mustard [3:8, :, :] = winter_crops_2018_2022_yellow_mustard 
+winter_crops_2000_2024_yellow_mustard [8:13, :, :] = winter_crops_2018_2022_yellow_mustard 
+winter_crops_2000_2024_yellow_mustard [13:18, :, :] = winter_crops_2018_2022_yellow_mustard 
+winter_crops_2000_2024_yellow_mustard [18:23, :, :] = winter_crops_2018_2022_yellow_mustard 
+winter_crops_2000_2024_yellow_mustard [23:25, :, :] = winter_crops_2018_2022_yellow_mustard[0:2, :, :]
 
 # write crop rotations to netcdf files
 attrs = dict(
@@ -188,11 +191,11 @@ attrs = dict(
 coords = {
         "lon": ("lon", xcoords),  # x
         "lat": ("lat", ycoords),  # y
-        "Year": ("Year", years_2000_2023),
+        "Year": ("Year", years_2000_2024),
     }
 data_vars=dict(
-        summer_crops=(["Year", "lat", "lon"], summer_crops_2000_2023_yellow_mustard),
-        winter_crops=(["Year", "lat", "lon"], winter_crops_2000_2023_yellow_mustard),
+        summer_crops=(["Year", "lat", "lon"], summer_crops_2000_2024_yellow_mustard),
+        winter_crops=(["Year", "lat", "lon"], winter_crops_2000_2024_yellow_mustard),
     )
 
 ds = xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
@@ -203,26 +206,26 @@ ds["winter_crops"].attrs["long_name"] = "Winter crops encoded as lu_id from RoGe
 # create spatial reference
 ds = ds.geo.write_crs("EPSG:25832")
 ds.coords["spatial_ref"] = spatial_ref  # update spatial reference from parameters_modflow.nc
-file = base_path / "input" / "crop_rotations_2000-2023_yellow_mustard.nc"
+file = base_path / "input" / "crop_rotations_2000-2024_yellow_mustard.nc"
 comp = dict(zlib=True, complevel=1)  # compress data to save storage
 encoding = {var: comp for var in ds.data_vars}
 ds.to_netcdf(file, engine="h5netcdf", encoding=encoding)
 
 unit_header = [""]
 years_header = ["No"]
-for year in years_2000_2023:
+for year in years_2000_2024:
     unit_header.append("[year_season]")
     unit_header.append("[year_season]")
     years_header.append(f"{year}_summer")
     years_header.append(f"{year}_winter")
-df_crop_rotations_2000_2023_yellow_mustard = pd.DataFrame(columns=years_header)
-for i, year in enumerate(years_2000_2023):
-    df_crop_rotations_2000_2023_yellow_mustard.loc[:, f"{year}_summer"] = summer_crops_2000_2023_yellow_mustard[i, :, :].flatten()
-    df_crop_rotations_2000_2023_yellow_mustard.loc[:, f"{year}_winter"] = winter_crops_2000_2023_yellow_mustard[i, :, :].flatten()
-df_crop_rotations_2000_2023_yellow_mustard.loc[:, "No"] = onp.arange(1, df_crop_rotations_2000_2023_yellow_mustard.shape[0]+1)
-df_crop_rotations_2000_2023_yellow_mustard.columns = [unit_header, years_header]
-file = base_path / "input" / "crop_rotations_2000_2023_yellow_mustard.csv"
-df_crop_rotations_2000_2023_yellow_mustard.to_csv(file, sep=";", index=False)
+df_crop_rotations_2000_2024_yellow_mustard = pd.DataFrame(columns=years_header)
+for i, year in enumerate(years_2000_2024):
+    df_crop_rotations_2000_2024_yellow_mustard.loc[:, f"{year}_summer"] = summer_crops_2000_2024_yellow_mustard[i, :, :].flatten()
+    df_crop_rotations_2000_2024_yellow_mustard.loc[:, f"{year}_winter"] = winter_crops_2000_2024_yellow_mustard[i, :, :].flatten()
+df_crop_rotations_2000_2024_yellow_mustard.loc[:, "No"] = onp.arange(1, df_crop_rotations_2000_2024_yellow_mustard.shape[0]+1)
+df_crop_rotations_2000_2024_yellow_mustard.columns = [unit_header, years_header]
+file = base_path / "input" / "crop_rotations_2000_2024_yellow_mustard.csv"
+df_crop_rotations_2000_2024_yellow_mustard.to_csv(file, sep=";", index=False)
 
 unit_header = [""]
 years_header = ["No"]

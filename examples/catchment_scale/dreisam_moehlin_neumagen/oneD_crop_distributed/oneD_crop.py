@@ -13,10 +13,10 @@ from roger.cli.roger_run_base import roger_base_cli
 @click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "base_2000-2024", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]), default="base", help="Type of meteorological stress test")
 @click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=0, help="Magnitude of meteorological stress test")
 @click.option("-stmd", "--stress-test-meteo-duration", type=click.Choice([0, 2, 3]), default=0, help="Duration of meteorological stress test in consecutive years")
-@click.option("-irr", "--irrigation", type=bool, default=False, is_flag=True, help="Enable irrigation")
-@click.option("-ym", "--yellow-mustard", type=bool, default=False, is_flag=True, help="Enable catch crop using yellow mustard")
-@click.option("-sc", "--soil-compaction", type=bool, default=False, is_flag=True, help="Enable soil compaction")
-@click.option("-gco", "--grain-corn-only", type=bool, default=False, is_flag=True, help="Enable grain corn monoculture (no crop rotation)")
+@click.option("-irr", "--irrigation", type=click.Choice(["no-irrigation", "irrigation"]), default="no-irrigation", help="Enable irrigation")
+@click.option("-ym", "--yellow-mustard", type=click.Choice(["no-yellow-mustard", "yellow-mustard"]), default="no-yellow-mustard", help="Enable catch crop using yellow mustard")
+@click.option("-sc", "--soil-compaction", type=click.Choice(["no-soil-compaction", "soil-compaction"]), default="no-soil-compaction", help="Enable soil compaction")
+@click.option("-gco", "--grain-corn-only", type=click.Choice(["no-grain-corn-only", "grain-corn-only"]), default="no-grain-corn-only", help="Enable grain corn monoculture (no crop rotation)")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent / "output")
 @roger_base_cli
 def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_duration, irrigation, yellow_mustard, soil_compaction, grain_corn_only, tmp_dir):
@@ -38,27 +38,10 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         with open(_file_config, "r") as file:
             _config = yaml.safe_load(file)
 
-        if irrigation:
-            _irrig = "irrigation"
-        else:
-            _irrig = "no-irrigation"
-
-        if yellow_mustard:
-            _yellow_mustard = "yellow-mustard"
-        else:
-            _yellow_mustard = "no-yellow-mustard"
-
-        if soil_compaction:
-            _soil_compaction = "soil-compaction"
-        else:
-            _soil_compaction = "no-soil-compaction"
-
-        print(soil_compaction, _soil_compaction)
-
-        if grain_corn_only:
-            _grain_corn_only = "_grain-corn-only"
-        else:
+        if grain_corn_only == "no-grain-corn-only":
             _grain_corn_only = ""
+        else:
+            _grain_corn_only = "_grain-corn-only"
 
         if stress_test_meteo == "base":
             _meteo_dir = _base_path / "input" / "2013-2023"
@@ -69,17 +52,17 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         elif stress_test_meteo == "spring-summer-wet":
             _meteo_dir = _base_path / "input" / "stress_tests_meteo" / stress_test_meteo
 
-        if stress_test_meteo == "base" and not yellow_mustard:
+        if stress_test_meteo == "base" and yellow_mustard == "no-yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2013-2023.nc"
-        elif stress_test_meteo == "base" and yellow_mustard:
+        elif stress_test_meteo == "base" and yellow_mustard == "yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2013-2023_yellow_mustard.nc"
-        elif stress_test_meteo == "base_2000-2024" and not yellow_mustard:
+        elif stress_test_meteo == "base_2000-2024" and yellow_mustard == "no-yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2000-2023.nc"
-        elif stress_test_meteo == "base_2000-2024" and yellow_mustard:
+        elif stress_test_meteo == "base_2000-2024" and yellow_mustard == "yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2000-2023_yellow_mustard.nc"
-        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"] and not yellow_mustard:
+        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"] and yellow_mustard == "no-yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2013-2023.nc"
-        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"] and yellow_mustard:
+        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"] and yellow_mustard == "yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2013-2023_yellow_mustard.nc"
 
         if stress_test_meteo == "base":
@@ -162,7 +145,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{self._irrig}_{self._yellow_mustard}_{self._soil_compaction}{self._grain_corn_only}"
+            settings.identifier = f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{self._grain_corn_only}"
             print(f"Simulation ID: {settings.identifier}")
 
             # total grid numbers in x- and y-direction
@@ -187,9 +170,16 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
 
             # enable specific processes
             settings.enable_lateral_flow = True
-            settings.enable_irrigation = irrigation
-            settings.enable_net_irrigation = irrigation
-            settings.enable_soil_compaction = soil_compaction
+            if irrigation == "irrigation":
+                settings.enable_irrigation = True
+                settings.enable_net_irrigation = True
+            else:
+                settings.enable_irrigation = False
+                settings.enable_net_irrigation = False
+            if soil_compaction == "soil-compaction":
+                settings.enable_soil_compaction = True
+            else:
+                settings.enable_soil_compaction = False
             settings.enable_crop_water_stress = True
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True

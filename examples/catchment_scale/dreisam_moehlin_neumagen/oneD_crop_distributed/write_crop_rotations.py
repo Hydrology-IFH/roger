@@ -28,7 +28,7 @@ lu_ids_2018_2022 = lu_ids_2018_2022.astype(onp.int16)
 
 years_2018_2022 = onp.arange(2018, 2023)
 years_2013_2023 = onp.arange(2013, 2023)
-years_2000_2023 = onp.arange(2000, 2023)
+years_2000_2024 = onp.arange(2000, 2025)
 
 # extend annual crop types to years 2013-2023 and 2000-2023
 lu_ids_2013_2023 = onp.zeros((len(years_2013_2023), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
@@ -36,12 +36,13 @@ lu_ids_2013_2023[0:5, :, :] = lu_ids_2018_2022
 lu_ids_2013_2023[5:10, :, :] = lu_ids_2018_2022
 lu_ids_2013_2023[-1, :, :] = lu_ids_2018_2022[0, :, :]
 
-lu_ids_2000_2023 = onp.zeros((len(years_2000_2023), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
-lu_ids_2000_2023[0:5, :, :] = lu_ids_2018_2022
-lu_ids_2000_2023[5:10, :, :] = lu_ids_2018_2022
-lu_ids_2000_2023[10:15, :, :] = lu_ids_2018_2022
-lu_ids_2000_2023[15:20, :, :] = lu_ids_2018_2022
-lu_ids_2000_2023[-1, :, :] = lu_ids_2018_2022[0, :, :]
+lu_ids_2000_2024 = onp.zeros((len(years_2000_2024), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
+lu_ids_2000_2024[0:3, :, :] = lu_ids_2018_2022[2:5, :, :]
+lu_ids_2000_2024[3:8, :, :] = lu_ids_2018_2022
+lu_ids_2000_2024[8:13, :, :] = lu_ids_2018_2022
+lu_ids_2000_2024[13:18, :, :] = lu_ids_2018_2022
+lu_ids_2000_2024[18:23, :, :] = lu_ids_2018_2022
+lu_ids_2000_2024[23:25, :, :] = lu_ids_2018_2022[0:2, :, :]
 
 # create xarray dataset
 attrs = dict(
@@ -78,10 +79,10 @@ attrs = dict(
 coords = {
         "lon": ("lon", xcoords),  # x
         "lat": ("lat", ycoords),  # y
-        "Year": ("Year", years_2000_2023),
+        "Year": ("Year", years_2000_2024),
     }
 data_vars=dict(
-        crop_type=(["Year", "lat", "lon"], lu_ids_2000_2023),
+        crop_type=(["Year", "lat", "lon"], lu_ids_2000_2024),
     )
 
 ds = xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
@@ -280,12 +281,14 @@ cond_bare_2022 = onp.isin(df_crops["2018"].values, [599])
 df_crop_rotations.loc[cond_winter_crops_2022 & cond_bare_2022, "2022_winter"] = df_crops.loc[cond_winter_crops_2022 & cond_bare_2022, "2022"]
 
 df_crop_rotations.loc[:, "No"] = df_crop_rotations.index + 1
+for col in df_crop_rotations.columns[1:]:
+    df_crop_rotations.loc[:, col] = df_crop_rotations.loc[:, col].astype(float)
 # if any value in row is finite replace nan with 599
 cond = onp.isfinite(df_crop_rotations.loc[:, years_header[1:]].astype(float)).any(axis=1)
-df_crop_rotations.loc[cond, years_header[1:]] = df_crop_rotations.loc[cond, years_header[1:]].fillna(599)
+df_crop_rotations.loc[cond, years_header[1:]] = df_crop_rotations.loc[cond, years_header[1:]].astype(float).fillna(599).infer_objects(copy=False)
 # if all values in row are NaN replace nan with 598
 cond = onp.isnan(df_crop_rotations.loc[:, years_header[1:]].astype(float)).all(axis=1)
-df_crop_rotations.loc[cond, years_header[1:]] = df_crop_rotations.loc[cond, years_header[1:]].fillna(598)
+df_crop_rotations.loc[cond, years_header[1:]] = df_crop_rotations.loc[cond, years_header[1:]].astype(float).fillna(598).infer_objects(copy=False)
 
 for year1, year2 in zip([2018, 2019, 2020, 2021], [2019, 2020, 2021, 2022]):
     cond_596_ = (df_crop_rotations.loc[:, f"{year1}_summer"] == 596) & (df_crop_rotations.loc[:, f"{year2}_summer"] == 599)
@@ -312,6 +315,8 @@ file = base_path / "input" / "crop_rotations_2018_2022.csv"
 df_crop_rotations.to_csv(file, sep=";", index=False)
 
 df_crop_rotations.fillna(-9999, inplace=True)
+for col in df_crop_rotations.columns[1:]:
+    df_crop_rotations.loc[:, col] = df_crop_rotations.loc[:, col].astype(int)
 for i, year in enumerate([2018, 2019, 2020, 2021, 2022]):
     df_crop_rotations.loc[:, f"{year}_summer"] = df_crop_rotations.loc[:, f"{year}_summer"].astype(onp.int16)
     df_crop_rotations.loc[:, f"{year}_winter"] = df_crop_rotations.loc[:, f"{year}_winter"].astype(onp.int16)
@@ -333,20 +338,22 @@ winter_crops_2013_2023[0:5, :, :] = winter_crops_2018_2022
 winter_crops_2013_2023[5:10, :, :] = winter_crops_2018_2022
 winter_crops_2013_2023[-1, :, :] = winter_crops_2018_2022[0, :, :]
 
-# extend crop rotations to years 2000-2023
-summer_crops_2000_2023 = onp.zeros((len(years_2000_2023), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
-summer_crops_2000_2023[0:5, :, :] = summer_crops_2018_2022
-summer_crops_2000_2023[5:10, :, :] = summer_crops_2018_2022
-summer_crops_2000_2023[10:15, :, :] = summer_crops_2018_2022
-summer_crops_2000_2023[15:20, :, :] = summer_crops_2018_2022
-summer_crops_2000_2023[-1, :, :] = summer_crops_2018_2022[0, :, :]
+# extend crop rotations to years 2000-2024
+summer_crops_2000_2024 = onp.zeros((len(years_2000_2024), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
+summer_crops_2000_2024[0:3, :, :] = summer_crops_2018_2022[2:5, :, :]
+summer_crops_2000_2024[3:8, :, :] = summer_crops_2018_2022
+summer_crops_2000_2024[8:13, :, :] = summer_crops_2018_2022
+summer_crops_2000_2024[13:18, :, :] = summer_crops_2018_2022
+summer_crops_2000_2024[18:23, :, :] = summer_crops_2018_2022
+summer_crops_2000_2024[23:25, :, :] = summer_crops_2018_2022[0:2, :, :]
 
-winter_crops_2000_2023 = onp.zeros((len(years_2000_2023), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
-winter_crops_2000_2023[0:5, :, :] = winter_crops_2018_2022
-winter_crops_2000_2023[5:10, :, :] = winter_crops_2018_2022
-winter_crops_2000_2023[10:15, :, :] = winter_crops_2018_2022
-winter_crops_2000_2023[15:20, :, :] = winter_crops_2018_2022
-winter_crops_2000_2023[-1, :, :] = winter_crops_2018_2022[0, :, :]
+winter_crops_2000_2024 = onp.zeros((len(years_2000_2024), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
+winter_crops_2000_2024[0:3, :, :] = winter_crops_2018_2022[2:5, :, :]
+winter_crops_2000_2024[3:8, :, :] = winter_crops_2018_2022
+winter_crops_2000_2024[8:13, :, :] = winter_crops_2018_2022
+winter_crops_2000_2024[13:18, :, :] = winter_crops_2018_2022
+winter_crops_2000_2024[18:23, :, :] = winter_crops_2018_2022
+winter_crops_2000_2024[23:25, :, :] = winter_crops_2018_2022[0:2, :, :]
 
 # write crop rotations to netcdf files
 attrs = dict(
@@ -414,11 +421,11 @@ attrs = dict(
 coords = {
         "lon": ("lon", xcoords),  # x
         "lat": ("lat", ycoords),  # y
-        "Year": ("Year", years_2000_2023),
+        "Year": ("Year", years_2000_2024),
     }
 data_vars=dict(
-        summer_crops=(["Year", "lat", "lon"], summer_crops_2000_2023),
-        winter_crops=(["Year", "lat", "lon"], winter_crops_2000_2023),
+        summer_crops=(["Year", "lat", "lon"], summer_crops_2000_2024),
+        winter_crops=(["Year", "lat", "lon"], winter_crops_2000_2024),
     )
 
 ds = xr.Dataset(data_vars=data_vars, coords=coords, attrs=attrs)
@@ -453,16 +460,16 @@ df_crop_rotations_2013_2023.to_csv(file, sep=";", index=False)
 
 unit_header = [""]
 years_header = ["No"]
-for year in years_2000_2023:
+for year in years_2000_2024:
     unit_header.append("[year_season]")
     unit_header.append("[year_season]")
     years_header.append(f"{year}_summer")
     years_header.append(f"{year}_winter")
-df_crop_rotations_2000_2023 = pd.DataFrame(columns=years_header)
-for i, year in enumerate(years_2000_2023):
-    df_crop_rotations_2000_2023.loc[:, f"{year}_summer"] = summer_crops_2000_2023[i, :, :].flatten()
-    df_crop_rotations_2000_2023.loc[:, f"{year}_winter"] = winter_crops_2000_2023[i, :, :].flatten()
-df_crop_rotations_2000_2023.loc[:, "No"] = onp.arange(1, df_crop_rotations_2000_2023.shape[0]+1)
-df_crop_rotations_2000_2023.columns = [unit_header, years_header]
-file = base_path / "input" / "crop_rotations_2000_2023.csv"
-df_crop_rotations_2000_2023.to_csv(file, sep=";", index=False)
+df_crop_rotations_2000_2024 = pd.DataFrame(columns=years_header)
+for i, year in enumerate(years_2000_2024):
+    df_crop_rotations_2000_2024.loc[:, f"{year}_summer"] = summer_crops_2000_2024[i, :, :].flatten()
+    df_crop_rotations_2000_2024.loc[:, f"{year}_winter"] = winter_crops_2000_2024[i, :, :].flatten()
+df_crop_rotations_2000_2024.loc[:, "No"] = onp.arange(1, df_crop_rotations_2000_2024.shape[0]+1)
+df_crop_rotations_2000_2024.columns = [unit_header, years_header]
+file = base_path / "input" / "crop_rotations_2000_2024.csv"
+df_crop_rotations_2000_2024.to_csv(file, sep=";", index=False)

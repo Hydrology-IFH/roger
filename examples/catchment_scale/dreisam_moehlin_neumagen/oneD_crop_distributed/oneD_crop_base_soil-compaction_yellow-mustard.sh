@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --time=14:00:00
+#SBATCH --time=13:00:00
 #SBATCH --gres=gpu:a100:1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
@@ -28,7 +28,7 @@ cp -r /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_mo
 cp -r /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
 sleep 120
 cd ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
-python oneD_crop.py -b jax -d gpu --stress-test-meteo base --soil-compaction --yellow-mustard
+python oneD_crop.py -b jax -d gpu --stress-test-meteo base --soil-compaction soil-compaction --yellow-mustard yellow-mustard
 # Move output from local SSD to global workspace
 echo "Move output to /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/output"
 mkdir -p /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/output
