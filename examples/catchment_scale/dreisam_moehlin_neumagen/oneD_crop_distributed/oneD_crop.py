@@ -742,6 +742,9 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         @roger_routine
         def set_diagnostics(self, state, base_path=tmp_dir):
             diagnostics = state.diagnostics
+            settings = state.settings
+            if settings.enable_irrigation:
+                self._config["OUTPUT_RATE"] += ["irrig"]
 
             # variables written to output files
             diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
