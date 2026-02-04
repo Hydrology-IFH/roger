@@ -34,13 +34,13 @@ THETA_PWP: 0.2
 # saturated hydraulic conductivity (mm/h)
 KS: 25
 # hydraulic conductivity of bedrock/saturated zone (mm/h)
-KF: 2500
+KF: 25
 
 # --- Initial conditions -------------------------------------------------------
 # soil water content of root zone/upper soil layer (-)
-THETA_RZ: 0.3
+THETA_RZ: 0.25
 # soil water content of subsoil/lower soil layer (-)
-THETA_SS: 0.3
+THETA_SS: 0.22
 
 # --- Diagnostics --------------------------------------------------------------
 OUTPUT_FREQUENCY: 86400  # output frequency in seconds
@@ -61,6 +61,7 @@ OUTPUT_RATE:
 - "q_snow"  # snow melt (mm/day)
 - "re_rg"  # redistribution after root growth (mm/day)
 - "re_rl"  # redistribution after root loss (mm/day)
+- cpr_ss
 
 # simulated hydrologic storages
 OUTPUT_COLLECT:

@@ -92,6 +92,7 @@ def main(tmp_dir):
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
             settings.enable_macropore_lower_boundary_condition = False
+            settings.enable_groundwater_boundary = True
             # enable adaptive time stepping
             settings.enable_adaptive_time_stepping = True
 
@@ -270,6 +271,8 @@ def main(tmp_dir):
                 at[2:-2, 2:-2, :, 1],
                 npx.where(mask2[2:-2, 2:-2, npx.newaxis], 0.93, vs.ccc[2:-2, 2:-2, :, 1]),
             )
+
+            vs.z_gw = update(vs.z_gw, at[2:-2, 2:-2, :], 1.5)
 
 
         @roger_routine

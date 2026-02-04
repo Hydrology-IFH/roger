@@ -183,6 +183,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             settings.enable_crop_water_stress = True
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
+            settings.enable_groundwater_boundary = True
             settings.enable_macropore_lower_boundary_condition = False
             settings.enable_adaptive_time_stepping = True
             settings.enable_distributed_input = True
@@ -406,17 +407,6 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                 vs.pet_weight,
                 at[2:-2, 2:-2],
                 npx.where(npx.isnan(vs.pet_weight)[2:-2, 2:-2], 1, vs.pet_weight[2:-2, 2:-2])
-            )
-            # groundwater table depth (m)
-            vs.z_gw = update(
-                vs.z_gw,
-                at[2:-2, 2:-2, 0],
-                self._read_var_from_nc_xr("gwfa_gew", self._base_path, "parameters_roger.nc")/100  # convert cm to m
-            )
-            vs.z_gw = update(
-                vs.z_gw,
-                at[2:-2, 2:-2, 0],
-                vs.z_gw[2:-2, 2:-2, 1]
             )
             # identifier of meteorological station
             vs.station_id = update(
