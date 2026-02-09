@@ -183,6 +183,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             settings.enable_crop_water_stress = True
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
+            settings.enable_crop_specific_irrigation_demand = True
             settings.enable_groundwater_boundary = True
             settings.enable_macropore_lower_boundary_condition = False
             settings.enable_adaptive_time_stepping = True
@@ -422,7 +423,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                 station_ids,
             )
 
-            if grain_corn_only:
+            if grain_corn_only == "grain-corn-only":
                 for i, ii in zip(range(0, settings.ncr, 2), range(0, int(settings.ncr/2))):
                     vs.CROP_TYPE = update(
                         vs.CROP_TYPE,
@@ -715,7 +716,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             )
 
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
-                vs.itt_cr = vs.itt_cr + 1
+                vs.itt_cr = vs.itt_cr + 2
                 vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.crop_type[2:-2, 2:-2, 2])
                 vs.crop_type = update(
                     vs.crop_type,

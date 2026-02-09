@@ -770,9 +770,3 @@ for station in meteo_stations:
                 df_pet["mm"] = 0
                 df_pet = df_pet.loc[:, ["YYYY", "MM", "DD", "hh", "mm", "PET"]]
                 df_pet.to_csv(PET_path, header=True, index=False, sep="\t")
-
-
-
-
-
-

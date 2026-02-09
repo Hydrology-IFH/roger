@@ -295,7 +295,7 @@ VARIABLES = {
         "",
         "Current iteration of crop rotation",
         dtype=runtime_settings.int_type,
-        initial=2,
+        initial=0,
         write_to_restart=True,
     ),
     "year": Variable(

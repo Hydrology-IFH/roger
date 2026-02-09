@@ -51,3 +51,5 @@ OUTPUT_COLLECT:
 - "lu_id"  # land use id (-)
 - "ta"  # air temperature (degC)
 - "ta_max"  # maximum air temperature (degC)
+- "z_root"
+- "ground_cover"
