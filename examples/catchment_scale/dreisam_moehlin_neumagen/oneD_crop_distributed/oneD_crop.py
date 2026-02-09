@@ -298,6 +298,11 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                 at[2:-2, 2:-2],
                 self._read_var_from_nc_xr("slope", self._base_path, "parameters_roger.nc")/100,
             )
+            vs.slope = update(
+                vs.slope,
+                at[2:-2, 2:-2],
+                npx.where(vs.slope[2:-2, 2:-2] > 1, 1, vs.slope[2:-2, 2:-2]),
+            )
             # degree of sealing (-)
             vs.sealing = update(
                 vs.sealing,

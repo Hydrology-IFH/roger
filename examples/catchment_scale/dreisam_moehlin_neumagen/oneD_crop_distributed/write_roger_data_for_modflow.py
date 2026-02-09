@@ -24,6 +24,8 @@ def main():
         mask = infile["maskCatch"].values
         xcoords = infile["x"].values
         ycoords = infile["y"].values
+        slope = infile["slope"].values/100
+        slope = onp.where(slope > 1, 1, slope)
 
     irrigation_scenarios = ["no-irrigation"]
     catch_crop_scenarios = ["no-yellow-mustard"]
@@ -99,8 +101,9 @@ def main():
                                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                                             time_indices = onp.where(date_time.year == year)[0]
                                             v = f.create_variable("recharge", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
-                                            var_object = df.variables.get("q_ss")
-                                            v[:, :, :] = var_object[time_indices, :, :]
+                                            var_object = df.variables.get("q_ss")* (1 - slope)
+                                            var_object1 = df.variables.get("q_sub_ss") * (1 - slope)
+                                            v[:, :, :] = var_object[time_indices, :, :] + var_object1[time_indices, :, :]
                                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
                                 # output_file = base_path_output / f"capillary_rise_{meteo_stress_test}_{irrigation_scenario}_{catch_crop_scenario}_{soil_compaction_scenario}_year{year}.nc"
