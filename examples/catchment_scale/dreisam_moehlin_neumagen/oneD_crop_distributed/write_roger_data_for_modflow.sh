@@ -2,7 +2,7 @@
 #SBATCH --time=6:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=64000
+#SBATCH --mem=128000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=write_roger_data_for_modflow

@@ -22,7 +22,7 @@ def main():
         ycoords = infile["y"].values
 
     # directory of results
-    base_path_output = Path("/Volumes/LaCie/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed") / "output"
+    base_path_output = base_path / "output"
 
     years = np.arange(2013, 2024)
 
