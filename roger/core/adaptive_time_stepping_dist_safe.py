@@ -213,15 +213,15 @@ def adaptive_time_stepping(state):
     )
     vs.dt_secs = npx.where((cond1 | cond3) & ~cond2 & ~cond4 & ~cond5, 10 * 60, vs.dt_secs)
 
-    # determine end of event
+    # determine start of event
     cond_event1 = (
-        (vs.prec[2:-2, 2:-2] > 0).any()
-        | ((vs.swe[2:-2, 2:-2, vs.tau] > 0) | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0)).any()
-        & (vs.ta[2:-2, 2:-2] > settings.ta_fm)
+        ((vs.prec[2:-2, 2:-2, vs.tau] > 0) & (vs.ta[2:-2, 2:-2, vs.tau] > settings.ta_fm)).any()
+        | (((vs.swe[2:-2, 2:-2, vs.tau] > 0) | (vs.swe_top[2:-2, 2:-2, vs.tau] > 0)) & (vs.ta[2:-2, 2:-2, vs.tau] > settings.ta_fm)).any()
     ).any()
+    # determine end of event
     cond_event2 = (
-        ((vs.prec[2:-2, 2:-2] <= 0) & (vs.ta[2:-2, 2:-2] > settings.ta_fm)).all()
-        | ((vs.prec[2:-2, 2:-2] > 0) & (vs.ta[2:-2, 2:-2] <= settings.ta_fm)).all()
+        (vs.prec[2:-2, 2:-2, vs.tau] <= 0).all()
+        | ((vs.prec[2:-2, 2:-2, vs.tau] > 0) & (vs.ta[2:-2, 2:-2, vs.tau] <= settings.ta_fm)).all()
         | ((vs.swe[2:-2, 2:-2, vs.taum1] > 0).any() & (vs.swe[2:-2, 2:-2, vs.tau] <= 0).all())
     )
     vs.time_event0 = npx.where(cond_event1, 0, vs.time_event0)

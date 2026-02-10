@@ -27,12 +27,12 @@ def main():
             scenario_flags.append('--stress-test-meteo %s --irrigation --yellow-mustard\n' % (stress_test_meteo))
             scenario_flags.append('--stress-test-meteo %s --soil-compaction --irrigation --yellow-mustard\n' % (stress_test_meteo))
 
-            script_names.append('oneD_crop_%s_soil-compaction' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_irrigation' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_yellow-mustard' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_irrigation_yellow-mustard' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_irrigation_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction' % (stress_test_meteo))
+            script_names.append('write_data_%s' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction_irrigation' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_data_%s_irrigation_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction_irrigation_yellow-mustard' % (stress_test_meteo))
 
         elif stress_test_meteo == "base_2000-2024":
             scenario_flags.append('--stress-test-meteo %s --soil-compaction\n' % (stress_test_meteo))
@@ -42,12 +42,12 @@ def main():
             scenario_flags.append('--stress-test-meteo %s --irrigation --yellow-mustard\n' % (stress_test_meteo))
             scenario_flags.append('--stress-test-meteo %s --soil-compaction --irrigation --yellow-mustard\n' % (stress_test_meteo))
 
-            script_names.append('oneD_crop_%s_soil-compaction' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_irrigation' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_yellow-mustard' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_irrigation_yellow-mustard' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_irrigation_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction' % (stress_test_meteo))
+            script_names.append('write_data_%s' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction_irrigation' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_data_%s_irrigation_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction_irrigation_yellow-mustard' % (stress_test_meteo))
 
         else:
             for magnitude in stress_test_meteo_magnitudes:
@@ -62,19 +62,18 @@ def main():
                         scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --irrigation --yellow-mustard\n' % (stress_test_meteo, magnitude, duration))
                         scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction --irrigation --yellow-mustard\n' % (stress_test_meteo, magnitude, duration))
 
-                        script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction' % (stress_test_meteo, magnitude, duration))
-                        script_names.append('oneD_crop_%s_magnitude%s_duration%s' % (stress_test_meteo, magnitude, duration))
-                        script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_irrigation' % (stress_test_meteo, magnitude, duration))
-                        script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_yellow-mustard' % (stress_test_meteo, magnitude, duration))
-                        script_names.append('oneD_crop_%s_magnitude%s_duration%s_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
-                        script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
+                        script_names.append('write_data_%s_magnitude%s_duration%s_soil-compaction' % (stress_test_meteo, magnitude, duration))
+                        script_names.append('write_data_%s_magnitude%s_duration%s' % (stress_test_meteo, magnitude, duration))
+                        script_names.append('write_data_%s_magnitude%s_duration%s_soil-compaction_irrigation' % (stress_test_meteo, magnitude, duration))
+                        script_names.append('write_data_%s_magnitude%s_duration%s_soil-compaction_yellow-mustard' % (stress_test_meteo, magnitude, duration))
+                        script_names.append('write_data_%s_magnitude%s_duration%s_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
+                        script_names.append('write_data_%s_magnitude%s_duration%s_soil-compaction_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
 
     jobs = []
     for scenario_flag, script_name in zip(scenario_flags[:2], script_names[:2]):
-        output_path_ws = base_path_ws / "output"
         lines = []
         lines.append("#!/bin/bash\n")
-        lines.append("#SBATCH --time=7-00:00:00\n")
+        lines.append("#SBATCH --time=2-00:00:00\n")
         lines.append("#SBATCH --nodes=1\n")
         lines.append("#SBATCH --ntasks=1\n")
         lines.append("#SBATCH --cpus-per-task=1\n")
@@ -90,23 +89,7 @@ def main():
         lines.append('eval "$(conda shell.bash hook)"\n')
         lines.append("conda activate roger\n")
         lines.append(f"cd {base_path_bwhpc}/{dir_name}\n")
-        lines.append(" \n")
-        lines.append("mkdir ${TMPDIR}/roger\n")
-        lines.append("mkdir ${TMPDIR}/roger/examples\n")
-        lines.append("mkdir ${TMPDIR}/roger/examples/catchment_scale\n")
-        lines.append("mkdir ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen\n")
-        lines.append("mkdir ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/output\n")
-        lines.append("cp -r %s/oneD_crop.py ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc)) 
-        lines.append("cp -r %s/parameters_roger.nc ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
-        lines.append("cp -r %s/config.yml ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
-        lines.append("cp -r %s/input ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n" % (base_path_bwhpc))
-        lines.append('sleep 120\n')
-        lines.append("cd ${TMPDIR}/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed\n")
-        lines.append('python oneD_crop.py -b jax -d cpu %s"\n' % (scenario_flag))
-        lines.append("# Move output from local SSD to global workspace\n")
-        lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
-        lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
-        lines.append('mv "${TMPDIR}"/roger/examples/catchment_scale/dreisam_moehlin_neumagen/output/ONEDCROP_*.nc %s\n' % (output_path_ws.as_posix()))
+        lines.append('python write_roger_data_for_modflow.py %s\n' % (scenario_flag))
         file_path = base_path / f"{script_name}.sh"
         file = open(file_path, "w")
         file.writelines(lines)
@@ -115,7 +98,7 @@ def main():
         jobs.append(f"{script_name}.sh")
 
 
-    file_path = base_path / "submit_jobs.sh"
+    file_path = base_path / "submit_data_jobs.sh"
     with open(file_path, "w") as job_file:
         job_file.write("#!/bin/bash\n")
         job_file.write("\n")
