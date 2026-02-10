@@ -7,7 +7,7 @@
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=write_roger_data_for_modflow
 #SBATCH --output=write_roger_data_for_modflow.out
-#SBATCH --error=write_roger_data_for_modflow.out
+#SBATCH --error=write_roger_data_for_modflow_err.out
 #SBATCH --export=ALL
 
 module load devel/miniforge
