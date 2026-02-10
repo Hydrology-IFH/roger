@@ -11,6 +11,7 @@ conda-environment-doc.yml
 *.nc
 !doc/_data/*.nc
 *.h5
+*.nc.aux.xml
 
 # GIS files
 *.gpkg
