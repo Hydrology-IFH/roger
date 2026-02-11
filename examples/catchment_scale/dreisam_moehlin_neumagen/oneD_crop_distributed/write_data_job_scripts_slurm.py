@@ -70,14 +70,14 @@ def main():
                         script_names.append('write_data_%s_magnitude%s_duration%s_soil-compaction_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
 
     jobs = []
-    for scenario_flag, script_name in zip(scenario_flags[:2], script_names[:2]):
+    for scenario_flag, script_name in zip(scenario_flags, script_names):
         lines = []
         lines.append("#!/bin/bash\n")
-        lines.append("#SBATCH --time=2-00:00:00\n")
+        lines.append("#SBATCH --time=02:00:00\n")
         lines.append("#SBATCH --nodes=1\n")
         lines.append("#SBATCH --ntasks=1\n")
         lines.append("#SBATCH --cpus-per-task=1\n")
-        lines.append("#SBATCH --mem=32000\n")
+        lines.append("#SBATCH --mem=64000\n")
         lines.append("#SBATCH --mail-type=FAIL\n")
         lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
         lines.append(f"#SBATCH --job-name={script_name}\n")

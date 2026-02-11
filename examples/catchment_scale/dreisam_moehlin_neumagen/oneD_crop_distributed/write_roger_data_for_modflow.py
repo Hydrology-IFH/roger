@@ -89,81 +89,81 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v[:, :, :] = var_object[time_indices, :, :] + var_object1[time_indices, :, :]
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
-                # output_file = base_path_output / f"capillary_rise_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
-                # if not os.path.exists(output_file):
-                #     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
-                #         f.attrs.update(
-                #             date_created=datetime.datetime.today().isoformat(),
-                #             title=f"RoGeR capillary rise simulations for the Dreisam-Moehlin-Neumagen catchment - Year {year}",
-                #             institution="University of Freiburg, Chair of Hydrology",
-                #             references="",
-                #             comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                #             model_structure="ONED model with free drainage and explicit crop growth dynamics",
-                #             roger_version=f"{roger.__version__}",
-                #         )
-                #         # set dimensions with a dictionary
-                #         dict_dim = {
-                #             "x": nx,
-                #             "y": ny,
-                #             "Time": len(onp.where(date_time.year == year)[0]),
-                #         }
-                #         f.dimensions = dict_dim
-                #         v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
-                #         v.attrs["long_name"] = "x"
-                #         v.attrs["units"] = "m"
-                #         v[:] = xcoords
-                #         v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
-                #         v.attrs["long_name"] = "y"
-                #         v.attrs["units"] = "m"
-                #         v[:] = ycoords
-                #         v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                #         v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
-                #         v[:] = range(dict_dim["Time"])
-                #         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
-                #             time_indices = onp.where(date_time.year == year)[0]
-                #             v = f.create_variable("capillary_rise", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
-                #             var_object = df.variables.get("cpr_ss")
-                #             v[:, :, :] = var_object[time_indices, :, :]
-                #             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
+                output_file = base_path_output / f"capillary_rise_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                if not os.path.exists(output_file):
+                    with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
+                        f.attrs.update(
+                            date_created=datetime.datetime.today().isoformat(),
+                            title=f"RoGeR capillary rise simulations for the Dreisam-Moehlin-Neumagen catchment - Year {year}",
+                            institution="University of Freiburg, Chair of Hydrology",
+                            references="",
+                            comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
+                            model_structure="ONED model with free drainage and explicit crop growth dynamics",
+                            roger_version=f"{roger.__version__}",
+                        )
+                        # set dimensions with a dictionary
+                        dict_dim = {
+                            "x": nx,
+                            "y": ny,
+                            "Time": len(onp.where(date_time.year == year)[0]),
+                        }
+                        f.dimensions = dict_dim
+                        v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
+                        v.attrs["long_name"] = "x"
+                        v.attrs["units"] = "m"
+                        v[:] = xcoords
+                        v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
+                        v.attrs["long_name"] = "y"
+                        v.attrs["units"] = "m"
+                        v[:] = ycoords
+                        v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
+                        v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                        v[:] = range(dict_dim["Time"])
+                        with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
+                            time_indices = onp.where(date_time.year == year)[0]
+                            v = f.create_variable("capillary_rise", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
+                            var_object = df.variables.get("cpr_ss")
+                            v[:, :, :] = var_object[time_indices, :, :]
+                            v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
 
-                # if irrigation_scenario == "irrigation":
-                #     output_file = base_path_output / f"irrigation_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
-                #     if not os.path.exists(output_file):
-                #         with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
-                #             f.attrs.update(
-                #                 date_created=datetime.datetime.today().isoformat(),
-                #                 title=f"RoGeR irrigation supply simulations for the Dreisam-Moehlin-Neumagen catchment - Year {year}",
-                #                 institution="University of Freiburg, Chair of Hydrology",
-                #                 references="",
-                #                 comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-                #                 model_structure="ONED model with free drainage and explicit crop growth dynamics",
-                #                 roger_version=f"{roger.__version__}",
-                #             )
-                #             # set dimensions with a dictionary
-                #             dict_dim = {
-                #                 "x": nx,
-                #                 "y": ny,
-                #                 "Time": len(onp.where(date_time.year == year)[0]),
-                #             }
-                #             f.dimensions = dict_dim
-                #             v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
-                #             v.attrs["long_name"] = "x"
-                #             v.attrs["units"] = "m"
-                #             v[:] = xcoords
-                #             v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
-                #             v.attrs["long_name"] = "y"
-                #             v.attrs["units"] = "m"
-                #             v[:] = ycoords
-                #             v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                #             v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
-                #             v[:] = range(dict_dim["Time"])
-                #             with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
-                #                 time_indices = onp.where(date_time.year == year)[0]
-                #                 v = f.create_variable("irrigation", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
-                #                 var_object = df.variables.get("irrig")
-                #                 v[:, :, :] = var_object[time_indices, :, :]
-                #                 v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
+                if irrigation == "irrigation":
+                    output_file = base_path_output / f"irrigation_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                    if not os.path.exists(output_file):
+                        with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
+                            f.attrs.update(
+                                date_created=datetime.datetime.today().isoformat(),
+                                title=f"RoGeR irrigation supply simulations for the Dreisam-Moehlin-Neumagen catchment - Year {year}",
+                                institution="University of Freiburg, Chair of Hydrology",
+                                references="",
+                                comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
+                                model_structure="ONED model with free drainage and explicit crop growth dynamics",
+                                roger_version=f"{roger.__version__}",
+                            )
+                            # set dimensions with a dictionary
+                            dict_dim = {
+                                "x": nx,
+                                "y": ny,
+                                "Time": len(onp.where(date_time.year == year)[0]),
+                            }
+                            f.dimensions = dict_dim
+                            v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
+                            v.attrs["long_name"] = "x"
+                            v.attrs["units"] = "m"
+                            v[:] = xcoords
+                            v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
+                            v.attrs["long_name"] = "y"
+                            v.attrs["units"] = "m"
+                            v[:] = ycoords
+                            v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
+                            v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                            v[:] = range(dict_dim["Time"])
+                            with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
+                                time_indices = onp.where(date_time.year == year)[0]
+                                v = f.create_variable("irrigation", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
+                                var_object = df.variables.get("irrig")
+                                v[:, :, :] = var_object[time_indices, :, :]
+                                v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
     # merge model output into single file
     diag_file = str(base_path_output / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}.collect.nc")
@@ -214,42 +214,42 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
 
-            #     output_file = base_path_output / f"tamax_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
-            #     if not os.path.exists(output_file):
-            #         with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
-            #             f.attrs.update(
-            #                 date_created=datetime.datetime.today().isoformat(),
-            #                 title=f"Maximum daily air temperature for the Dreisam-Moehlin-Neumagen catchment - Year {year}",
-            #                 institution="University of Freiburg, Chair of Hydrology",
-            #                 references="",
-            #                 comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
-            #                 model_structure="ONED model with free drainage and explicit crop growth dynamics",
-            #                 roger_version=f"{roger.__version__}",
-            #             )
-            #             # set dimensions with a dictionary
-            #             dict_dim = {
-            #                 "x": nx,
-            #                 "y": ny,
-            #                 "Time": len(onp.where(date_time.year == year)[0]),
-            #             }
-            #             f.dimensions = dict_dim
-            #             v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
-            #             v.attrs["long_name"] = "x"
-            #             v.attrs["units"] = "m"
-            #             v[:] = xcoords
-            #             v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
-            #             v.attrs["long_name"] = "y"
-            #             v.attrs["units"] = "m"
-            #             v[:] = ycoords
-            #             v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-            #             v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
-            #             v[:] = range(dict_dim["Time"])
-            #             with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
-            #                 time_indices = onp.where(date_time.year == year)[0]
-            #                 v = f.create_variable("ta_max", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
-            #                 var_object = df.variables.get("ta_max")
-            #                 v[:, :, :] = var_object[time_indices, :, :]
-            #                 v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
+                output_file = base_path_output / f"tamax_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                if not os.path.exists(output_file):
+                    with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
+                        f.attrs.update(
+                            date_created=datetime.datetime.today().isoformat(),
+                            title=f"Maximum daily air temperature for the Dreisam-Moehlin-Neumagen catchment - Year {year}",
+                            institution="University of Freiburg, Chair of Hydrology",
+                            references="",
+                            comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
+                            model_structure="ONED model with free drainage and explicit crop growth dynamics",
+                            roger_version=f"{roger.__version__}",
+                        )
+                        # set dimensions with a dictionary
+                        dict_dim = {
+                            "x": nx,
+                            "y": ny,
+                            "Time": len(onp.where(date_time.year == year)[0]),
+                        }
+                        f.dimensions = dict_dim
+                        v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
+                        v.attrs["long_name"] = "x"
+                        v.attrs["units"] = "m"
+                        v[:] = xcoords
+                        v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
+                        v.attrs["long_name"] = "y"
+                        v.attrs["units"] = "m"
+                        v[:] = ycoords
+                        v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
+                        v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                        v[:] = range(dict_dim["Time"])
+                        with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
+                            time_indices = onp.where(date_time.year == year)[0]
+                            v = f.create_variable("ta_max", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
+                            var_object = df.variables.get("ta_max")
+                            v[:, :, :] = var_object[time_indices, :, :]
+                            v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
 
                 output_file = base_path_output / f"irrigation_demand_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"

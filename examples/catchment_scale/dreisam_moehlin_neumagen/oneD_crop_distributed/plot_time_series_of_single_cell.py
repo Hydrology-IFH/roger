@@ -78,7 +78,7 @@ def main():
         plt.xticks(rotation=33)
         ax.set_xlabel("Date")
         ax.set_ylabel("Land Use")
-        output_file = figures_folder / f"land_use_time_series_{year}.png"
+        output_file = figures_folder / f"land_use_time_series_{year}_x{x}_y{y}.png"
         fig.savefig(output_file, dpi=300, bbox_inches='tight')
         plt.close(fig)
 
@@ -98,7 +98,7 @@ def main():
         plt.xticks(rotation=33)
         ax.set_xlabel("Date")
         ax.set_ylabel("Ground Cover [-]")
-        output_file = figures_folder / f"ground_cover_time_series_{year}.png"
+        output_file = figures_folder / f"ground_cover_time_series_{year}_x{x}_y{y}.png"
         fig.savefig(output_file, dpi=300, bbox_inches='tight')
         plt.close(fig)
 
@@ -118,7 +118,7 @@ def main():
         plt.xticks(rotation=33)
         ax.set_xlabel("Date")
         ax.set_ylabel("Root Depth [mm]")
-        output_file = figures_folder / f"root_depth_time_series_{year}.png"
+        output_file = figures_folder / f"root_depth_time_series_{year}_x{x}_y{y}.png"
         fig.savefig(output_file, dpi=300, bbox_inches='tight')
         plt.close(fig)
 
