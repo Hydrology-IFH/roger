@@ -10,7 +10,6 @@ def main():
     base_path = Path(__file__).parent
     dir_name = os.path.basename(str(Path(__file__).parent))
     base_path_bwhpc = "/pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed"
-    base_path_ws = Path("/pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed")
 
     # identifiers of the simulations
     stress_tests_meteo = ["base", "base_2000-2024", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]
@@ -88,7 +87,7 @@ def main():
         lines.append('module load devel/miniforge\n')
         lines.append('eval "$(conda shell.bash hook)"\n')
         lines.append("conda activate roger\n")
-        lines.append(f"cd {base_path_bwhpc}/{dir_name}\n")
+        lines.append(f"cd {base_path_bwhpc}\n")
         lines.append("\n")
         lines.append('python write_roger_data_for_modflow.py %s\n' % (scenario_flag))
         file_path = base_path / f"{script_name}.sh"
