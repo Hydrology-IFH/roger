@@ -1,9 +1,9 @@
 #!/bin/bash
-#SBATCH --time=28:00:00
+#SBATCH --time=32:00:00
 #SBATCH --gres=gpu:a100:1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=32000
+#SBATCH --mem=64000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
 #SBATCH --job-name=oneD_crop_base_2000-2024_soil-compaction

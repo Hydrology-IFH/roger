@@ -162,11 +162,11 @@ def main():
         output_path_ws = base_path_ws / "output"
         lines = []
         lines.append("#!/bin/bash\n")
-        lines.append("#SBATCH --time=28:00:00\n")
+        lines.append("#SBATCH --time=32:00:00\n")
         lines.append("#SBATCH --gres=gpu:a100:1\n")
         lines.append("#SBATCH --ntasks=1\n")
         lines.append("#SBATCH --cpus-per-task=1\n")
-        lines.append("#SBATCH --mem=32000\n")
+        lines.append("#SBATCH --mem=64000\n")
         lines.append("#SBATCH --mail-type=FAIL\n")
         lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
         lines.append(f"#SBATCH --job-name={script_name}\n")
