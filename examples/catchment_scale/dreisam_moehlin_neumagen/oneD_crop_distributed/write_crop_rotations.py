@@ -27,12 +27,12 @@ lu_ids_2018_2022[cond] = -9999  # set nan to
 lu_ids_2018_2022 = lu_ids_2018_2022.astype(onp.int16)
 
 years_2018_2022 = onp.arange(2018, 2023)
-years_2013_2023 = onp.arange(2013, 2023)
+years_2013_2023 = onp.arange(2013, 2024)
 years_2000_2024 = onp.arange(2000, 2025)
 
 # extend annual crop types to years 2013-2023 and 2000-2023
 lu_ids_2013_2023 = onp.zeros((len(years_2013_2023), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
-lu_ids_2013_2023[0:5, :, :] = lu_ids_2018_2022
+lu_ids_2013_2023[:5, :, :] = lu_ids_2018_2022
 lu_ids_2013_2023[5:10, :, :] = lu_ids_2018_2022
 lu_ids_2013_2023[-1, :, :] = lu_ids_2018_2022[0, :, :]
 
@@ -226,6 +226,9 @@ for year in [2018, 2019, 2020, 2021, 2022]:
 df_crop_rotations = pd.DataFrame(index=range(len(df_crops)), columns=years_header)
 for year1, year2 in zip([2018, 2019, 2020, 2021], [2019, 2020, 2021, 2022]):
     cond_summer_crops = onp.isin(df_crops[f"{year1}"].values, summer_crops)
+    # define crop rotations of summer crops
+    df_crop_rotations.loc[cond_summer_crops, f"{year1}_summer"] = df_crops.loc[cond_summer_crops, f"{year1}"]
+    # define crop rotations of winter crops
     cond_winter_crops = onp.isin(df_crops[f"{year1}"].values, winter_crops)
     cond_summer1_crops = onp.isin(df_crops[f"{year2}"].values, summer_crops)
     cond_winter1_crops = onp.isin(df_crops[f"{year2}"].values, winter_crops)
@@ -257,8 +260,6 @@ for year1, year2 in zip([2018, 2019, 2020, 2021], [2019, 2020, 2021, 2022]):
     cond_591 = df_crops[f"{year1}"] == 591
     df_crop_rotations.loc[cond_591, f"{year2}_summer"] = 591  # sowing period
     df_crop_rotations.loc[cond_591, f"{year1}_winter"] = 590  # continuation period
-    # define crop rotations for summer crops
-    df_crop_rotations.loc[cond_summer_crops, f"{year1}_summer"] = df_crops.loc[cond_summer_crops, f"{year1}"]
 for year1, year2 in zip([2018, 2019, 2020, 2021], [2019, 2020, 2021, 2022]):
     # define crop rotations for intensive grassland continued over multiple years
     cond_596 = (df_crop_rotations.loc[:, f"{year1}_summer"] == 596) & (df_crop_rotations.loc[:, f"{year2}_summer"] == 596)
@@ -275,10 +276,6 @@ df_crop_rotations.loc[cond_594, "2022_summer"] = 594
 # set summer crops of year 2022
 cond_summer_crops_2022 = onp.isin(df_crops["2022"].values, summer_crops)
 df_crop_rotations.loc[cond_summer_crops_2022, "2022_summer"] = df_crops.loc[cond_summer_crops_2022, "2022"]
-# set winter crops of year 2022
-cond_winter_crops_2022 = onp.isin(df_crops["2022"].values, summer_crops)
-cond_bare_2022 = onp.isin(df_crops["2018"].values, [599])
-df_crop_rotations.loc[cond_winter_crops_2022 & cond_bare_2022, "2022_winter"] = df_crops.loc[cond_winter_crops_2022 & cond_bare_2022, "2022"]
 
 df_crop_rotations.loc[:, "No"] = df_crop_rotations.index + 1
 for col in df_crop_rotations.columns[1:]:
@@ -299,6 +296,12 @@ for year1, year2 in zip([2018, 2019, 2020, 2021], [2019, 2020, 2021, 2022]):
     df_crop_rotations.loc[cond_596_, f"{year2}_winter"] = 597
     cond_594_ = (df_crop_rotations.loc[:, f"{year2}_summer"] == 594) & (df_crop_rotations.loc[:, f"{year2}_winter"] == 599)
     df_crop_rotations.loc[cond_594_, f"{year2}_winter"] = 595
+
+# set winter crops of year 2022
+cond_winter_crops_2018 = onp.isin(df_crops["2018"].values, winter_crops)
+cond_bare_2018 = (df_crop_rotations.loc[:, "2018_summer"].values == 599) & (df_crop_rotations.loc[:, "2018_winter"].values == 599)
+_cond_winter_crops_2022 = onp.isin(df_crop_rotations.loc[:, "2022_summer"].values, summer_crops)
+df_crop_rotations.loc[cond_winter_crops_2018 & cond_bare_2018 & _cond_winter_crops_2022, "2022_winter"] = df_crops.loc[cond_winter_crops_2018 & cond_bare_2018 & _cond_winter_crops_2022, "2018"]
 
 cond_565_596 = (df_crops["2018"] == 565) & (df_crops["2022"] == 596)
 df_crop_rotations.loc[cond_565_596, "2018_summer"] = 565
@@ -327,16 +330,23 @@ for i, year in enumerate([2018, 2019, 2020, 2021, 2022]):
     summer_crops_2018_2022[i, :, :] = df_crop_rotations.loc[:, f"{year}_summer"].values.reshape(lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2])
     winter_crops_2018_2022[i, :, :] = df_crop_rotations.loc[:, f"{year}_winter"].values.reshape(lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2])
 
+for i, year in enumerate([2018, 2019, 2020, 2021, 2022]):
+    crops_year = df_crops.loc[:, f"{year}"].values.reshape(lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2])
+    print(f"Year: {year}", summer_crops_2018_2022[i, 629, 265], winter_crops_2018_2022[i, 629, 265], crops_year[629, 265])
+
 # extend crop rotations to years 2013-2023
 summer_crops_2013_2023 = onp.zeros((len(years_2013_2023), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
-summer_crops_2013_2023[0:5, :, :] = summer_crops_2018_2022
+summer_crops_2013_2023[:5, :, :] = summer_crops_2018_2022
 summer_crops_2013_2023[5:10, :, :] = summer_crops_2018_2022
 summer_crops_2013_2023[-1, :, :] = summer_crops_2018_2022[0, :, :]
 
 winter_crops_2013_2023 = onp.zeros((len(years_2013_2023), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
-winter_crops_2013_2023[0:5, :, :] = winter_crops_2018_2022
+winter_crops_2013_2023[:5, :, :] = winter_crops_2018_2022
 winter_crops_2013_2023[5:10, :, :] = winter_crops_2018_2022
 winter_crops_2013_2023[-1, :, :] = winter_crops_2018_2022[0, :, :]
+
+for i, year in enumerate(years_2013_2023):
+    print(f"Year: {year}({i})", summer_crops_2013_2023[i, 629, 265], winter_crops_2013_2023[i, 629, 265])
 
 # extend crop rotations to years 2000-2024
 summer_crops_2000_2024 = onp.zeros((len(years_2000_2024), lu_ids_2018_2022.shape[1], lu_ids_2018_2022.shape[2]), dtype=onp.int16)
@@ -354,6 +364,9 @@ winter_crops_2000_2024[8:13, :, :] = winter_crops_2018_2022
 winter_crops_2000_2024[13:18, :, :] = winter_crops_2018_2022
 winter_crops_2000_2024[18:23, :, :] = winter_crops_2018_2022
 winter_crops_2000_2024[23:25, :, :] = winter_crops_2018_2022[0:2, :, :]
+
+for i, year in enumerate(years_2000_2024):
+    print(f"Year: {year}({i})", summer_crops_2000_2024[i, 629, 265], winter_crops_2000_2024[i, 629, 265])
 
 # write crop rotations to netcdf files
 attrs = dict(

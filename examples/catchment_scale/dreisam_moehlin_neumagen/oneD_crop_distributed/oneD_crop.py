@@ -66,12 +66,11 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2013-2023_yellow_mustard.nc"
 
         if stress_test_meteo == "base":
-            _ncr = 10 * 2  # number of crop rotations
+            _ncr = 11 * 2  # number of crop rotations
         elif stress_test_meteo == "base_2000-2024":
-            _ncr = 23 * 2  # number of crop rotations
+            _ncr = 24 * 2  # number of crop rotations
         else:
-            _ncr = 10 * 2  # number of crop rotations
-
+            _ncr = 11 * 2  # number of crop rotations
 
         # custom helper functions
         def _read_var_from_nc(self, var, path_dir, file):
