@@ -40,7 +40,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
 
     time_origin = "2012-12-31 23:00:00"
     # merge model output into single file
-    diag_file = str(base_path_output / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}.rate.nc")
+    diag_file = str(base_path_output / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.rate.nc")
     print(f"Processing file: {diag_file}")
     if os.path.exists(diag_file):
         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
@@ -51,7 +51,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             nx = len(df.variables["x"])
             ny = len(df.variables["y"])
             for year in years:
-                output_file = base_path_output / f"recharge_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                output_file = base_path_output / f"recharge_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -89,7 +89,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v[:, :, :] = var_object[time_indices, :, :] + var_object1[time_indices, :, :]
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
-                output_file = base_path_output / f"capillary_rise_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                output_file = base_path_output / f"capillary_rise_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -128,7 +128,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
 
 
                 if irrigation == "irrigation":
-                    output_file = base_path_output / f"irrigation_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                    output_file = base_path_output / f"irrigation_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                     if not os.path.exists(output_file):
                         with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                             f.attrs.update(
@@ -166,7 +166,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                                 v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
     # merge model output into single file
-    diag_file = str(base_path_output / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}.collect.nc")
+    diag_file = str(base_path_output / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.collect.nc")
     print(f"Processing file: {diag_file}")
     if os.path.exists(diag_file):
         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
@@ -177,7 +177,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             nx = len(df.variables["x"])
             ny = len(df.variables["y"])
             for year in years:
-                output_file = base_path_output / f"land_use_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                output_file = base_path_output / f"land_use_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -214,7 +214,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
 
-                output_file = base_path_output / f"tamax_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                output_file = base_path_output / f"tamax_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -252,7 +252,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
 
-                output_file = base_path_output / f"irrigation_demand_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                output_file = base_path_output / f"irrigation_demand_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -289,7 +289,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v[:, :, :] = var_object[time_indices, :, :]
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
-                output_file = base_path_output / f"root_depth_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                output_file = base_path_output / f"root_depth_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -326,7 +326,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v[:, :, :] = var_object[time_indices, :, :]
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
-                    output_file = base_path_output / f"ground_cover_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}_{_grain_corn_only}_year{year}.nc"
+                    output_file = base_path_output / f"ground_cover_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
                             date_created=datetime.datetime.today().isoformat(),

@@ -10,10 +10,11 @@
 #SBATCH --output=write_data_spring-summer-drought_magnitude2_duration3_soil-compaction.out
 #SBATCH --error=write_data_spring-summer-drought_magnitude2_duration3_soil-compaction_err.out
 #SBATCH --export=ALL
- 
+
 module load devel/miniforge
 eval "$(conda shell.bash hook)"
 conda activate roger
 cd /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed/oneD_crop_distributed
+
 python write_roger_data_for_modflow.py --stress-test-meteo spring-summer-drought --stress-test-meteo-magnitude 2 --stress-test-meteo-duration 3 --soil-compaction soil-compaction
 

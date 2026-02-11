@@ -84,11 +84,12 @@ def main():
         lines.append(f"#SBATCH --output={script_name}.out\n")
         lines.append(f"#SBATCH --error={script_name}_err.out\n")
         lines.append("#SBATCH --export=ALL\n")
-        lines.append(" \n")
+        lines.append("\n")
         lines.append('module load devel/miniforge\n')
         lines.append('eval "$(conda shell.bash hook)"\n')
         lines.append("conda activate roger\n")
         lines.append(f"cd {base_path_bwhpc}/{dir_name}\n")
+        lines.append("\n")
         lines.append('python write_roger_data_for_modflow.py %s\n' % (scenario_flag))
         file_path = base_path / f"{script_name}.sh"
         file = open(file_path, "w")
