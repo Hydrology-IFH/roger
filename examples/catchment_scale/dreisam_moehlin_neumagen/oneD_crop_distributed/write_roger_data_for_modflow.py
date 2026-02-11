@@ -38,7 +38,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         slope = infile["slope"].values/100
         slope = onp.where(slope > 1, 1, slope)
 
-    time_origin = "2012-12-31 23:00:00"
+    time_origin = "2013-01-01 00:00:00"
     # merge model output into single file
     diag_file = str(base_path_output / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.rate.nc")
     print(f"Processing file: {diag_file}")
@@ -79,7 +79,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         v.attrs["units"] = "m"
                         v[:] = ycoords
                         v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                        v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                        v.attrs.update(time_origin=f"{year}-01-01 00:00:00", units="days")
                         v[:] = range(dict_dim["Time"])
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
@@ -117,7 +117,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         v.attrs["units"] = "m"
                         v[:] = ycoords
                         v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                        v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                        v.attrs.update(time_origin=f"{year}-01-01 00:00:00", units="days")
                         v[:] = range(dict_dim["Time"])
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
@@ -156,7 +156,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v.attrs["units"] = "m"
                             v[:] = ycoords
                             v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                            v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                            v.attrs.update(time_origin=f"{year}-01-01 00:00:00", units="days")
                             v[:] = range(dict_dim["Time"])
                             with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                                 time_indices = onp.where(date_time.year == year)[0]
@@ -204,7 +204,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         v.attrs["units"] = "m"
                         v[:] = ycoords
                         v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                        v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                        v.attrs.update(time_origin=f"{year}-01-01 00:00:00", units="days")
                         v[:] = range(dict_dim["Time"])
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
@@ -242,7 +242,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         v.attrs["units"] = "m"
                         v[:] = ycoords
                         v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                        v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                        v.attrs.update(time_origin=f"{year}-01-01 00:00:00", units="days")
                         v[:] = range(dict_dim["Time"])
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
@@ -280,7 +280,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         v.attrs["units"] = "m"
                         v[:] = ycoords
                         v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                        v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                        v.attrs.update(time_origin=f"{year}-01-01 00:00:00", units="days")
                         v[:] = range(dict_dim["Time"])
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
@@ -317,7 +317,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         v.attrs["units"] = "m"
                         v[:] = ycoords
                         v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                        v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                        v.attrs.update(time_origin=f"{year}-01-01 00:00:00", units="days")
                         v[:] = range(dict_dim["Time"])
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
@@ -353,7 +353,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         v.attrs["units"] = "m"
                         v[:] = ycoords
                         v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
-                        v.attrs.update(time_origin=f"{year-1}-12-31 23:00:00", units="days")
+                        v.attrs.update(time_origin=f"{year}-01-01 00:00:00", units="days")
                         v[:] = range(dict_dim["Time"])
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
