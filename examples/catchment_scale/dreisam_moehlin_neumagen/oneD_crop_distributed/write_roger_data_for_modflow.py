@@ -6,7 +6,60 @@ from pathlib import Path
 import numpy as onp
 import pandas as pd
 import click
+import zlib
+import struct
 import roger
+
+def compress_files(file_list, output_file, compression_level=6):
+    """
+    Compress multiple files into a single archive using zlib.
+    
+    Args:
+        file_list: List of file paths to compress
+        output_file: Output archive file path
+        compression_level: Compression level (0-9, where 9 is maximum compression)
+    """
+    output_dir = Path(file_list[0]).parent
+    zip_file = str(output_dir / output_file)
+    with open(zip_file, 'wb') as out:
+        # Write number of files
+        out.write(struct.pack('I', len(file_list)))
+        
+        for file_path in file_list:
+            file_path = Path(file_path)
+            
+            if not file_path.exists():
+                print(f"Warning: {file_path} not found, skipping...")
+                continue
+            
+            # Read file content
+            with open(file_path, 'rb') as f:
+                data = f.read()
+            
+            # Compress the data
+            compressed_data = zlib.compress(data, compression_level)
+            
+            # Get file metadata
+            file_name = str(file_path.name)
+            file_name_bytes = file_name.encode('utf-8')
+            original_size = len(data)
+            compressed_size = len(compressed_data)
+            
+            # Write metadata and compressed data
+            # Format: [name_length][name][original_size][compressed_size][compressed_data]
+            out.write(struct.pack('I', len(file_name_bytes)))  # Name length
+            out.write(file_name_bytes)                          # File name
+            out.write(struct.pack('Q', original_size))          # Original size
+            out.write(struct.pack('Q', compressed_size))        # Compressed size
+            out.write(compressed_data)                          # Compressed data
+            
+            # Print compression stats
+            ratio = (1 - compressed_size / original_size) * 100 if original_size > 0 else 0
+            print(f"Compressed: {file_name}")
+            print(f"  Original: {original_size:,} bytes")
+            print(f"  Compressed: {compressed_size:,} bytes")
+            print(f"  Ratio: {ratio:.2f}%\n")
+
 
 @click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "base_2000-2024", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]), default="base", help="Type of meteorological stress test")
 @click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=0, help="Magnitude of meteorological stress test")
@@ -38,7 +91,11 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         slope = infile["slope"].values/100
         slope = onp.where(slope > 1, 1, slope)
 
-    time_origin = "2013-01-01 00:00:00"
+    if stress_test_meteo == "base":
+        time_origin = "2013-01-01 00:00:00"
+    elif stress_test_meteo == "base_2000-2024":
+        time_origin = "2000-01-01 00:00:00"
+    files_to_compress = []
     # merge model output into single file
     diag_file = str(base_path_output / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.rate.nc")
     print(f"Processing file: {diag_file}")
@@ -52,6 +109,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             ny = len(df.variables["y"])
             for year in years:
                 output_file = base_path_output / f"recharge_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
+                files_to_compress.append(output_file)
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -90,6 +148,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
                 output_file = base_path_output / f"capillary_rise_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
+                files_to_compress.append(output_file)
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -129,6 +188,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
 
                 if irrigation == "irrigation":
                     output_file = base_path_output / f"irrigation_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
+                    files_to_compress.append(output_file)
                     if not os.path.exists(output_file):
                         with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                             f.attrs.update(
@@ -178,6 +238,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             ny = len(df.variables["y"])
             for year in years:
                 output_file = base_path_output / f"land_use_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
+                files_to_compress.append(output_file)
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -215,6 +276,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
 
 
                 output_file = base_path_output / f"tamax_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
+                files_to_compress.append(output_file)
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -253,6 +315,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
 
 
                 output_file = base_path_output / f"irrigation_demand_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
+                files_to_compress.append(output_file)
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -290,6 +353,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
                 output_file = base_path_output / f"root_depth_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
+                files_to_compress.append(output_file)
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -327,6 +391,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
 
                     output_file = base_path_output / f"ground_cover_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
+                    files_to_compress.append(output_file)
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
                             date_created=datetime.datetime.today().isoformat(),
@@ -361,6 +426,12 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             var_object = df.variables.get("ground_cover")
                             v[:, :, :] = var_object[time_indices, :, :]
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
+    
+    # compress files
+    archive_name = f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.zlb"
+    compress_files(files_to_compress, archive_name, compression_level=9)
+    
+    
     return
 
 

@@ -172,6 +172,7 @@ SUMMER_MULTI_YEAR_CROPS_INIT = onp.array([550, 571, 580, 589, 592, 565], dtype=o
 SUMMER_MULTI_YEAR_CROPS_CONT = onp.array([552, 582, 584, 594, 596], dtype=onp.int32)
 SUMMER_MULTI_YEAR_CROPS_CONT_GROW = onp.array([573, 591, 594, 596], dtype=onp.int32)
 WINTER_CROPS_FERT = onp.array([556, 557, 558, 559, 560, 564, 579, 580, 582, 584], dtype=onp.int32)
+WINTER_CROPS_ALL = onp.unique(onp.concatenate([WINTER_CROPS, WINTER_CATCH_CROPS, WINTER_MULTI_YEAR_CROPS_INIT, WINTER_MULTI_YEAR_CROPS_CONT]))
 
 dict_crops = {
     536: "beetroot",

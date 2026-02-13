@@ -1,5 +1,4 @@
 from pathlib import Path
-import yaml
 import subprocess
 import os
 import click
@@ -8,7 +7,6 @@ import click
 @click.command("main")
 def main():
     base_path = Path(__file__).parent
-    dir_name = os.path.basename(str(Path(__file__).parent))
 
     # identifiers of the simulations
     stress_tests_meteo = ["base", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]

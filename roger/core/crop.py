@@ -1307,9 +1307,8 @@ def update_lu_id(state):
     """
     vs = state.variables
 
-    arr0 = allocate(state.dimensions, ("x", "y"))
     mask1 = (
-        (vs.doy[vs.tau] >= arr0)
+        npx.isin(vs.crop_type[:, :, 0], lut.WINTER_CROPS_ALL)
         & (vs.doy[vs.tau] <= vs.doy_end[:, :, 0])
         & (vs.doy_start[:, :, 0] != 0)
         & (vs.doy_end[:, :, 0] != 0)
@@ -1324,7 +1323,7 @@ def update_lu_id(state):
     )
     mask3 = (
         (vs.doy[vs.tau] >= vs.doy_start[:, :, 2])
-        & (vs.doy[vs.tau] > vs.doy_end[:, :, 0])
+        & npx.isin(vs.crop_type[:, :, 2], lut.WINTER_CROPS_ALL)
         & (vs.doy_start[:, :, 2] != 0)
         & (vs.doy_end[:, :, 2] != 0)
         & (vs.crop_type[:, :, 2] != 598)
