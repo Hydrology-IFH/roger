@@ -428,8 +428,9 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
     
     # compress files
-    archive_name = f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.zlb"
-    compress_files(files_to_compress, archive_name, compression_level=9)
+    if files_to_compress:
+        archive_name = f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.zlb"
+        compress_files(files_to_compress, archive_name, compression_level=9)
     
     
     return

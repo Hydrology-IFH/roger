@@ -16,5 +16,5 @@ eval "$(conda shell.bash hook)"
 conda activate roger
 cd /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
 
-python write_roger_data_for_modflow.py --stress-test-meteo spring-summer-wet
+python write_roger_data_for_modflow.py --stress-test-meteo spring-summer-wet --soil-compaction no-soil-compaction
 
