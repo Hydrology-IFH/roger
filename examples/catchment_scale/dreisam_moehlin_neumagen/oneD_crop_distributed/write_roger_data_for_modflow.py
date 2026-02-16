@@ -91,10 +91,10 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         slope = infile["slope"].values/100
         slope = onp.where(slope > 1, 1, slope)
 
-    if stress_test_meteo == "base":
-        time_origin = "2013-01-01 00:00:00"
-    elif stress_test_meteo == "base_2000-2024":
+    if stress_test_meteo == "base_2000-2024":
         time_origin = "2000-01-01 00:00:00"
+    else:
+        time_origin = "2013-01-01 00:00:00"
     files_to_compress = []
     # merge model output into single file
     diag_file = str(base_path_output / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.rate.nc")
