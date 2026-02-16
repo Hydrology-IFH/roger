@@ -48,6 +48,21 @@ def main():
             script_names.append('write_data_%s_irrigation_yellow-mustard' % (stress_test_meteo))
             script_names.append('write_data_%s_soil-compaction_irrigation_yellow-mustard' % (stress_test_meteo))
 
+        elif stress_test_meteo == "spring-summer-wet":
+            scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction\n' % (stress_test_meteo))
+            scenario_flags.append('--stress-test-meteo %s\n' % (stress_test_meteo))
+            scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction --irrigation irrigation\n' % (stress_test_meteo))
+            scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction --yellow-mustard yellow-mustard\n' % (stress_test_meteo))
+            scenario_flags.append('--stress-test-meteo %s --irrigation irrigation --yellow-mustard yellow-mustard\n' % (stress_test_meteo))
+            scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction --irrigation irrigation --yellow-mustard yellow-mustard\n' % (stress_test_meteo))
+
+            script_names.append('write_data_%s_soil-compaction' % (stress_test_meteo))
+            script_names.append('write_data_%s' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction_irrigation' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_data_%s_irrigation_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_data_%s_soil-compaction_irrigation_yellow-mustard' % (stress_test_meteo))
+
         else:
             for magnitude in stress_test_meteo_magnitudes:
                 for duration in stress_test_meteo_durations:

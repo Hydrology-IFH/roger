@@ -6,9 +6,9 @@
 #SBATCH --mem=128000
 #SBATCH --mail-type=FAIL
 #SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de
-#SBATCH --job-name=write_data_spring-summer-wet_magnitude2_duration3
-#SBATCH --output=write_data_spring-summer-wet_magnitude2_duration3.out
-#SBATCH --error=write_data_spring-summer-wet_magnitude2_duration3_err.out
+#SBATCH --job-name=write_data_spring-summer-wet_soil-compaction_irrigation
+#SBATCH --output=write_data_spring-summer-wet_soil-compaction_irrigation.out
+#SBATCH --error=write_data_spring-summer-wet_soil-compaction_irrigation_err.out
 #SBATCH --export=ALL
 
 module load devel/miniforge
@@ -16,5 +16,5 @@ eval "$(conda shell.bash hook)"
 conda activate roger
 cd /pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed
 
-python write_roger_data_for_modflow.py --stress-test-meteo spring-summer-wet --stress-test-meteo-magnitude 2 --stress-test-meteo-duration 3
+python write_roger_data_for_modflow.py --stress-test-meteo spring-summer-wet --soil-compaction soil-compaction --irrigation irrigation
 
