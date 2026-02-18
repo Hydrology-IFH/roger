@@ -87,11 +87,17 @@ def main():
     for scenario_flag, script_name in zip(scenario_flags, script_names):
         lines = []
         lines.append("#!/bin/bash\n")
-        lines.append("#SBATCH --time=02:00:00\n")
+        if "base_2000-2024" in scenario_flag:
+            lines.append("#SBATCH --time=04:00:00\n")
+        else:            
+            lines.append("#SBATCH --time=02:00:00\n")
         lines.append("#SBATCH --nodes=1\n")
         lines.append("#SBATCH --ntasks=1\n")
         lines.append("#SBATCH --cpus-per-task=1\n")
-        lines.append("#SBATCH --mem=128000\n")
+        if "base_2000-2024" in scenario_flag:
+            lines.append("#SBATCH --mem=256000\n")
+        else:
+            lines.append("#SBATCH --mem=128000\n")
         lines.append("#SBATCH --mail-type=FAIL\n")
         lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
         lines.append(f"#SBATCH --job-name={script_name}\n")
