@@ -125,6 +125,231 @@ def aggregate_to_annual(df_prec, df_ta, df_pet):
     return prec_annual, ta_annual, pet_annual
 
 
+def plot_monthly_bars_2015_2018(base_data, scenario_name, station, duration, magnitude, figures_dir):
+    """Create bar plots for monthly values from 2015-2018 (baseline only)"""
+    
+    prec_mon_base, ta_mon_base, pet_mon_base = base_data[0:3]
+    
+    # Filter data for 2015-2018
+    mask = (prec_mon_base.index.year >= 2015) & (prec_mon_base.index.year <= 2018)
+    prec_filtered = prec_mon_base[mask]
+    ta_filtered = ta_mon_base[mask]
+    pet_filtered = pet_mon_base[mask]
+    
+    if len(prec_filtered) == 0:
+        print(f"No data available for 2015-2018 for station {station}")
+        return
+    
+    # Create figure with 3 subplots
+    fig, axes = plt.subplots(3, 1, figsize=(16, 12))
+    fig.suptitle(f'Monatswerte 2015-2018 - Station {station}', 
+                 fontsize=16, fontweight='bold')
+    
+    # Create x-axis positions
+    x_pos = np.arange(len(prec_filtered))
+    
+    # Top panel: Precipitation
+    axes[0].bar(x_pos, prec_filtered['PREC'], color='black', alpha=0.7, width=0.8)
+    axes[0].set_ylabel('Niederschlag [mm/Monat]', fontsize=12, fontweight='bold')
+    axes[0].grid(True, alpha=0.3, axis='y')
+    axes[0].set_xticks(x_pos)
+    axes[0].set_xticklabels([])
+    
+    # Add vertical lines at year ends
+    year_ends = []
+    for i, date in enumerate(prec_filtered.index):
+        if date.month == 12:
+            year_ends.append(i + 0.5)
+    for year_end in year_ends:
+        axes[0].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
+    
+    # Middle panel: PET
+    axes[1].bar(x_pos, pet_filtered['PET'], color='black', alpha=0.7, width=0.8)
+    axes[1].set_ylabel('PET [mm/Monat]', fontsize=12, fontweight='bold')
+    axes[1].grid(True, alpha=0.3, axis='y')
+    axes[1].set_xticks(x_pos)
+    axes[1].set_xticklabels([])
+    
+    # Add vertical lines at year ends
+    for year_end in year_ends:
+        axes[1].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
+    
+    # Bottom panel: Temperature
+    axes[2].bar(x_pos, ta_filtered['TA'], color='black', alpha=0.7, width=0.8)
+    axes[2].set_ylabel('Lufttemperatur (°C)', fontsize=12, fontweight='bold')
+    axes[2].set_xlabel('Monat', fontsize=12, fontweight='bold')
+    axes[2].grid(True, alpha=0.3, axis='y')
+    axes[2].set_xticks(x_pos)
+    
+    # Create month labels
+    month_labels = [f"{date.strftime('%b')}\n{date.year}" if date.month == 1 
+                    else date.strftime('%b') 
+                    for date in prec_filtered.index]
+    axes[2].set_xticklabels(month_labels, rotation=0, ha='center', fontsize=9)
+    
+    # Add vertical lines at year ends
+    for year_end in year_ends:
+        axes[2].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
+    
+    plt.tight_layout()
+    
+    # Save figure
+    output_path = figures_dir / f'monthly_bars_2015-2018_baseline_station{station}.png'
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Saved baseline monthly bar plot: {output_path}")
+
+
+def plot_monthly_bars_comparison_2017_2018(base_data, stress_data, scenario_name, station, duration, magnitude, figures_dir):
+    """Create comparison bar plots for monthly values from 2015-2018 (baseline vs stress)"""
+    
+    prec_mon_base, ta_mon_base, pet_mon_base = base_data[0:3]
+    prec_mon_stress, ta_mon_stress, pet_mon_stress = stress_data[0:3]
+    
+    # Filter data for 2015-2018
+    mask_base = (prec_mon_base.index.year >= 2017) & (prec_mon_base.index.year <= 2018)
+    mask_stress = (prec_mon_stress.index.year >= 2017) & (prec_mon_stress.index.year <= 2018)
+    
+    prec_base_filtered = prec_mon_base[mask_base]
+    ta_base_filtered = ta_mon_base[mask_base]
+    pet_base_filtered = pet_mon_base[mask_base]
+    
+    prec_stress_filtered = prec_mon_stress[mask_stress]
+    ta_stress_filtered = ta_mon_stress[mask_stress]
+    pet_stress_filtered = pet_mon_stress[mask_stress]
+    
+    if len(prec_base_filtered) == 0 or len(prec_stress_filtered) == 0:
+        print(f"No data available for 2015-2018 for station {station}")
+        return
+    
+    # Create figure with 3 subplots
+    fig, axes = plt.subplots(3, 1, figsize=(8, 5))
+    
+    # Create x-axis positions
+    x_pos = np.arange(len(prec_base_filtered))
+    width = 0.4  # Width of bars
+    
+    # bottom panel: Precipitation
+    axes[2].bar(x_pos - width/2, prec_base_filtered['PREC'], width=width, 
+                color='black', alpha=0.7, label='Basis')
+    axes[2].set_ylabel('Niederschlag\n[mm/Monat]', fontsize=11)
+    axes[2].grid(True, alpha=0.3, axis='y')
+    axes[2].set_xticks(x_pos)
+    # Create month labels
+    month_labels = [f"{date.strftime('%b')}\n{date.year}" if date.month == 1 
+                    else date.strftime('%b') 
+                    for date in prec_base_filtered.index]
+    axes[2].set_xticklabels(month_labels, rotation=0, ha='center', fontsize=9)
+    axes[2].set_xlabel('Zeit', fontsize=11)
+    
+    # Add vertical lines at year ends
+    year_ends = []
+    for i, date in enumerate(prec_base_filtered.index):
+        if date.month == 12:
+            year_ends.append(i + 0.5)
+    for year_end in year_ends:
+        axes[2].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
+    
+    # Middle panel: PET
+    axes[1].bar(x_pos - width/2, pet_base_filtered['PET'], width=width, 
+                color='black', alpha=0.7, label='Basis')
+    axes[1].set_ylabel('PET\n[mm/Monat]', fontsize=11)
+    axes[1].grid(True, alpha=0.3, axis='y')
+    axes[1].set_xticks(x_pos)
+    axes[1].set_xticklabels([])
+    
+    # Add vertical lines at year ends
+    for year_end in year_ends:
+        axes[1].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
+    
+    # Top panel: Temperature
+    axes[0].bar(x_pos - width/2, ta_base_filtered['TA'], width=width, 
+                color='black', alpha=0.7, label='Basis')
+    axes[0].set_ylabel('Lufttemperatur\n(°C)', fontsize=11)
+    axes[0].grid(True, alpha=0.3, axis='y')
+    axes[0].set_xticks(x_pos)
+    axes[0].set_xticklabels([])
+    
+    # Add vertical lines at year ends
+    for year_end in year_ends:
+        axes[0].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
+    
+    plt.tight_layout()
+    
+    # Save figure
+    output_path = figures_dir / f'monthly_bars_2017-2018_comparison_{scenario_name}_duration{duration}_magnitude{magnitude}_station{station}_no-stress.png'
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    # Create figure with 3 subplots
+    fig, axes = plt.subplots(3, 1, figsize=(8, 5))
+    
+    # Create x-axis positions
+    x_pos = np.arange(len(prec_base_filtered))
+    width = 0.4  # Width of bars
+    
+    # Bottom panel: Precipitation
+    axes[2].bar(x_pos - width/2, prec_base_filtered['PREC'], width=width, 
+                color='black', alpha=0.7, label='Basis')
+    axes[2].bar(x_pos + width/2, prec_stress_filtered['PREC'], width=width, 
+                color='red', alpha=0.7, label='Stresstest')
+    axes[2].set_ylabel('Niederschlag\n[mm/Monat]', fontsize=11)
+    axes[2].set_xlabel('Zeit', fontsize=11)
+    axes[2].grid(True, alpha=0.3, axis='y')
+    axes[2].set_xticks(x_pos)
+    # Create month labels
+    month_labels = [f"{date.strftime('%b')}\n{date.year}" if date.month == 1 
+                    else date.strftime('%b') 
+                    for date in prec_base_filtered.index]
+    axes[2].set_xticklabels(month_labels, rotation=0, ha='center', fontsize=9)
+    
+    # Add vertical lines at year ends
+    year_ends = []
+    for i, date in enumerate(prec_base_filtered.index):
+        if date.month == 12:
+            year_ends.append(i + 0.5)
+    for year_end in year_ends:
+        axes[2].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
+    
+    # Middle panel: PET
+    axes[1].bar(x_pos - width/2, pet_base_filtered['PET'], width=width, 
+                color='black', alpha=0.7, label='Basis')
+    axes[1].bar(x_pos + width/2, pet_stress_filtered['PET'], width=width, 
+                color='red', alpha=0.7, label='Stresstest')
+    axes[1].set_ylabel('PET\n[mm/Monat]', fontsize=11)
+    axes[1].grid(True, alpha=0.3, axis='y')
+    axes[1].set_xticks(x_pos)
+    axes[1].set_xticklabels([])
+    
+    # Add vertical lines at year ends
+    for year_end in year_ends:
+        axes[1].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
+    
+    # Top panel: Temperature
+    axes[0].bar(x_pos - width/2, ta_base_filtered['TA'], width=width, 
+                color='black', alpha=0.7, label='Basis')
+    axes[0].bar(x_pos + width/2, ta_stress_filtered['TA'], width=width, 
+                color='red', alpha=0.7, label='Stresstest')
+    axes[0].set_ylabel('Lufttemperatur\n(°C)', fontsize=11)
+    axes[0].grid(True, alpha=0.3, axis='y')
+    axes[0].set_xticks(x_pos)
+    axes[0].set_xticklabels([])
+    
+    # Add vertical lines at year ends
+    for year_end in year_ends:
+        axes[0].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
+    
+    plt.tight_layout()
+    
+    # Save figure
+    output_path = figures_dir / f'monthly_bars_2017-2018_comparison_{scenario_name}_duration{duration}_magnitude{magnitude}_station{station}.png'
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Saved comparison monthly bar plot: {output_path}")
+
+
 def plot_comparisons(base_data, stress_data, scenario_name, station, duration, magnitude, figures_dir):
     """Create comparison plots for base and stress scenarios"""
     
@@ -278,7 +503,7 @@ def main():
         os.makedirs(figures_dir)
     
     meteo_stations = [1443, 684, 1346, 2388, 259, 757, 1224]
-    scenarios = ['spring-drought', 'summer-drought', 'spring-summer-drought']
+    scenarios = ['summer-drought', 'spring-drought', 'spring-summer-drought']
     durations = [0, 2, 3]
     magnitudes = [0, 1, 2]
     
@@ -301,6 +526,9 @@ def main():
             base_data = (prec_mon_base, ta_mon_base, pet_mon_base,
                         prec_seas_base, ta_seas_base, pet_seas_base,
                         prec_ann_base, ta_ann_base, pet_ann_base)
+            
+            # Create baseline monthly bar plot for 2015-2018
+            plot_monthly_bars_2015_2018(base_data, "baseline", station, 0, 0, figures_dir)
             
         except Exception as e:
             print(f"Error loading baseline data for station {station}: {e}")
@@ -340,6 +568,9 @@ def main():
                         # Create plots
                         plot_comparisons(base_data, stress_data, scenario, station, duration, magnitude, figures_dir)
                         
+                        # Create monthly bar plots comparison for 2017-2018
+                        plot_monthly_bars_comparison_2017_2018(base_data, stress_data, scenario, station, duration, magnitude, figures_dir)
+                        
                         # Create summary statistics
                         summary = create_summary_statistics(base_data, stress_data, scenario, station, duration, magnitude)
                         all_summaries.append(summary)
@@ -370,6 +601,9 @@ def main():
                 
                 # Create plots (using duration=0, magnitude=0 as placeholders)
                 plot_comparisons(base_data, wet_data, wet_scenario, station, 0, 0, figures_dir)
+                
+                # Create monthly bar plots comparison for 2015-2018
+                plot_monthly_bars_comparison_2015_2018(base_data, wet_data, wet_scenario, station, 0, 0, figures_dir)
                 
                 # Create summary statistics
                 summary = create_summary_statistics(base_data, wet_data, wet_scenario, station, 0, 0)

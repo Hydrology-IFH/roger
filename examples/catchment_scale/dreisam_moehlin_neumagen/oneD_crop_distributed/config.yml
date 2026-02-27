@@ -18,8 +18,10 @@ OUTPUT_FREQUENCY: 86400  # output frequency in seconds
 # simulated hydrological fluxes
 OUTPUT_RATE:
 - "prec" # precipitation (mm/day)
+- "pet"  # potential evapotranspiration (mm/day)
 - "aet"  # actual evapotranspiration (mm/day)
 - "transp"  # transpiration (mm/day)
+- "pt"  # potential transpiration (mm/day)
 - "evap_soil"  # soil evaporation (mm/day)
 - "q_sur"  # surface runoff (mm/day)
 # - "inf_mat_rz"  # soil matrix infiltration into root zone (mm/day)
@@ -46,10 +48,11 @@ OUTPUT_COLLECT:
 - "theta_rz"  # soil water content of root zone (-)
 - "theta_ss"  # soil water content of subsoil (-)
 - "theta"  # soil water content (-)
+- "theta_irrig"
 # - "S_snow"  # storage volume snow cover (mm)
 - "irr_demand"  # irrigation demand (mm/day)
 - "lu_id"  # land use id (-)
 - "ta"  # air temperature (degC)
 - "ta_max"  # maximum air temperature (degC)
-- "z_root"
-- "ground_cover"
+- "z_root"  # root depth (m) 
+- "ground_cover"  # ground cover (-)

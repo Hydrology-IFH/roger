@@ -230,22 +230,22 @@ for station in meteo_stations:
                     os.makedirs(path_to_dir)  
 
                 prec_10mins, df_pet, df_ta = read_meteo(meteo_path / str(station))
-                # insert spring period of 2020 in spring period of 2017
-                prec_10mins.loc["2017-03-01":"2017-05-31"] = prec_10mins_spring_2020.values
-                df_ta.loc["2017-03-01":"2017-05-31"] = df_ta_spring_2020.values
-                df_pet.loc["2017-03-01":"2017-05-31"] = df_pet_spring_2020.values
-                # insert spring period of 2020 in spring period of 2016
-                prec_10mins.loc["2016-03-01":"2016-05-31"] = prec_10mins_spring_2020.values
-                df_ta.loc["2016-03-01":"2016-05-31"] = df_ta_spring_2020.values
-                df_pet.loc["2016-03-01":"2016-05-31"] = df_pet_spring_2020.values
-                # insert summer period of 2018 in summer period of 2017
-                prec_10mins.loc["2017-06-01":"2017-08-31"] = prec_10mins_summer_2018.values
-                df_ta.loc["2017-06-01":"2017-08-31"] = df_ta_summer_2018.values
-                df_pet.loc["2017-06-01":"2017-08-31"] = df_pet_summer_2018.values
-                # insert summer period of 2018 in summer period of 2016
-                prec_10mins.loc["2016-06-01":"2016-08-31"] = prec_10mins_summer_2018.values
-                df_ta.loc["2016-06-01":"2016-08-31"] = df_ta_summer_2018.values
-                df_pet.loc["2016-06-01":"2016-08-31"] = df_pet_summer_2018.values
+                # insert spring period of 2020 in spring period of 2019
+                prec_10mins.loc["2019-03-01":"2019-05-31"] = prec_10mins_spring_2020.values
+                df_ta.loc["2019-03-01":"2019-05-31"] = df_ta_spring_2020.values
+                df_pet.loc["2019-03-01":"2019-05-31"] = df_pet_spring_2020.values
+                # insert spring period of 2020 in spring period of 2018
+                prec_10mins.loc["2018-03-01":"2018-05-31"] = prec_10mins_spring_2020.values
+                df_ta.loc["2018-03-01":"2018-05-31"] = df_ta_spring_2020.values
+                df_pet.loc["2018-03-01":"2018-05-31"] = df_pet_spring_2020.values
+                # insert summer period of 2018 in summer period of 2019
+                prec_10mins.loc["2019-06-01":"2019-08-31"] = prec_10mins_summer_2018.values
+                df_ta.loc["2019-06-01":"2019-08-31"] = df_ta_summer_2018.values
+                df_pet.loc["2019-06-01":"2019-08-31"] = df_pet_summer_2018.values
+                # insert summer period of 2018 in summer period of 2020
+                prec_10mins.loc["2020-06-01":"2020-08-31"] = prec_10mins_summer_2018.values
+                df_ta.loc["2020-06-01":"2020-08-31"] = df_ta_summer_2018.values
+                df_pet.loc["2020-06-01":"2020-08-31"] = df_pet_summer_2018.values
 
                 PREC_path = path_to_dir / "PREC.txt"
                 Ta_path = path_to_dir / "TA.txt"
@@ -388,10 +388,10 @@ for station in meteo_stations:
                 prec_10mins.loc["2018-06-01":"2018-08-31", "PREC"] = prec_10mins_summer_2018.loc[:, "PREC"].values * (1 + (prec_magnitude_summer / 100))
                 df_ta.loc["2018-06-01":"2018-08-31", "TA":] = df_ta_summer_2018.loc[:, "TA":].values + ta_magnitude_summer
                 df_pet.loc["2018-06-01":"2018-08-31", "PET"] = df_pet_summer_2018.loc[:, "PET"].values * (1 + (pet_magnitude_summer / 100))
-                # insert summer period of 2018 in summer period of 2017
-                prec_10mins.loc["2017-06-01":"2017-08-31", "PREC"] = prec_10mins_summer_2018.loc[:, "PREC"].values * (1 + (prec_magnitude_summer / 100))
-                df_ta.loc["2017-06-01":"2017-08-31", "TA":] = df_ta_summer_2018.loc[:, "TA":].values + ta_magnitude_summer
-                df_pet.loc["2017-06-01":"2017-08-31", "PET"] = df_pet_summer_2018.loc[:, "PET"].values * (1 + (pet_magnitude_summer / 100))
+                # insert summer period of 2018 in summer period of 2019
+                prec_10mins.loc["2019-06-01":"2019-08-31", "PREC"] = prec_10mins_summer_2018.loc[:, "PREC"].values * (1 + (prec_magnitude_summer / 100))
+                df_ta.loc["2019-06-01":"2019-08-31", "TA":] = df_ta_summer_2018.loc[:, "TA":].values + ta_magnitude_summer
+                df_pet.loc["2019-06-01":"2019-08-31", "PET"] = df_pet_summer_2018.loc[:, "PET"].values * (1 + (pet_magnitude_summer / 100))
 
                 PREC_path = path_to_dir / "PREC.txt"
                 Ta_path = path_to_dir / "TA.txt"
@@ -548,14 +548,14 @@ for station in meteo_stations:
                 prec_10mins.loc["2018-06-01":"2018-08-31", "PREC"] = prec_10mins_summer_2018.loc[:, "PREC"].values * (1 + (prec_magnitude_summer / 100))
                 df_ta.loc["2018-06-01":"2018-08-31", "TA":] = df_ta_summer_2018.loc[:, "TA":].values + ta_magnitude_summer
                 df_pet.loc["2018-06-01":"2018-08-31", "PET"] = df_pet_summer_2018.loc[:, "PET"].values * (1 + (pet_magnitude_summer / 100))
-                # insert summer period of 2018 in summer period of 2017
-                prec_10mins.loc["2017-06-01":"2017-08-31", "PREC"] = prec_10mins_summer_2018.loc[:, "PREC"].values * (1 + (prec_magnitude_summer / 100))
-                df_ta.loc["2017-06-01":"2017-08-31", "TA":] = df_ta_summer_2018.loc[:, "TA":].values + ta_magnitude_summer
-                df_pet.loc["2017-06-01":"2017-08-31", "PET"] = df_pet_summer_2018.loc[:, "PET"].values * (1 + (pet_magnitude_summer / 100))
-                # insert summer period of 2018 in summer period of 2016
-                prec_10mins.loc["2016-06-01":"2016-08-31", "PREC"] = prec_10mins_summer_2018.loc[:, "PREC"].values * (1 + (prec_magnitude_summer / 100))
-                df_ta.loc["2016-06-01":"2016-08-31", "TA":] = df_ta_summer_2018.loc[:, "TA":].values + ta_magnitude_summer
-                df_pet.loc["2016-06-01":"2016-08-31", "PET"] = df_pet_summer_2018.loc[:, "PET"].values * (1 + (pet_magnitude_summer / 100))
+                # insert summer period of 2018 in summer period of 2019
+                prec_10mins.loc["2019-06-01":"2019-08-31", "PREC"] = prec_10mins_summer_2018.loc[:, "PREC"].values * (1 + (prec_magnitude_summer / 100))
+                df_ta.loc["2019-06-01":"2019-08-31", "TA":] = df_ta_summer_2018.loc[:, "TA":].values + ta_magnitude_summer
+                df_pet.loc["2019-06-01":"2019-08-31", "PET"] = df_pet_summer_2018.loc[:, "PET"].values * (1 + (pet_magnitude_summer / 100))
+                # insert summer period of 2018 in summer period of 2020
+                prec_10mins.loc["2020-06-01":"2020-08-31", "PREC"] = prec_10mins_summer_2018.loc[:, "PREC"].values * (1 + (prec_magnitude_summer / 100))
+                df_ta.loc["2020-06-01":"2020-08-31", "TA":] = df_ta_summer_2018.loc[:, "TA":].values + ta_magnitude_summer
+                df_pet.loc["2020-06-01":"2020-08-31", "PET"] = df_pet_summer_2018.loc[:, "PET"].values * (1 + (pet_magnitude_summer / 100))
 
                 PREC_path = path_to_dir / "PREC.txt"
                 Ta_path = path_to_dir / "TA.txt"
