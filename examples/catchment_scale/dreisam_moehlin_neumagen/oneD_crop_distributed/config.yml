@@ -48,11 +48,11 @@ OUTPUT_COLLECT:
 - "theta_rz"  # soil water content of root zone (-)
 - "theta_ss"  # soil water content of subsoil (-)
 - "theta"  # soil water content (-)
-- "theta_irrig"
+- "theta_irr"
 # - "S_snow"  # storage volume snow cover (mm)
 - "irr_demand"  # irrigation demand (mm/day)
 - "lu_id"  # land use id (-)
 - "ta"  # air temperature (degC)
 - "ta_max"  # maximum air temperature (degC)
-- "z_root"  # root depth (m) 
-- "ground_cover"  # ground cover (-)
+- "z_root"  # root depth (mm) 
+- "ground_cover"  # fraction of ground cover (-)
