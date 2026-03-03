@@ -90,6 +90,7 @@ def main():
 
     vals_monthly = onp.concatenate(list_monthly_arrays, axis=0)
     vals_monthly = onp.where(vals_monthly < 0, onp.nan, vals_monthly)
+    vals_monthly = onp.where(vals_monthly > 300, 300, vals_monthly)
 
     # plot time series of monthly recharge showing average, min and max
     vals_mean = onp.nanmean(onp.nanmean(vals_monthly, axis=2), axis=1)
