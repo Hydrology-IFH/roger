@@ -34,14 +34,15 @@ def main():
 
     for year in years:
         base_file = str(base_path_output / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_soil-compaction_year{year}.nc")
+        click.echo(f"Loading recharge data from {base_file}")
         ds_base = xr.open_dataset(base_file)
         base_recharge = ds_base["recharge"].values
-        base_recharge = np.where(mask, base_recharge, np.nan)
         ds_base.close()
+        base_recharge = np.where(mask, base_recharge, np.nan)
         base_recharge = np.where(base_recharge < 0, np.nan, base_recharge)
         list_base_recharge.append(base_recharge)
         base_recharge_annual_sum = np.sum(base_recharge, axis=0)
-        list_base_recharge_annual_sum.append(base_recharge_annual_sum)
+        list_base_recharge_annual_sum.append(base_recharge_annual_sum.flatten())
 
     # make boxplot with annual sums of recharge
     fig, ax = plt.subplots(figsize=(6, 3))
