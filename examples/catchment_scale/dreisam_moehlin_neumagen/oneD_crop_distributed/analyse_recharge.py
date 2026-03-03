@@ -42,6 +42,7 @@ def main():
         base_recharge = np.where(base_recharge < 0, np.nan, base_recharge)
         list_base_recharge.append(base_recharge)
         base_recharge_annual_sum = np.sum(base_recharge, axis=0)
+        base_recharge_annual_sum = np.where(base_recharge_annual_sum > 900, 900, base_recharge_annual_sum)
         click.echo(f"Annual sum of recharge for {year}: {np.nanmean(base_recharge_annual_sum)} mm/year")
         cond = np.isfinite(base_recharge_annual_sum)
         base_recharge_annual_sum_ = base_recharge_annual_sum[cond]
@@ -49,11 +50,12 @@ def main():
 
     # make boxplot with annual sums of recharge
     fig, ax = plt.subplots(figsize=(6, 3))
-    ax.boxplot(list_base_recharge_annual_sum)
+    ax.boxplot(list_base_recharge_annual_sum, showfliers=False)
     ax.set_xlabel("Jahr")
     ax.set_ylabel("Direkte GWN\n[mm/Jahr]")
     ax.set_xticks(range(1, len(years) + 1))
     ax.set_xticklabels(years)
+    ax.set_ylim(0, )
     fig.tight_layout()
     fig.savefig(figures_folder / "annual_recharge_boxplot.png")
     plt.close(fig)
