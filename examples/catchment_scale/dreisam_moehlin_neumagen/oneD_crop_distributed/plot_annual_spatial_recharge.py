@@ -97,8 +97,8 @@ def main():
     # plot time series of monthly recharge showing average, min and max
     vals_mean = onp.nanmean(onp.nanmean(vals_monthly, axis=2), axis=1)
     vals_median = onp.nanmedian(onp.nanmedian(vals_monthly, axis=2), axis=1)
-    vals_99 = onp.nanpercentile(onp.nanpercentile(vals_monthly, 99, axis=2), axis=1)
-    vals_1 = onp.nanpercentile(onp.nanpercentile(vals_monthly, 1, axis=2), axis=1)
+    vals_99 = onp.nanpercentile(onp.nanpercentile(vals_monthly, 99, axis=2), 99, axis=1)
+    vals_1 = onp.nanpercentile(onp.nanpercentile(vals_monthly, 1, axis=2), 1, axis=1)
     time = pd.date_range(start="2013-01-31", periods=vals_monthly.shape[0], freq="M")
     fig, axes = plt.subplots(figsize=(6, 2))
     axes.plot(time, vals_median, color='blue', label='median GWN')
