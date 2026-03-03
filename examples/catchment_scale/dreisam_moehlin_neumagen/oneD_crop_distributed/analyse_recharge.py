@@ -42,6 +42,7 @@ def main():
         base_recharge = np.where(base_recharge < 0, np.nan, base_recharge)
         list_base_recharge.append(base_recharge)
         base_recharge_annual_sum = np.sum(base_recharge, axis=0)
+        click.echo(f"Annual sum of recharge for {year}: {np.nanmean(base_recharge_annual_sum)} mm")
         list_base_recharge_annual_sum.append(base_recharge_annual_sum.flatten())
 
     # make boxplot with annual sums of recharge
