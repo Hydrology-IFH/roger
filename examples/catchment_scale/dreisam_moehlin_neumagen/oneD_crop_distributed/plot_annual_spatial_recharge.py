@@ -52,7 +52,7 @@ def main():
     years = onp.arange(2013, 2023).tolist()
     for year in years:
         # load the hydrological simulations
-        sim_file = base_path_output / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_no-soil-compaction_year{year}.nc"
+        sim_file = base_path_output / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_soil-compaction_year{year}.nc"
         ds_sim = xr.open_dataset(sim_file, engine="h5netcdf")
 
         # assign date
@@ -70,14 +70,14 @@ def main():
         plt.ylabel('Y-Koordinate')
         plt.grid(zorder=-1)
         plt.tight_layout()
-        file = base_path_figs / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_no-soil-compaction_spatial_annual_sum_year{year}.png"
+        file = base_path_figs / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_soil-compaction_spatial_annual_sum_year{year}.png"
         fig.savefig(file, dpi=300)
         plt.close(fig)
 
     list_monthly_arrays = []
     for year in years:
         # load the hydrological simulations
-        sim_file = base_path_output / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_no-soil-compaction_year{year}.nc"
+        sim_file = base_path_output / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_soil-compaction_year{year}.nc"
         ds_sim = xr.open_dataset(sim_file, engine="h5netcdf")
 
         # assign date
@@ -102,7 +102,7 @@ def main():
     axes.set_xlabel('Zeit')
     axes.set_ylabel('Direkte GWN\n[mm/Monate]')
     plt.tight_layout()
-    file = base_path_figs / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_no-soil-compaction_monthly_timeseries.png"
+    file = base_path_figs / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_soil-compaction_monthly_timeseries.png"
     fig.savefig(file, dpi=300)
     plt.close(fig)
 
