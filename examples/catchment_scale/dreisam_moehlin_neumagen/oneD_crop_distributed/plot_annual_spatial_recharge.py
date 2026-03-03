@@ -84,7 +84,7 @@ def main():
         days_sim = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
         ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
 
-        vals = ds_sim["recharge"].resample(Time="ME").sum().values
+        vals = ds_sim["recharge"].resample(Time="M").sum().values
         list_monthly_arrays.append(vals)
         ds_sim.close()
 
@@ -100,7 +100,7 @@ def main():
     axes.plot(time, vals_mean, color='blue', label='durchschnittliche GWN')
     axes.fill_between(time, vals_min, vals_max, color='lightblue', alpha=0.5, label='min-max GWN')
     axes.set_xlabel('Zeit')
-    axes.set_ylabel('Direkte GWN\n[mm/Monate]')
+    axes.set_ylabel('Direkte GWN\n[mm/Monat]')
     plt.tight_layout()
     file = base_path_figs / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_soil-compaction_monthly_timeseries.png"
     fig.savefig(file, dpi=300)
