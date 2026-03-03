@@ -82,7 +82,8 @@ def main():
 
         # assign date
         days_sim = (ds_sim['Time'].values / onp.timedelta64(24 * 60 * 60, "s"))
-        ds_sim = ds_sim.assign_coords(date=("Time", days_sim))
+        time = pd.date_range(start="2013-01-31", periods=len(days_sim), freq="D")
+        ds_sim = ds_sim.assign_coords(date=("Time", time))
 
         vals = ds_sim["recharge"].resample(Time="M").sum().values
         list_monthly_arrays.append(vals)

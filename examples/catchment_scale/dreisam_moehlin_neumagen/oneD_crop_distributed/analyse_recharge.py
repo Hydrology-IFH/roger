@@ -50,7 +50,7 @@ def main():
 
     # make boxplot with annual sums of recharge
     fig, ax = plt.subplots(figsize=(6, 3))
-    ax.boxplot(list_base_recharge_annual_sum, showfliers=False)
+    ax.boxplot(list_base_recharge_annual_sum, showfliers=False, facecolor='lightblue', medianprops={'color': 'black'})
     ax.set_xlabel("Jahr")
     ax.set_ylabel("Direkte GWN\n[mm/Jahr]")
     ax.set_xticks(range(1, len(years) + 1))
