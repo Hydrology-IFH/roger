@@ -35,7 +35,7 @@ def main():
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
     # directory of figures
-    base_path_figs = base_path / "figures"
+    base_path_figs = base_path / "figures" / "recharge"
     if not os.path.exists(base_path_figs):
         os.mkdir(base_path_figs)
 
@@ -65,9 +65,9 @@ def main():
         fig, ax = plt.subplots(figsize=(6,4))
         extent = (ds_param.x.values[0] / 1000, ds_param.x.values[-1] / 1000, ds_param.y.values[-1] / 1000, ds_param.y.values[0] / 1000)
         im = ax.imshow(vals, cmap='viridis_r', zorder=2, extent=extent, vmin=0, vmax=600)
-        plt.colorbar(im, ax=ax, shrink=0.7, label="recharge\n[mm/year]")
-        plt.xlabel('Distance in x-direction [km]')
-        plt.ylabel('Distance in y-direction [km]')
+        plt.colorbar(im, ax=ax, shrink=0.7, label="Direkte GWN\n[mm/Jahr]")
+        plt.xlabel('X-Koordinate')
+        plt.ylabel('Y-Koordinate')
         plt.grid(zorder=-1)
         plt.tight_layout()
         file = base_path_figs / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_no-soil-compaction_spatial_annual_sum_year{year}.png"
@@ -97,11 +97,10 @@ def main():
     vals_max = onp.nanmax(onp.nanmax(vals_monthly, axis=2), axis=1)
     time = pd.date_range(start="2013-01-31", periods=vals_monthly.shape[0], freq="M")
     fig, axes = plt.subplots(figsize=(4, 4))
-    axes.plot(time, vals_mean, color='blue', label='mean recharge')
-    axes.fill_between(time, vals_min, vals_max, color='lightblue', alpha=0.5, label='min-max range')
-    axes.set_xlabel('Time')
-    axes.set_ylabel('Monthly recharge [mm/month]')
-    axes.set_title('Monthly Recharge Time Series (2013-2022)')
+    axes.plot(time, vals_mean, color='blue', label='durchschnittliche GWN')
+    axes.fill_between(time, vals_min, vals_max, color='lightblue', alpha=0.5, label='min-max GWN')
+    axes.set_xlabel('Zeit')
+    axes.set_ylabel('Direkte GWN\n[mm/Monate]')
     plt.tight_layout()
     file = base_path_figs / f"recharge_base-magnitude0-duration0_no-irrigation_no-yellow-mustard_no-soil-compaction_monthly_timeseries.png"
     fig.savefig(file, dpi=300)
