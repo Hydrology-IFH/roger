@@ -95,11 +95,13 @@ def main():
 
     # plot time series of monthly recharge showing average, min and max
     vals_mean = onp.nanmean(onp.nanmean(vals_monthly, axis=2), axis=1)
+    vals_median = onp.nanmedian(onp.nanmedian(vals_monthly, axis=2), axis=1)
     vals_min = onp.nanmin(onp.nanmin(vals_monthly, axis=2), axis=1)
     vals_max = onp.nanmax(onp.nanmax(vals_monthly, axis=2), axis=1)
     time = pd.date_range(start="2013-01-31", periods=vals_monthly.shape[0], freq="M")
     fig, axes = plt.subplots(figsize=(4, 4))
-    axes.plot(time, vals_mean, color='blue', label='durchschnittliche GWN')
+    axes.plot(time, vals_median, color='blue', label='median GWN')
+    axes.plot(time, vals_mean, color='orange', label='mittlere GWN')
     axes.fill_between(time, vals_min, vals_max, color='lightblue', alpha=0.5, label='min-max GWN')
     axes.set_xlabel('Zeit')
     axes.set_ylabel('Direkte GWN\n[mm/Monat]')
