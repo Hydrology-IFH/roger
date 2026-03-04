@@ -104,6 +104,7 @@ def main():
     axes.plot(time, vals_median, color='blue', label='median GWN')
     axes.plot(time, vals_mean, color='black', label='mittlere GWN', linestyle='--', lw=1)
     axes.fill_between(time, vals_1, vals_99, color='lightblue', alpha=0.5, label='1%-99% GWN')
+    axes.set_xlim(time[0], time[-1])
     axes.set_xlabel('Zeit')
     axes.set_ylabel('Direkte GWN\n[mm/Monat]')
     plt.tight_layout()
