@@ -337,7 +337,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             heat_stress = onp.where(mask[onp.newaxis, :, :], heat_stress, onp.nan)
                             v = f.create_variable("heat_stress", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
                             v[:, :, :] = heat_stress
-                            v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
+                            v.attrs.update(long_name="heat stress", units="")
 
 
                     output_file = base_path_output / f"heat_days_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
@@ -379,7 +379,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             heat_days = onp.where(mask[onp.newaxis, :, :], heat_days, onp.nan)
                             v = f.create_variable("heat_day", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
                             v[:, :, :] = heat_days
-                            v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
+                            v.attrs.update(long_name="heat day", units="")
 
                     output_file = base_path_output / f"drought_days_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                     files_to_compress.append(output_file)
@@ -420,7 +420,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             drought_days = onp.where(mask[onp.newaxis, :, :], drought_days, onp.nan)
                             v = f.create_variable("drought_day", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
                             v[:, :, :] = drought_days
-                            v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
+                            v.attrs.update(long_name="drought day", units="")
 
                     output_file = base_path_output / f"root_ventilation_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                     files_to_compress.append(output_file)
@@ -455,13 +455,13 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
                             theta_rz_year = df.variables.get("theta_rz")[time_indices, :, :]
-                            root_ventilation = (theta_rz_year - (theta_ufc[onp.newaxis, :, :] + theta_pwp[onp.newaxis, :, :])) / theta_ac[onp.newaxis, :, :]
+                            root_ventilation = 1 - ((theta_rz_year - (theta_ufc[onp.newaxis, :, :] + theta_pwp[onp.newaxis, :, :])) / theta_ac[onp.newaxis, :, :])
                             root_ventilation = onp.where(root_ventilation < 0, 0, root_ventilation)
                             root_ventilation = onp.where(root_ventilation > 1, 1, root_ventilation)
-                            root_ventilation = onp.where(mask[onp.newaxis, :, :], root_ventilation, onp.nan)
+                            root_ventilation = onp.where(mask[onp.newaxis, :, :], root_ventilation * 100, onp.nan)
                             v = f.create_variable("root_ventilation", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
                             v[:, :, :] = root_ventilation
-                            v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"])
+                            v.attrs.update(long_name="root ventilation", units="%")
 
     # merge model output into single file
     diag_file = str(base_path_output / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.rate.nc")
