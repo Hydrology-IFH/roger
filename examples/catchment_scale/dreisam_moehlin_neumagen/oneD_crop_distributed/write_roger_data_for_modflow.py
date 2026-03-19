@@ -42,11 +42,11 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         mask = (infile["maskCatch"].values == 1)
         xcoords = infile["x"].values
         ycoords = infile["y"].values
-        slope = infile["slope"].values/100
+        slope = infile["slope"].values / 100
         slope = onp.where(slope > 1, 1, slope)
-        theta_ufc = infile["theta_ufc"].values
-        theta_pwp = infile["theta_pwp"].values
-        theta_ac = infile["theta_ac"].values
+        theta_ufc = infile["NFK"].values / 100
+        theta_pwp = infile["PWP"].values / 100
+        theta_ac = infile["LK"].values / 100
 
     if stress_test_meteo == "base_2000-2024":
         time_origin = "2000-01-01 00:00:00"
