@@ -214,7 +214,7 @@ def plot_monthly_bars_comparison_2017_2018(base_data, stress_data, scenario_name
     prec_base_filtered = prec_mon_base[mask_base]
     ta_base_filtered = ta_mon_base[mask_base]
     pet_base_filtered = pet_mon_base[mask_base]
-    
+
     prec_stress_filtered = prec_mon_stress[mask_stress]
     ta_stress_filtered = ta_mon_stress[mask_stress]
     pet_stress_filtered = pet_mon_stress[mask_stress]
@@ -231,7 +231,7 @@ def plot_monthly_bars_comparison_2017_2018(base_data, stress_data, scenario_name
     width = 0.4  # Width of bars
     
     # bottom panel: Precipitation
-    axes[2].bar(x_pos - width/2, prec_base_filtered['PREC'], width=width, 
+    axes[2].bar(x_pos, prec_base_filtered['PREC'], width=width, 
                 color='black', alpha=0.7, label='Basis')
     axes[2].set_ylabel('Niederschlag\n[mm/Monat]', fontsize=11)
     axes[2].grid(True, alpha=0.3, axis='y')
@@ -252,7 +252,7 @@ def plot_monthly_bars_comparison_2017_2018(base_data, stress_data, scenario_name
         axes[2].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
     
     # Middle panel: PET
-    axes[1].bar(x_pos - width/2, pet_base_filtered['PET'], width=width, 
+    axes[1].bar(x_pos, pet_base_filtered['PET'], width=width, 
                 color='black', alpha=0.7, label='Basis')
     axes[1].set_ylabel('PET\n[mm/Monat]', fontsize=11)
     axes[1].grid(True, alpha=0.3, axis='y')
@@ -264,7 +264,7 @@ def plot_monthly_bars_comparison_2017_2018(base_data, stress_data, scenario_name
         axes[1].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
     
     # Top panel: Temperature
-    axes[0].bar(x_pos - width/2, ta_base_filtered['TA'], width=width, 
+    axes[0].bar(x_pos, ta_base_filtered['TA'], width=width, 
                 color='black', alpha=0.7, label='Basis')
     axes[0].set_ylabel('Lufttemperatur\n(°C)', fontsize=11)
     axes[0].grid(True, alpha=0.3, axis='y')
@@ -281,7 +281,19 @@ def plot_monthly_bars_comparison_2017_2018(base_data, stress_data, scenario_name
     output_path = figures_dir / f'monthly_bars_2017-2018_comparison_{scenario_name}_duration{duration}_magnitude{magnitude}_station{station}_no-stress.png'
     plt.savefig(output_path, dpi=300, bbox_inches='tight')
     plt.close()
-    
+
+    # set values of base for summer months to nan
+    summer_mask = (prec_base_filtered.index.month >= 6) & (prec_base_filtered.index.month <= 8)
+    prec_base_filtered.loc[~summer_mask, 'PREC'] = np.nan
+    ta_base_filtered.loc[~summer_mask, 'TA'] = np.nan
+    pet_base_filtered.loc[~summer_mask, 'PET'] = np.nan
+
+    # set values of stress for spring, winter and autumn to nan
+    non_summer_mask = ~((prec_stress_filtered.index.month >= 6) & (prec_stress_filtered.index.month <= 8))
+    prec_stress_filtered.loc[non_summer_mask, 'PREC'] = np.nan
+    ta_stress_filtered.loc[non_summer_mask, 'TA'] = np.nan
+    pet_stress_filtered.loc[non_summer_mask, 'PET'] = np.nan
+
     # Create figure with 3 subplots
     fig, axes = plt.subplots(3, 1, figsize=(8, 5))
     
@@ -290,9 +302,9 @@ def plot_monthly_bars_comparison_2017_2018(base_data, stress_data, scenario_name
     width = 0.4  # Width of bars
     
     # Bottom panel: Precipitation
-    axes[2].bar(x_pos - width/2, prec_base_filtered['PREC'], width=width, 
+    axes[2].bar(x_pos, prec_base_filtered['PREC'], width=width, 
                 color='black', alpha=0.7, label='Basis')
-    axes[2].bar(x_pos + width/2, prec_stress_filtered['PREC'], width=width, 
+    axes[2].bar(x_pos, prec_stress_filtered['PREC'], width=width, 
                 color='red', alpha=0.7, label='Stresstest')
     axes[2].set_ylabel('Niederschlag\n[mm/Monat]', fontsize=11)
     axes[2].set_xlabel('Zeit', fontsize=11)
@@ -313,9 +325,9 @@ def plot_monthly_bars_comparison_2017_2018(base_data, stress_data, scenario_name
         axes[2].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
     
     # Middle panel: PET
-    axes[1].bar(x_pos - width/2, pet_base_filtered['PET'], width=width, 
+    axes[1].bar(x_pos, pet_base_filtered['PET'], width=width, 
                 color='black', alpha=0.7, label='Basis')
-    axes[1].bar(x_pos + width/2, pet_stress_filtered['PET'], width=width, 
+    axes[1].bar(x_pos, pet_stress_filtered['PET'], width=width, 
                 color='red', alpha=0.7, label='Stresstest')
     axes[1].set_ylabel('PET\n[mm/Monat]', fontsize=11)
     axes[1].grid(True, alpha=0.3, axis='y')
@@ -327,9 +339,9 @@ def plot_monthly_bars_comparison_2017_2018(base_data, stress_data, scenario_name
         axes[1].axvline(x=year_end, color='black', linestyle='--', linewidth=1.5, alpha=0.7)
     
     # Top panel: Temperature
-    axes[0].bar(x_pos - width/2, ta_base_filtered['TA'], width=width, 
+    axes[0].bar(x_pos, ta_base_filtered['TA'], width=width, 
                 color='black', alpha=0.7, label='Basis')
-    axes[0].bar(x_pos + width/2, ta_stress_filtered['TA'], width=width, 
+    axes[0].bar(x_pos, ta_stress_filtered['TA'], width=width, 
                 color='red', alpha=0.7, label='Stresstest')
     axes[0].set_ylabel('Lufttemperatur\n(°C)', fontsize=11)
     axes[0].grid(True, alpha=0.3, axis='y')

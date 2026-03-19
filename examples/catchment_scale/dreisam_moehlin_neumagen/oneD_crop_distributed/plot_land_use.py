@@ -5,6 +5,7 @@ from cftime import num2date
 import numpy as onp
 import matplotlib.pyplot as plt
 import pandas as pd
+import rasterio
 import click
 import matplotlib as mpl
 import seaborn as sns
@@ -81,8 +82,14 @@ def main():
     lu_ids[~maskCatch] = -9999
     mask_crops = (lu_ids == 5)
 
+    # load mask of porous aquifer
+    file = base_path / "input" / "mask_porous_25m.tif"
+    with rasterio.open(file) as src:
+        _mask_porous = src.read(1)
+    mask_porous = _mask_porous == 1
+
     # get unique land use types and their counts
-    unique_lu_ids, counts = onp.unique(lu_ids[maskCatch], return_counts=True)
+    unique_lu_ids, counts = onp.unique(lu_ids[mask_porous], return_counts=True)
     # make data frame with land use type and count
     land_use_df = pd.DataFrame({"Land Use ID": unique_lu_ids, "Count": counts})
     # map land use IDs to names
@@ -96,7 +103,7 @@ def main():
     
     # plot bar chart for Siedlungsflaeche, Landwirtschaft, Gruenland und Wald
     plt.figure(figsize=(5, 2))
-    sns.barplot(x="Land Use Type", y="Percentage", data=land_use_df, order=["Wald", "Landwirtschaft", "Siedlungsfläche", "Grünland"], hue="Percentage", palette="viridis", dodge=False)
+    sns.barplot(x="Land Use Type", y="Percentage", data=land_use_df, order=["Landwirtschaft", "Siedlungsfläche", "Wald", "Grünland"], hue="Percentage", palette="PuBuGn", dodge=False)
     plt.ylabel("Flächenanteil [%]", fontsize=11)
     plt.xlabel("", fontsize=11)
     # remove legend    
@@ -110,7 +117,7 @@ def main():
     crops = ds_cr_2018_2022["Nutzcode"].values
     for i in range(crops.shape[0]):
         crops[i, ~mask_crops] = onp.nan
-        crops[i, ~maskCatch] = onp.nan
+        crops[i, ~mask_porous] = onp.nan
 
     # get unique land use types and their counts
     unique_crop_ids, counts = onp.unique(crops, return_counts=True)
@@ -129,7 +136,7 @@ def main():
 
     # plot bar chart for Grünland, Mais, Sommergetreide, Wintergetreide, Winterraps, Zuckerruebe, Kleegras und Sonderkulturen
     plt.figure(figsize=(5, 2))
-    sns.barplot(x="Crop Type", y="Percentage", data=crop_df, order=["ext. + int.\nGrünland", "Mais", "Wintergetreide", "Sonderkulturen", "Sommergetreide",], hue="Percentage", palette="Greens", dodge=False)
+    sns.barplot(x="Crop Type", y="Percentage", data=crop_df, order=["Mais", "ext. + int.\nGrünland", "Wintergetreide", "Sonderkulturen", "Sommergetreide",], hue="Percentage", palette="Greens", dodge=False)
     plt.ylabel("Flächenanteil\n an landw. Fläche [%]", fontsize=11)
     plt.xlabel("", fontsize=11)
     # remove legend    
@@ -137,8 +144,6 @@ def main():
     plt.tight_layout()
     file = base_path_figs / "crop_distribution.png"
     plt.savefig(file, dpi=300, bbox_inches="tight")
-
-
 
     return
 
