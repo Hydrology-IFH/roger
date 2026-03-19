@@ -455,10 +455,10 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
                             theta_rz_year = df.variables.get("theta_rz")[time_indices, :, :]
-                            root_ventilation = 1 - ((theta_rz_year - (theta_ufc[onp.newaxis, :, :] + theta_pwp[onp.newaxis, :, :])) / theta_ac[onp.newaxis, :, :])
+                            root_ventilation = (theta_rz_year - (theta_ufc[onp.newaxis, :, :] + theta_pwp[onp.newaxis, :, :])) / theta_ac[onp.newaxis, :, :]
                             root_ventilation = onp.where(root_ventilation < 0, 0, root_ventilation)
                             root_ventilation = onp.where(root_ventilation > 1, 1, root_ventilation)
-                            root_ventilation = onp.where(mask[onp.newaxis, :, :], root_ventilation * 100, onp.nan)
+                            root_ventilation = onp.where(mask[onp.newaxis, :, :], (1 - root_ventilation) * 100, onp.nan)
                             v = f.create_variable("root_ventilation", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
                             v[:, :, :] = root_ventilation
                             v.attrs.update(long_name="root ventilation", units="%")
