@@ -10,8 +10,8 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "base_2000-2024", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]), default="base_2000-2024", help="Type of meteorological stress test")
-@click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=0, help="Magnitude of meteorological stress test")
+@click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "base_2000-2024", "spring-drought", "summer-drought", "long-term", "spring-summer-wet"]), default="long-term", help="Type of meteorological stress test")
+@click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=2, help="Magnitude of meteorological stress test")
 @click.option("-stmd", "--stress-test-meteo-duration", type=click.Choice([0, 2, 3]), default=0, help="Duration of meteorological stress test in consecutive years")
 @click.option("-irr", "--irrigation", type=click.Choice(["no-irrigation", "irrigation"]), default="no-irrigation", help="Enable irrigation")
 @click.option("-ym", "--yellow-mustard", type=click.Choice(["no-yellow-mustard", "yellow-mustard"]), default="no-yellow-mustard", help="Enable catch crop using yellow mustard")
@@ -47,7 +47,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             _meteo_dir = _base_path / "input" / "2013-2023"
         elif stress_test_meteo == "base_2000-2024":
             _meteo_dir = _base_path / "input" / "2000-2024"
-        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought"]:
+        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "long-term"]:
             _meteo_dir = _base_path / "input" / "stress_tests_meteo" / stress_test_meteo / f"duration{stress_test_meteo_duration}_magnitude{stress_test_meteo_magnitude}"
         elif stress_test_meteo == "spring-summer-wet":
             _meteo_dir = _base_path / "input" / "stress_tests_meteo" / stress_test_meteo
@@ -60,9 +60,9 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2000-2024.nc"
         elif stress_test_meteo == "base_2000-2024" and yellow_mustard == "yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2000-2024_yellow_mustard.nc"
-        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"] and yellow_mustard == "no-yellow-mustard":
+        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet", "long-term"] and yellow_mustard == "no-yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2013-2023.nc"
-        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"] and yellow_mustard == "yellow-mustard":
+        elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet", "long-term"] and yellow_mustard == "yellow-mustard":
             _file_crop_rotations = _base_path / "input" / "crop_rotations_2013-2023_yellow_mustard.nc"
 
         if stress_test_meteo == "base":

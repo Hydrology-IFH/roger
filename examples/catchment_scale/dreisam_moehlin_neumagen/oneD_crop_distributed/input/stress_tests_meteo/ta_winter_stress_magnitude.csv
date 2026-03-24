@@ -1,0 +1,9 @@
+;;[degC];[degC];[m a.s.l.]
+station;ID;magnitude1;magnitude2;elevation
+Freiburg;1443;1.8;3.9;236
+Breitnau;684;1.8;3.9;1001
+Feldberg;1346;1.7;4;1490
+Ihringen;2388;1.9;3.9;193
+Muellheim;259;2;4.2;275
+Buchenbach;757;1.9;4.1;445
+Mundingen;1224;1.9;3.9;201

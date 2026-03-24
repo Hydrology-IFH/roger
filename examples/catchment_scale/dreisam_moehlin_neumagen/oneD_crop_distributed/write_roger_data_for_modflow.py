@@ -42,11 +42,39 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         mask = (infile["maskCatch"].values == 1)
         xcoords = infile["x"].values
         ycoords = infile["y"].values
+        nx = len(xcoords)
+        ny = len(ycoords)
         slope = infile["slope"].values / 100
         slope = onp.where(slope > 1, 1, slope)
         theta_ufc = infile["NFK"].values / 100
         theta_pwp = infile["PWP"].values / 100
         theta_ac = infile["LK"].values / 100
+
+    output_file = base_path_output / "theta_fc.nc"
+    if not os.path.exists(output_file):
+        with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
+            f.attrs.update(
+                date_created=datetime.datetime.today().isoformat(),
+                title=f"Field capacity of the Dreisam-Moehlin-Neumagen catchment",
+                references="",
+            )
+            # set dimensions with a dictionary
+            dict_dim = {
+                "x": nx,
+                "y": ny,
+            }
+            f.dimensions = dict_dim
+            v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
+            v.attrs["long_name"] = "x"
+            v.attrs["units"] = "m"
+            v[:] = xcoords
+            v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
+            v.attrs["long_name"] = "y"
+            v.attrs["units"] = "m"
+            v[:] = ycoords
+            v = f.create_variable("theta_fc", ("y", "x"), float, compression="gzip", compression_opts=1)
+            v[:, :] = theta_pwp + theta_ufc
+            v.attrs.update(long_name="Field capacity", units="m3/m3")
 
     if stress_test_meteo == "base_2000-2024":
         time_origin = "2000-01-01 00:00:00"
