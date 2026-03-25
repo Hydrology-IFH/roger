@@ -25,11 +25,11 @@ def main():
             scenario_flags.append('--stress-test-meteo %s --soil-compaction no-soil-compaction --yellow-mustard yellow-mustard' % (stress_test_meteo))
             scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction --grain-corn-only grain-corn-only' % (stress_test_meteo))
 
-            script_names.append('oneD_crop_%s_soil-compaction' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_irrigation' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_irrigation_yellow-mustard' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_yellow-mustard' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_grain-corn-only' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_soil-compaction' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_soil-compaction_irrigation' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_irrigation_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_soil-compaction_grain-corn-only' % (stress_test_meteo))
 
         elif stress_test_meteo == "base_2000-2024":
             scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction' % (stress_test_meteo))
@@ -38,11 +38,11 @@ def main():
             scenario_flags.append('--stress-test-meteo %s --soil-compaction no-soil-compaction --yellow-mustard yellow-mustard' % (stress_test_meteo))
             scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction --grain-corn-only grain-corn-only' % (stress_test_meteo))
 
-            script_names.append('oneD_crop_%s_soil-compaction' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_irrigation' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_irrigation_yellow-mustard' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_yellow-mustard' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_grain-corn-only' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_soil-compaction' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_soil-compaction_irrigation' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_irrigation_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_soil-compaction_grain-corn-only' % (stress_test_meteo))
 
         elif stress_test_meteo == "spring-summer-wet":
             scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction' % (stress_test_meteo))
@@ -51,11 +51,11 @@ def main():
             scenario_flags.append('--stress-test-meteo %s --soil-compaction no-soil-compaction --yellow-mustard yellow-mustard' % (stress_test_meteo))
             scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction --grain-corn-only grain-corn-only' % (stress_test_meteo))
 
-            script_names.append('oneD_crop_%s_soil-compaction' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_soil-compaction_yellow-mustard' % (stress_test_meteo))
-            script_names.append('oneD_crop_%s_yellow-mustard' % (stress_test_meteo)) 
-            script_names.append('oneD_crop_%s_soil-compaction_grain-corn-only' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_soil-compaction' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_soil-compaction_yellow-mustard' % (stress_test_meteo))
+            script_names.append('write_roger_data_%s_yellow-mustard' % (stress_test_meteo)) 
+            script_names.append('write_roger_data_%s_soil-compaction_grain-corn-only' % (stress_test_meteo))
 
         elif stress_test_meteo in ["spring-drought", "summer-drought", "spring-summer-drought"]:
             for magnitude, duration in zip(stress_test_meteo_magnitudes, stress_test_meteo_durations):
@@ -68,11 +68,11 @@ def main():
                     scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction no-soil-compaction --yellow-mustard yellow-mustard' % (stress_test_meteo, magnitude, duration))
                     scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction soil-compaction --grain-corn-only grain-corn-only' % (stress_test_meteo, magnitude, duration))
 
-                    script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction' % (stress_test_meteo, magnitude, duration))
-                    script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_irrigation' % (stress_test_meteo, magnitude, duration))
-                    script_names.append('oneD_crop_%s_magnitude%s_duration%s_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
-                    script_names.append('oneD_crop_%s_magnitude%s_duration%s_yellow-mustard' % (stress_test_meteo, magnitude, duration))
-                    script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_grain-corn-only' % (stress_test_meteo, magnitude, duration))
+                    script_names.append('write_roger_data_%s_magnitude%s_duration%s_soil-compaction' % (stress_test_meteo, magnitude, duration))
+                    script_names.append('write_roger_data_%s_magnitude%s_duration%s_soil-compaction_irrigation' % (stress_test_meteo, magnitude, duration))
+                    script_names.append('write_roger_data_%s_magnitude%s_duration%s_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
+                    script_names.append('write_roger_data_%s_magnitude%s_duration%s_yellow-mustard' % (stress_test_meteo, magnitude, duration))
+                    script_names.append('write_roger_data_%s_magnitude%s_duration%s_soil-compaction_grain-corn-only' % (stress_test_meteo, magnitude, duration))
 
         elif stress_test_meteo in ["long-term"]:
             magnitude = 2
@@ -84,11 +84,11 @@ def main():
             scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction no-soil-compaction --yellow-mustard yellow-mustard' % (stress_test_meteo, magnitude, duration))
             scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction soil-compaction --grain-corn-only grain-corn-only' % (stress_test_meteo, magnitude, duration))
 
-            script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction' % (stress_test_meteo, magnitude, duration))
-            script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_irrigation' % (stress_test_meteo, magnitude, duration))
-            script_names.append('oneD_crop_%s_magnitude%s_duration%s_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
-            script_names.append('oneD_crop_%s_magnitude%s_duration%s_yellow-mustard' % (stress_test_meteo, magnitude, duration))
-            script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_grain-corn-only' % (stress_test_meteo, magnitude, duration))
+            script_names.append('write_roger_data_%s_magnitude%s_duration%s_soil-compaction' % (stress_test_meteo, magnitude, duration))
+            script_names.append('write_roger_data_%s_magnitude%s_duration%s_soil-compaction_irrigation' % (stress_test_meteo, magnitude, duration))
+            script_names.append('write_roger_data_%s_magnitude%s_duration%s_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
+            script_names.append('write_roger_data_%s_magnitude%s_duration%s_yellow-mustard' % (stress_test_meteo, magnitude, duration))
+            script_names.append('write_roger_data_%s_magnitude%s_duration%s_soil-compaction_grain-corn-only' % (stress_test_meteo, magnitude, duration))
 
     jobs = []
     for scenario_flag, script_name in zip(scenario_flags, script_names):

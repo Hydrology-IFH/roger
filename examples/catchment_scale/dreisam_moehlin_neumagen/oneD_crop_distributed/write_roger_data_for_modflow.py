@@ -10,7 +10,7 @@ import tarfile
 import roger
 
 
-@click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "base_2000-2024", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]), default="base", help="Type of meteorological stress test")
+@click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "base_2000-2024", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet", "long-term"]), default="base", help="Type of meteorological stress test")
 @click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=0, help="Magnitude of meteorological stress test")
 @click.option("-stmd", "--stress-test-meteo-duration", type=click.Choice([0, 2, 3]), default=0, help="Duration of meteorological stress test in consecutive years")
 @click.option("-irr", "--irrigation", type=click.Choice(["no-irrigation", "irrigation"]), default="no-irrigation", help="Enable irrigation")
@@ -81,6 +81,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
     else:
         time_origin = "2013-01-01 00:00:00"
     files_to_compress = []
+    files_to_compress_rci = []
     # merge model output into single file
     diag_file = str(base_path_output / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.collect.nc")
     click.echo(f"Processing file: {diag_file}")
@@ -505,6 +506,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             for year in years:
                 output_file = base_path_output / f"recharge_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                 files_to_compress.append(output_file)
+                files_to_compress_rci.append(output_file)
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -543,6 +545,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
 
                 output_file = base_path_output / f"capillary_rise_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                 files_to_compress.append(output_file)
+                files_to_compress_rci.append(output_file)
                 if not os.path.exists(output_file):
                     with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                         f.attrs.update(
@@ -624,6 +627,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                 if irrigation == "irrigation":
                     output_file = base_path_output / f"irrigation_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
                     files_to_compress.append(output_file)
+                    files_to_compress_rci.append(output_file)
                     if not os.path.exists(output_file):
                         with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
                             f.attrs.update(
@@ -667,6 +671,17 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         with tarfile.open(archive_path, "w:gz") as tar:
             for file in files_to_compress:
                 tar.add(file, arcname=file.name)
+
+    if files_to_compress_rci:
+        archive_name = f"ONEDCROP_rci_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.tar.gz"
+        archive_path = base_path_output / archive_name
+        with tarfile.open(archive_path, "w:gz") as tar:
+            for file in files_to_compress_rci:
+                tar.add(file, arcname=file.name)
+
+    # remove uncompressed files
+    for file in files_to_compress:
+        os.remove(file)
     
     return
 
