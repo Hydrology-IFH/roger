@@ -45,3 +45,8 @@ sbatch -p compute write_roger_data_spring-summer-wet.sh
 sbatch -p compute write_roger_data_spring-summer-wet_soil-compaction_yellow-mustard.sh
 sbatch -p compute write_roger_data_spring-summer-wet_yellow-mustard.sh
 sbatch -p compute write_roger_data_spring-summer-wet_soil-compaction_grain-corn-only.sh
+sbatch -p compute write_roger_data_long-term_magnitude2_duration0_soil-compaction.sh
+sbatch -p compute write_roger_data_long-term_magnitude2_duration0_soil-compaction_irrigation.sh
+sbatch -p compute write_roger_data_long-term_magnitude2_duration0_irrigation_yellow-mustard.sh
+sbatch -p compute write_roger_data_long-term_magnitude2_duration0_yellow-mustard.sh
+sbatch -p compute write_roger_data_long-term_magnitude2_duration0_soil-compaction_grain-corn-only.sh

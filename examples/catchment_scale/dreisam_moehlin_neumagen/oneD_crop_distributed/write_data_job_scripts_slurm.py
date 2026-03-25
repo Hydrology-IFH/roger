@@ -12,7 +12,7 @@ def main():
     base_path_bwhpc = "/pfs/10/work/fr_rs1092-workspace/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed"
 
     # identifiers of the simulations
-    stress_tests_meteo = ["base", "base_2000-2024", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet"]
+    stress_tests_meteo = ["base", "base_2000-2024", "spring-drought", "summer-drought", "spring-summer-drought", "spring-summer-wet", "long-term"]
     stress_test_meteo_magnitudes = [0, 2]
     stress_test_meteo_durations = [3, 3]
     scenario_flags = []
