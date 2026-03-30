@@ -5,6 +5,7 @@ import datetime
 from pathlib import Path
 import numpy as onp
 import pandas as pd
+import shutil
 import click
 import tarfile
 import roger
@@ -25,6 +26,8 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
     base_path_output = base_path / "output"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
+
+    base_path_project = Path("/pfs/10/project/bw22g004/fr_rs1092/workspace-1773831854/roger/examples/catchment_scale/dreisam_moehlin_neumagen/oneD_crop_distributed") / "output"
 
     if grain_corn_only == "no-grain-corn-only":
         _grain_corn_only = ""
@@ -671,6 +674,8 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         with tarfile.open(archive_path, "w:gz") as tar:
             for file in files_to_compress:
                 tar.add(file, arcname=file.name)
+        shutil.copy(archive_path, base_path_project / archive_name)
+        os.remove(archive_path)
 
     if files_to_compress_rci:
         archive_name = f"ONEDCROP_rci_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.tar.gz"
@@ -678,11 +683,18 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         with tarfile.open(archive_path, "w:gz") as tar:
             for file in files_to_compress_rci:
                 tar.add(file, arcname=file.name)
+        shutil.copy(archive_path, base_path_project / archive_name)
+        os.remove(archive_path)
 
     # remove uncompressed files
     for file in files_to_compress:
         os.remove(file)
-    
+
+    # copy all .nc files to project folder and remove them from output folder
+    for file in base_path_output.glob("*.nc"):
+        shutil.copy(file, base_path_project / file.name)
+        os.remove(file)
+
     return
 
 
