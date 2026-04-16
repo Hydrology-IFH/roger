@@ -481,8 +481,9 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
                         v.attrs.update(time_origin=f"{year}-01-01 00:00:00", units="days")
                         v[:] = range(dict_dim["Time"])
-                        v = f.create_variable("spatial_ref", (), int, compression="gzip", compression_opts=1)
-                        v[:] = spatial_ref
+                        v = f.create_variable("spatial_ref", ("scalar",), dtype="i4")
+                        for key in spatial_ref.attrs:
+                            v.attrs[key] = spatial_ref.attrs[key]
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
                             theta_rz_year = df.variables.get("theta_rz")[time_indices, :, :]
