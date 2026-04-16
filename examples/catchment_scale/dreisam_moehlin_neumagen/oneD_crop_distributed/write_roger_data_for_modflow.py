@@ -46,7 +46,6 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         xcoords = infile["x"].values
         ycoords = infile["y"].values
         spatial_ref = infile.spatial_ref
-        click.echo(f"Spatial reference of the model grid: {spatial_ref.attrs} ({spatial_ref.attrs['crs_wkt']})")
         nx = len(xcoords)
         ny = len(ycoords)
         slope = infile["slope"].values / 100
@@ -84,7 +83,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                 v.attrs[key] = spatial_ref.attrs[key]
             v = f.create_variable("theta_fc", ("y", "x"), float, compression="gzip", compression_opts=1)
             v[:, :] = theta_pwp + theta_ufc
-            v.attrs.update(long_name="Field capacity", units="m3/m3")
+            v.attrs.update(long_name="Field capacity", units="m3/m3", grid_mapping="spatial_ref")
 
     # if stress_test_meteo == "base_2000-2024":
     #     time_origin = "2000-01-01 00:00:00"
