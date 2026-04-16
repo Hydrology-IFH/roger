@@ -72,3 +72,8 @@ crop_rotation_scenarios:
 - sugar-beet_winter-wheat_winter-barley_yellow-mustard
 - grain-corn_winter-wheat_winter-barley_yellow-mustard
 # - asparagus
+
+climate_scenarios:
+- spring-drought
+- summer-drought
+- long-term

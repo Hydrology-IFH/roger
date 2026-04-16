@@ -188,6 +188,7 @@ examples/plot_scale/boadkh/plot_single_time_series.py
 examples/plot_scale/boadkh/_plot_nitrate_leaching.py
 examples/plot_scale/boadkh/merge_NO3_polygons.py
 examples/plot_scale/boadkh/submit_shapefile_jobs.sh
+examples/plot_scale/bw_cropland/input
 gpu_memory_profiling/
 *_2016-*.sh
 debug_setup/

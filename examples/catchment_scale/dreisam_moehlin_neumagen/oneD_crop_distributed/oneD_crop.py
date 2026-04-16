@@ -34,7 +34,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         _base_path = Path(__file__).parent
         _input_dir = _base_path / "input"
         # load configuration file
-        _file_config = _base_path / "config.yml"
+        _file_config = _base_path / "config_roger.yml"
         with open(_file_config, "r") as file:
             _config = yaml.safe_load(file)
 
@@ -291,7 +291,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                 at[2:-2, 2:-2],
                 self._read_var_from_nc_xr("lanu", self._base_path, "parameters_roger.nc"),
             )
-            # slope (degrees)
+            # surface slope (degrees)
             vs.slope = update(
                 vs.slope,
                 at[2:-2, 2:-2],

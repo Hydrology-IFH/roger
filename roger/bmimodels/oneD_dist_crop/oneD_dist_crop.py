@@ -90,6 +90,8 @@ class ONEDDISTCROPSetup(RogerSetup):
         settings.enable_distributed_input = True
         settings.enable_soil_compaction = self.enable_soil_compaction
         settings.enable_groundwater_boundary = self.enable_groundwater_boundary
+        settings.enable_irrigation = self._config["enable_irrigation"]
+        settings.enable_net_irrigation = self._config["enable_net_irrigation"]
 
         if settings.enable_crop_rotation:
             settings.ncrops = 3
@@ -117,12 +119,19 @@ class ONEDDISTCROPSetup(RogerSetup):
     def set_look_up_tables(self, state):
         vs = state.variables
 
+        # land use-dependent interception storage
         vs.lut_ilu = update(vs.lut_ilu, at[:, :], lut.ARR_ILU)
+        # land use-dependent ground cover
         vs.lut_gc = update(vs.lut_gc, at[:, :], lut.ARR_GC)
+        # land use-dependent maximum ground cover
         vs.lut_gcm = update(vs.lut_gcm, at[:, :], lut.ARR_GCM)
+        # land use-dependent maximum ground cover
         vs.lut_is = update(vs.lut_is, at[:, :], lut.ARR_IS)
+        # land use-dependent rooting depth
         vs.lut_rdlu = update(vs.lut_rdlu, at[:, :], lut.ARR_RDLU)
+        # horizontal macropore flow velocities
         vs.lut_mlms = update(vs.lut_mlms, at[:, :], lut.ARR_MLMS)
+        # crop-dependent parameters
         vs.lut_crops = update(vs.lut_crops, at[:, :], lut.ARR_CP)
 
     @roger_routine
@@ -143,6 +152,7 @@ class ONEDDISTCROPSetup(RogerSetup):
         vs = state.variables
         settings = state.settings
 
+        
         vs.lu_id = update(
             vs.lu_id,
             at[2:-2, 2:-2],
