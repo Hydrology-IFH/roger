@@ -45,7 +45,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         mask = (infile["maskCatch"].values == 1)
         xcoords = infile["x"].values
         ycoords = infile["y"].values
-        spatial_ref = infile.spatial_ref
+        spatial_ref = infile.spatial_ref.values
         click.echo(f"Spatial reference of the model grid: {spatial_ref}")
         nx = len(xcoords)
         ny = len(ycoords)
