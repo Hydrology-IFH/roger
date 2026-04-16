@@ -61,6 +61,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                 date_created=datetime.datetime.today().isoformat(),
                 title=f"Field capacity of the Dreisam-Moehlin-Neumagen catchment",
                 references="",
+                spatial_ref=spatial_ref,
             )
             # set dimensions with a dictionary
             dict_dim = {
@@ -77,8 +78,8 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             v.attrs["long_name"] = "y"
             v.attrs["units"] = "m"
             v[:] = ycoords
-            v = f.create_variable("spatial_ref", ("scalar",), int, compression="gzip", compression_opts=1)
-            v[:] = spatial_ref
+            # v = f.create_variable("spatial_ref", ("scalar",), int, compression="gzip", compression_opts=1)
+            # v[:] = spatial_ref
             v = f.create_variable("theta_fc", ("y", "x"), float, compression="gzip", compression_opts=1)
             v[:, :] = theta_pwp + theta_ufc
             v.attrs.update(long_name="Field capacity", units="m3/m3")
