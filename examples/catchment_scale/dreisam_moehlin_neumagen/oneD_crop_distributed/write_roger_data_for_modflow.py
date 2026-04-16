@@ -46,7 +46,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
         xcoords = infile["x"].values
         ycoords = infile["y"].values
         spatial_ref = infile.spatial_ref
-        click.echo(f"Spatial reference of the model grid: {spatial_ref}")
+        click.echo(f"Spatial reference of the model grid: {spatial_ref.attrs} ({spatial_ref.attrs['crs_wkt']})")
         nx = len(xcoords)
         ny = len(ycoords)
         slope = infile["slope"].values / 100
