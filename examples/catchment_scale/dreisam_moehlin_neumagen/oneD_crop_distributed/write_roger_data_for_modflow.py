@@ -79,7 +79,9 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             v.attrs["units"] = "m"
             v[:] = ycoords
             v = f.create_variable("spatial_ref", ("scalar",), dtype="i4")
-            v[:] = spatial_ref
+            # loop over attributes of spatial_ref and add them to variable attributes
+            for key in spatial_ref.attrs:
+                v.attrs[key] = spatial_ref.attrs[key]
             v = f.create_variable("theta_fc", ("y", "x"), float, compression="gzip", compression_opts=1)
             v[:, :] = theta_pwp + theta_ufc
             v.attrs.update(long_name="Field capacity", units="m3/m3")
