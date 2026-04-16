@@ -66,6 +66,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             dict_dim = {
                 "x": nx,
                 "y": ny,
+                "scalar": 1,
             }
             f.dimensions = dict_dim
             v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
@@ -76,7 +77,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             v.attrs["long_name"] = "y"
             v.attrs["units"] = "m"
             v[:] = ycoords
-            v = f.create_variable("spatial_ref", (), int, compression="gzip", compression_opts=1)
+            v = f.create_variable("spatial_ref", ("scalar",), int, compression="gzip", compression_opts=1)
             v[:] = spatial_ref
             v = f.create_variable("theta_fc", ("y", "x"), float, compression="gzip", compression_opts=1)
             v[:, :] = theta_pwp + theta_ufc
