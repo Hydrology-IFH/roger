@@ -56,3 +56,4 @@ OUTPUT_COLLECT:
 - "ta_max"  # maximum air temperature (degC)
 - "z_root"  # root depth (mm) 
 - "ground_cover"  # fraction of ground cover (-)
+- "basal_transp_coeff"

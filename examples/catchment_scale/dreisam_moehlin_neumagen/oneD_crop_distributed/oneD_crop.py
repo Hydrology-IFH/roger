@@ -10,8 +10,8 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 
-@click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "base_2000-2024", "spring-drought", "summer-drought", "long-term", "spring-summer-wet"]), default="long-term", help="Type of meteorological stress test")
-@click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=2, help="Magnitude of meteorological stress test")
+@click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "base_2000-2024", "spring-drought", "summer-drought", "long-term", "spring-summer-wet"]), default="base", help="Type of meteorological stress test")
+@click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=0, help="Magnitude of meteorological stress test")
 @click.option("-stmd", "--stress-test-meteo-duration", type=click.Choice([0, 2, 3]), default=0, help="Duration of meteorological stress test in consecutive years")
 @click.option("-irr", "--irrigation", type=click.Choice(["no-irrigation", "irrigation"]), default="no-irrigation", help="Enable irrigation")
 @click.option("-ym", "--yellow-mustard", type=click.Choice(["no-yellow-mustard", "yellow-mustard"]), default="no-yellow-mustard", help="Enable catch crop using yellow mustard")
@@ -151,6 +151,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             settings.nx, settings.ny = self._config["nx"], self._config["ny"]
             # derive total number of time steps from forcing
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
+            settings.runlen = 365 * 24 * 60 * 60
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, 'forcing.nc'))
             station_ids = onp.unique(self._read_var_from_nc_xr("station_id", self._base_path, "parameters_roger.nc"))
             station_ids = station_ids[~onp.isnan(station_ids)]

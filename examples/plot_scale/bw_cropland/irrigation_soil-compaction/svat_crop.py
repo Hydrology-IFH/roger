@@ -66,9 +66,12 @@ from roger.cli.roger_run_base import roger_base_cli
                                                              "yellow-mustard",
                                                              "miscanthus",
                                                              "bare-grass"]), default="grain-corn")
+@click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "spring-drought", "summer-drought", "long-term", "spring-summer-wet"]), default="long-term", help="Type of meteorological stress test")
+@click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=2, help="Magnitude of meteorological stress test")
+@click.option("-stmd", "--stress-test-meteo-duration", type=click.Choice([0, 2, 3]), default=0, help="Duration of meteorological stress test in consecutive years")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "irrigation_soil-compaction")
 @roger_base_cli
-def main(location, irrigation_scenario, crop_rotation_scenario, tmp_dir):
+def main(location, irrigation_scenario, crop_rotation_scenario, stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_duration, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, update_add, at
@@ -76,7 +79,10 @@ def main(location, irrigation_scenario, crop_rotation_scenario, tmp_dir):
     from roger.tools.setup import write_forcing, write_crop_rotation
     import roger.lookuptables as lut
 
-    tmp_dir = Path(tmp_dir)
+    if stress_test_meteo == "base":
+        tmp_dir = Path(tmp_dir) / stress_test_meteo
+    elif stress_test_meteo in ["spring-drought", "summer-drought", "long-term", "spring-summer-wet"]:
+        tmp_dir = Path(tmp_dir) / stress_test_meteo / f"duration{stress_test_meteo_duration}_magnitude{stress_test_meteo_magnitude}"
 
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
@@ -85,7 +91,10 @@ def main(location, irrigation_scenario, crop_rotation_scenario, tmp_dir):
         """A SVAT model including crop phenology/crop rotation."""
 
         _base_path = Path(__file__).parent
-        _input_dir = _base_path.parent / "input" / location
+        if stress_test_meteo == "base":
+            _input_dir = _base_path.parent / "input" / location
+        elif stress_test_meteo in ["spring-drought", "summer-drought", "long-term", "spring-summer-wet"]:
+            _input_dir = _base_path.parent / "input" / "stress_tests_meteo" / stress_test_meteo / f"duration{stress_test_meteo_duration}_magnitude{stress_test_meteo_magnitude}" / location
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -126,7 +135,7 @@ def main(location, irrigation_scenario, crop_rotation_scenario, tmp_dir):
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            settings.identifier = f"SVATCROP_{location}_{crop_rotation_scenario}"
+            settings.identifier = f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}"
 
             settings.nx = self._get_nx(self._base_path.parent, "parameters.nc")
             settings.ny = 1
