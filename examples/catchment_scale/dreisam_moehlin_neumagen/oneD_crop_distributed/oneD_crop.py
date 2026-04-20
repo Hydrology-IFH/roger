@@ -150,7 +150,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             # total grid numbers in x- and y-direction
             settings.nx, settings.ny = self._config["nx"], self._config["ny"]
             # derive total number of time steps from forcing
-            settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
+            # settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
             settings.runlen = 365 * 24 * 60 * 60
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, 'forcing.nc'))
             station_ids = onp.unique(self._read_var_from_nc_xr("station_id", self._base_path, "parameters_roger.nc"))
