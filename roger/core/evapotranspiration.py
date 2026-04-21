@@ -538,6 +538,8 @@ def calc_transp(state):
         ptransp_res=vs.ptransp_res,
         transp_coeff=vs.transp_coeff,
         k_stress_transp=vs.k_stress_transp,
+        pt=vs.pt,
+        ptransp=vs.ptransp,
     )
 
 
