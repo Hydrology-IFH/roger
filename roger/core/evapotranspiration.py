@@ -13,6 +13,12 @@ def calc_evap_int_top(state):
     """
     vs = state.variables
 
+    vs.pt = update(
+        vs.pt,
+        at[2:-2, 2:-2],
+        vs.pet_res[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
     mask1 = (
         (vs.S_int_top[:, :, vs.tau] <= vs.S_int_top_tot)
         & (vs.pet_res <= vs.S_int_top[:, :, vs.tau])
@@ -127,6 +133,12 @@ def calc_evap_int_ground(state):
         vs.evap_int,
         at[2:-2, 2:-2],
         vs.evap_int_ground[2:-2, 2:-2] + vs.evap_int_top[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.ptransp = update(
+        vs.ptransp,
+        at[2:-2, 2:-2],
+        vs.pet_res[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(
@@ -391,17 +403,17 @@ def calc_transp(state):
     transp_fp = allocate(state.dimensions, ("x", "y"))
     transp_lp = allocate(state.dimensions, ("x", "y"))
 
-    vs.pt = update(
-        vs.pt,
-        at[2:-2, 2:-2],
-        vs.pet_res[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-    # potential transpiration (water limited)
-    vs.ptransp = update(
-        vs.ptransp,
-        at[2:-2, 2:-2],
-        vs.pet_res[2:-2, 2:-2] * vs.transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
+    # vs.pt = update(
+    #     vs.pt,
+    #     at[2:-2, 2:-2],
+    #     vs.pet_res[2:-2, 2:-2] * vs.basal_transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    # )
+    # # potential transpiration (water limited)
+    # vs.ptransp = update(
+    #     vs.ptransp,
+    #     at[2:-2, 2:-2],
+    #     vs.pet_res[2:-2, 2:-2] * vs.transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    # )
 
     # potential transpiration of trees
     vs.ptransp = update(
