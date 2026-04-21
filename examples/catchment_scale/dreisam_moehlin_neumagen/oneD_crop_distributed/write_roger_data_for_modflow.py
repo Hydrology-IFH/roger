@@ -540,6 +540,48 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v[:, :, :] = root_ventilation
                             v.attrs.update(long_name="root ventilation", units="%", grid_mapping="spatial_ref")
 
+                    output_file = base_path_output / f"theta_rz_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}_year{year}.nc"
+                    files_to_compress.append(output_file)
+                    with h5netcdf.File(output_file, "w", decode_vlen_strings=False) as f:
+                        f.attrs.update(
+                            date_created=datetime.datetime.today().isoformat(),
+                            title=f"Soil water content root zone of the Dreisam-Moehlin-Neumagen catchment - Year {year}",
+                            institution="University of Freiburg, Chair of Hydrology",
+                            references="",
+                            comment="First timestep (t=0) contains initial values. Simulations start are written from second timestep (t=1) to last timestep (t=N).",
+                            model_structure="ONED model with free drainage and explicit crop growth dynamics",
+                            roger_version=f"{roger.__version__}",
+                        )
+                        # set dimensions with a dictionary
+                        dict_dim = {
+                            "x": nx,
+                            "y": ny,
+                            "Time": len(onp.where(date_time.year == year)[0]),
+                            "scalar": 1,
+                        }
+                        f.dimensions = dict_dim
+                        v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
+                        v.attrs["long_name"] = "x"
+                        v.attrs["units"] = "m"
+                        v[:] = xcoords
+                        v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
+                        v.attrs["long_name"] = "y"
+                        v.attrs["units"] = "m"
+                        v[:] = ycoords
+                        v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
+                        v.attrs.update(time_origin=f"{year}-01-01 00:00:00", units="days")
+                        v[:] = range(dict_dim["Time"])
+                        v = f.create_variable("spatial_ref", ("scalar",), dtype="i4")
+                        for key in spatial_ref.attrs:
+                            v.attrs[key] = spatial_ref.attrs[key]
+                        with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
+                            time_indices = onp.where(date_time.year == year)[0]
+                            theta_rz_year = df.variables.get("theta_rz")[time_indices, :, :]
+                            v = f.create_variable("theta_rz", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
+                            v[:, :, :] = theta_rz_year
+                            v.attrs.update(long_name="soil water content of the root zone", units="-", grid_mapping="spatial_ref")
+
+
     # merge model output into single file
     diag_file = str(base_path_project / f"ONEDCROP_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.rate.nc")
     click.echo(f"Processing file: {diag_file}")

@@ -394,7 +394,7 @@ def calc_transp(state):
     vs.pt = update(
         vs.pt,
         at[2:-2, 2:-2],
-        vs.pet_res[2:-2, 2:-2] * vs.basal_transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+        vs.pet_res[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
     # potential transpiration (water limited)
     vs.ptransp = update(
