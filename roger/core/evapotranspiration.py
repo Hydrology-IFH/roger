@@ -13,12 +13,6 @@ def calc_evap_int_top(state):
     """
     vs = state.variables
 
-    vs.pt = update(
-        vs.pt,
-        at[2:-2, 2:-2],
-        vs.pet_res[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
     mask1 = (
         (vs.S_int_top[:, :, vs.tau] <= vs.S_int_top_tot)
         & (vs.pet_res <= vs.S_int_top[:, :, vs.tau])
@@ -133,12 +127,6 @@ def calc_evap_int_ground(state):
         vs.evap_int,
         at[2:-2, 2:-2],
         vs.evap_int_ground[2:-2, 2:-2] + vs.evap_int_top[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    )
-
-    vs.ptransp = update(
-        vs.ptransp,
-        at[2:-2, 2:-2],
-        vs.pet_res[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
     return KernelOutput(
@@ -272,6 +260,12 @@ def calc_evap_soil(state):
         vs.pet_res[2:-2, 2:-2] * vs.evap_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
     )
 
+    vs.pevap_soil = update(
+        vs.pevap_soil,
+        at[2:-2, 2:-2],
+        vs.pet_res[2:-2, 2:-2] * vs.evap_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+
     # conditions for evaporation from fine storage
     mask1 = (
         (vs.S_fp_rz > 0)
@@ -345,6 +339,7 @@ def calc_evap_soil(state):
         S_fp_rz=vs.S_fp_rz,
         pet_res=vs.pet_res,
         evap_soil=vs.evap_soil,
+        pevap_soil=vs.pevap_soil,
         evap_coeff=vs.evap_coeff,
         k_stress_evap=vs.k_stress_evap,
     )
@@ -402,18 +397,31 @@ def calc_transp(state):
 
     transp_fp = allocate(state.dimensions, ("x", "y"))
     transp_lp = allocate(state.dimensions, ("x", "y"))
+    _pt = allocate(state.dimensions, ("x", "y"))
+    _ptransp = allocate(state.dimensions, ("x", "y"))
 
-    # vs.pt = update(
-    #     vs.pt,
-    #     at[2:-2, 2:-2],
-    #     vs.pet_res[2:-2, 2:-2] * vs.basal_transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    # )
-    # # potential transpiration (water limited)
-    # vs.ptransp = update(
-    #     vs.ptransp,
-    #     at[2:-2, 2:-2],
-    #     vs.pet_res[2:-2, 2:-2] * vs.transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
-    # )
+    _pt = update(
+        _pt,
+        at[2:-2, 2:-2],
+        npx.where(vs.pevap_soil[2:-2, 2:-2] < vs.pet[2:-2, 2:-2], vs.pet[2:-2, 2:-2] - vs.pevap_soil[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+    _ptransp = update(
+        _ptransp,
+        at[2:-2, 2:-2],
+        npx.where(vs.evap_soil[2:-2, 2:-2] < vs.pet[2:-2, 2:-2], vs.pet[2:-2, 2:-2] - vs.evap_soil[2:-2, 2:-2], 0) * vs.maskCatch[2:-2, 2:-2],
+    )
+
+    vs.pt = update(
+        vs.pt,
+        at[2:-2, 2:-2],
+        _pt[2:-2, 2:-2] * vs.basal_transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
+    # potential transpiration (water limited)
+    vs.ptransp = update(
+        vs.ptransp,
+        at[2:-2, 2:-2],
+        _ptransp[2:-2, 2:-2] * vs.transp_coeff[2:-2, 2:-2] * vs.maskCatch[2:-2, 2:-2],
+    )
 
     # potential transpiration of trees
     vs.ptransp = update(

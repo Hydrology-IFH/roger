@@ -4228,6 +4228,13 @@ VARIABLES = {
         "actual soil evaporation",
         time_dependent=True,
     ),
+    "pevap_soil": Variable(
+        "potential soil evaporation",
+        CATCH_GRID,
+        "mm/dt",
+        "potential soil evaporation",
+        time_dependent=True,
+    ),
     "evap_int": Variable(
         "actual evaporation of intercepted water",
         CATCH_GRID,

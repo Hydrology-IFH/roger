@@ -35,6 +35,7 @@ OUTPUT_RATE:
 - "q_sub_rz"  # lateral subsurface runoff from root zone (mm/day)
 - "q_sub_ss"  # lateral subsurface runoff from subsoil (mm/day)
 - "ptransp"
+- "pevap_soil"
 
 
 # simulated hydrological storages and state variables
