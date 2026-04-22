@@ -34,8 +34,6 @@ OUTPUT_RATE:
 - "cpr_ss" # capillary rise from subsoil into root zone (mm/day)
 - "q_sub_rz"  # lateral subsurface runoff from root zone (mm/day)
 - "q_sub_ss"  # lateral subsurface runoff from subsoil (mm/day)
-- "ptransp"
-- "pevap_soil"
 
 
 # simulated hydrological storages and state variables
@@ -58,6 +56,3 @@ OUTPUT_COLLECT:
 - "ta_max"  # maximum air temperature (degC)
 - "z_root"  # root depth (mm) 
 - "ground_cover"  # fraction of ground cover (-)
-- "basal_transp_coeff"
-- "S_int_top"
-- "S_int_ground"
