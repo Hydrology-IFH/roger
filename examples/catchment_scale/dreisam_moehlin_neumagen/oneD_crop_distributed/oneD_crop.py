@@ -690,7 +690,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                         # irrigate if sum of rainfall for the next 5 days is less than 20 mm
                         sum_rainfall_next5days = npx.sum(precip_5days, axis=-1)
                         if (sum_rainfall_next5days <= 20).any() and vs.month[1] in [4, 5] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
-                            mask_crops = npx.isin(vs.lu_id, npx.array([515, 550]))
+                            mask_crops = npx.isin(vs.lu_id, npx.array([515, 550, 552]))
                             mask_irrig = (vs.irr_demand > 0) & (sum_rainfall_next5days <= 20)
                             vs.irrig = update(
                                 vs.irrig, at[2:-2, 2:-2], npx.where((mask_irrig[2:-2, 2:-2] & mask_crops[2:-2, 2:-2]), 30, vs.irrig[2:-2, 2:-2])
@@ -712,12 +712,12 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                                 vs.irrig, at[2:-2, 2:-2], npx.where((mask_irrig[2:-2, 2:-2] & mask_crops[2:-2, 2:-2]), 40, vs.irrig[2:-2, 2:-2])
                             )
                         elif (sum_rainfall_next5days <= 20).any() and vs.month[1] in [4, 5, 6, 7, 8] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
-                            mask_crops = npx.isin(vs.lu_id, npx.array([513]))
+                            mask_crops = npx.isin(vs.lu_id, npx.array([513, 521]))
                             mask_irrig = (vs.irr_demand > 0) & (sum_rainfall_next5days <= 20)
                             vs.irrig = update(
                                 vs.irrig, at[2:-2, 2:-2], npx.where((mask_irrig[2:-2, 2:-2] & mask_crops[2:-2, 2:-2]), 20, vs.irrig[2:-2, 2:-2])
                             )
-                            mask_crops = npx.isin(vs.lu_id, npx.array([567]))
+                            mask_crops = npx.isin(vs.lu_id, npx.array([567, 582, 584, 595, 596]))
                             vs.irrig = update(
                                 vs.irrig, at[2:-2, 2:-2], npx.where((mask_irrig[2:-2, 2:-2] & mask_crops[2:-2, 2:-2]), 30, vs.irrig[2:-2, 2:-2])
                             )
