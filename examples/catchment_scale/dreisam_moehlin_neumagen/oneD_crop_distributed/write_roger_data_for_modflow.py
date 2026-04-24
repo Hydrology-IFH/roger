@@ -875,6 +875,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
 
     # remove uncompressed files
     for file in files_to_compress:
+        shutil.copy(file, base_path_project / file.name)
         os.remove(file)
 
     # copy all .nc files to project folder and remove them from output folder

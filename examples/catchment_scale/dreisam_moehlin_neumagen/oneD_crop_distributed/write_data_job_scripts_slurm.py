@@ -95,9 +95,9 @@ def main():
         lines = []
         lines.append("#!/bin/bash\n")
         if "base_2000-2024" in scenario_flag:
-            lines.append("#SBATCH --time=04:00:00\n")
+            lines.append("#SBATCH --time=08:00:00\n")
         else:            
-            lines.append("#SBATCH --time=02:00:00\n")
+            lines.append("#SBATCH --time=04:00:00\n")
         lines.append("#SBATCH --nodes=1\n")
         lines.append("#SBATCH --ntasks=1\n")
         lines.append("#SBATCH --cpus-per-task=1\n")
@@ -126,13 +126,13 @@ def main():
         jobs.append(f"{script_name}.sh")
 
 
-    file_path = base_path / "submit_data_jobs.sh"
-    with open(file_path, "w") as job_file:
-        job_file.write("#!/bin/bash\n")
-        job_file.write("\n")
-        for job in jobs:
-            job_file.write(f"sbatch -p compute {job}\n")
-    subprocess.Popen(f"chmod +x {file_path}", shell=True)
+    # file_path = base_path / "submit_data_jobs.sh"
+    # with open(file_path, "w") as job_file:
+    #     job_file.write("#!/bin/bash\n")
+    #     job_file.write("\n")
+    #     for job in jobs:
+    #         job_file.write(f"sbatch -p compute {job}\n")
+    # subprocess.Popen(f"chmod +x {file_path}", shell=True)
 
     return
 
