@@ -862,7 +862,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             for file in files_to_compress:
                 tar.add(file, arcname=file.name)
         shutil.copy(archive_path, base_path_project / archive_name)
-        os.remove(archive_path)
+        # os.remove(archive_path)
 
     if files_to_compress_rci:
         archive_name = f"ONEDCROP_rci_{stress_test_meteo}-magnitude{stress_test_meteo_magnitude}-duration{stress_test_meteo_duration}_{irrigation}_{yellow_mustard}_{soil_compaction}{_grain_corn_only}.tar.gz"
@@ -871,17 +871,17 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             for file in files_to_compress_rci:
                 tar.add(file, arcname=file.name)
         shutil.copy(archive_path, base_path_project / archive_name)
-        os.remove(archive_path)
+        # os.remove(archive_path)
 
-    # remove uncompressed files
-    for file in files_to_compress:
-        shutil.copy(file, base_path_project / file.name)
-        os.remove(file)
+    # # remove uncompressed files
+    # for file in files_to_compress:
+    #     shutil.copy(file, base_path_project / file.name)
+    #     os.remove(file)
 
-    # copy all .nc files to project folder and remove them from output folder
-    for file in base_path_output.glob("*.nc"):
-        shutil.copy(file, base_path_project / file.name)
-        os.remove(file)
+    # # copy all .nc files to project folder and remove them from output folder
+    # for file in base_path_output.glob("*.nc"):
+    #     shutil.copy(file, base_path_project / file.name)
+    #     os.remove(file)
 
     return
 
