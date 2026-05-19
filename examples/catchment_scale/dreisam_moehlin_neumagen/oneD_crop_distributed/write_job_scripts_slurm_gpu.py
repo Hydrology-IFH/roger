@@ -24,12 +24,14 @@ def main():
             scenario_flags.append('--stress-test-meteo %s --soil-compaction no-soil-compaction --irrigation irrigation --yellow-mustard yellow-mustard' % (stress_test_meteo))
             scenario_flags.append('--stress-test-meteo %s --soil-compaction no-soil-compaction --yellow-mustard yellow-mustard' % (stress_test_meteo))
             scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction --grain-corn-only grain-corn-only' % (stress_test_meteo))
+            scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction --irrigation irrigation --grain-corn-only grain-corn-only' % (stress_test_meteo))
 
             script_names.append('oneD_crop_%s_soil-compaction' % (stress_test_meteo))
             script_names.append('oneD_crop_%s_soil-compaction_irrigation' % (stress_test_meteo))
             script_names.append('oneD_crop_%s_irrigation_yellow-mustard' % (stress_test_meteo))
             script_names.append('oneD_crop_%s_yellow-mustard' % (stress_test_meteo))
             script_names.append('oneD_crop_%s_soil-compaction_grain-corn-only' % (stress_test_meteo))
+            script_names.append('oneD_crop_%s_soil-compaction_irrigation_grain-corn-only' % (stress_test_meteo))
 
         elif stress_test_meteo == "base_2000-2024":
             scenario_flags.append('--stress-test-meteo %s --soil-compaction soil-compaction' % (stress_test_meteo))
@@ -67,12 +69,14 @@ def main():
                     scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction no-soil-compaction --irrigation irrigation --yellow-mustard yellow-mustard' % (stress_test_meteo, magnitude, duration))
                     scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction no-soil-compaction --yellow-mustard yellow-mustard' % (stress_test_meteo, magnitude, duration))
                     scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction soil-compaction --grain-corn-only grain-corn-only' % (stress_test_meteo, magnitude, duration))
+                    scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction soil-compaction --irrigation irrigation --grain-corn-only grain-corn-only' % (stress_test_meteo, magnitude, duration))
 
                     script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction' % (stress_test_meteo, magnitude, duration))
                     script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_irrigation' % (stress_test_meteo, magnitude, duration))
                     script_names.append('oneD_crop_%s_magnitude%s_duration%s_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
                     script_names.append('oneD_crop_%s_magnitude%s_duration%s_yellow-mustard' % (stress_test_meteo, magnitude, duration))
                     script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_grain-corn-only' % (stress_test_meteo, magnitude, duration))
+                    script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_irrigation_grain-corn-only' % (stress_test_meteo, magnitude, duration))
 
         elif stress_test_meteo in ["long-term"]:
             magnitude = 2
@@ -83,18 +87,16 @@ def main():
             scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction no-soil-compaction --irrigation irrigation --yellow-mustard yellow-mustard' % (stress_test_meteo, magnitude, duration))
             scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction no-soil-compaction --yellow-mustard yellow-mustard' % (stress_test_meteo, magnitude, duration))
             scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction soil-compaction --grain-corn-only grain-corn-only' % (stress_test_meteo, magnitude, duration))
+            scenario_flags.append('--stress-test-meteo %s --stress-test-meteo-magnitude %s --stress-test-meteo-duration %s --soil-compaction soil-compaction --irrigation irrigation --grain-corn-only grain-corn-only' % (stress_test_meteo, magnitude, duration))
 
             script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction' % (stress_test_meteo, magnitude, duration))
             script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_irrigation' % (stress_test_meteo, magnitude, duration))
             script_names.append('oneD_crop_%s_magnitude%s_duration%s_irrigation_yellow-mustard' % (stress_test_meteo, magnitude, duration))
             script_names.append('oneD_crop_%s_magnitude%s_duration%s_yellow-mustard' % (stress_test_meteo, magnitude, duration))
             script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_grain-corn-only' % (stress_test_meteo, magnitude, duration))
+            script_names.append('oneD_crop_%s_magnitude%s_duration%s_soil-compaction_irrigation_grain-corn-only' % (stress_test_meteo, magnitude, duration))
 
     jobs = []
-    # xx = [0, 1, 2, 3, 4, 5, 6, 70, 71, 72, 73, 74, 75, 76, 21, 22, 23, 24, 25, 26, 27, 42, 43, 44, 45, 46, 47, 48, 77, 78, 79, 80, 81]
-    # scenario_flags_ = [scenario_flags[i] for i in xx]
-    # script_names_ = [script_names[i] for i in xx]
-    # for scenario_flag, script_name in zip(scenario_flags_, script_names_):
     for scenario_flag, script_name in zip(scenario_flags, script_names):
         output_path_ws = base_path_ws / "output"
         lines = []
