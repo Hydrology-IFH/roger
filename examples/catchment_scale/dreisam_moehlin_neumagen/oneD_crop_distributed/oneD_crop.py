@@ -22,7 +22,7 @@ from roger.cli.roger_run_base import roger_base_cli
 def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_duration, irrigation, yellow_mustard, soil_compaction, grain_corn_only, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
-    from roger.core.operators import numpy as npx, update, at
+    from roger.core.operators import numpy as npx, update, update_add, at
     from roger.core.surface import calc_parameters_surface_kernel
     from roger.tools.setup import write_forcing_distributed
     import roger.lookuptables as lut
@@ -722,6 +722,12 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                                 vs.irrig, at[2:-2, 2:-2], npx.where((mask_irrig[2:-2, 2:-2] & mask_crops[2:-2, 2:-2]), 30, vs.irrig[2:-2, 2:-2])
                             )
 
+                        # irrigate for 4 hours from 06:00 to 10:00
+                        vs.prec_day = update_add(
+                            vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], vs.irrig[2:-2, 2:-2, npx.newaxis] / (6 * 4)
+                        )
+                        
+
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
                 vs.itt_cr = vs.itt_cr + 2
                 vs.crop_type = update(vs.crop_type, at[2:-2, 2:-2, 0], vs.crop_type[2:-2, 2:-2, 2])
@@ -742,7 +748,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
             diagnostics = state.diagnostics
             settings = state.settings
             if settings.enable_irrigation:
-                self._config["OUTPUT_RATE"] += ["irrig"]
+                self._config["OUTPUT_COLLECT"] += ["irrig"]
 
             # variables written to output files
             diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]

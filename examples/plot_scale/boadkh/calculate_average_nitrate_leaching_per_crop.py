@@ -223,32 +223,39 @@ def main(tmp_dir):
     # file = base_path_output / "data_nitrate_leaching" / "nitrate_leaching_values_per_crop_rotation_and_region.csv"
     # df_per_crop_rotation.to_csv(file, sep=";", index=True, header=True)
 
-    # # averaged per subregion
-    # subregions = ["freiburg", "lahr", "muellheim",
-    #               "stockach", "gottmadingen", "weingarten",
-    #               "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
-    #               "ehingen-kirchen", "merklingen", "hayingen",
-    #               "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
-    # df_per_crop = pd.DataFrame(index=_dict_crop_id.keys(), columns=["subregion", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"])
-    # df_per_crop.index.name = "crop"
-    # for subregion in subregions:
-    #     cond = (df_areas["location"] == subregion)
-    #     df_areas_subregion = df_areas.loc[cond, :]
-    #     df_areas_subregion["area_share"] = df_areas_subregion["area"] / df_areas_subregion["area"].sum()
-    #     for key in _dict_crop_id.keys():
-    #         df1 = df.copy()
-    #         cond = (df1["CID"] == _dict_crop_id[key]) & onp.isin(df1["FFID"].values, list(_dict_ffid_rev.keys())[:16]) & (df1["stationsna"] == subregion)
-    #         df1 = df1.loc[cond, :]
-    #         df2 = df1.loc[:, ["SID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]].groupby(["SID"]).mean()
-    #         df2 = df2.sort_index(ascending=True)
-    #         df_per_crop.loc[key, "subregion"] = subregion
+    # averaged per subregion
+    subregions = ["freiburg", "lahr", "muellheim",
+                  "stockach", "gottmadingen", "weingarten",
+                  "eppingen-elsenz", "bruchsal-heidelsheim", "bretten",
+                  "ehingen-kirchen", "merklingen", "hayingen",
+                  "kupferzell", "oehringen", "vellberg-kleinaltdorf"]
+    ll_dfs = []
+    for subregion in subregions:
+        df_per_crop = pd.DataFrame(index=_dict_crop_id.keys(), columns=["subregion", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"])
+        df_per_crop.index.name = "crop"
+        cond = (df_areas["location"] == subregion)
+        df_areas_subregion = df_areas.loc[cond, :]
+        df_areas_subregion.index = df_areas_subregion["clust_id"]
+        df_areas_subregion = df_areas_subregion.sort_index(ascending=True)
+        df_areas_subregion["area_share"] = df_areas_subregion["area"] / df_areas_subregion["area"].sum()
+        for key in _dict_crop_id.keys():
+            df1 = df.copy()
+            cond = (df1["CID"] == _dict_crop_id[key]) & onp.isin(df1["FFID"].values, list(_dict_ffid_rev.keys())[:16]) & (df1["stationsna"] == subregion)
+            df1 = df1.loc[cond, :]
+            df2 = df1.loc[:, ["SID", "QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]].groupby(["SID"]).mean()
+            df2 = df2.sort_index(ascending=True)
+            df_per_crop.loc[key, "subregion"] = subregion
 
-    #         for key1 in ["QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]:
-    #             df_per_crop.loc[key, key1] = onp.sum(df2[key1] * df_areas_subregion["area_share"].values)
+            cond = df2.index.isin(df_areas_subregion.index)
+            for key1 in ["QSUR", "PERC", "MPERC_N1", "MPERC_N2", "MPERC_N3", "CPERC_N1", "CPERC_N2", "CPERC_N3"]:
+                df_per_crop.loc[key, key1] = onp.sum(df2[key1][cond] * df_areas_subregion["area_share"].values)
 
-    # df_per_crop = df_per_crop.fillna(-9999)
-    # file = base_path_output / "data_nitrate_leaching" / "nitrate_leaching_values_per_crop_and_subregion.csv"
-    # df_per_crop.to_csv(file, sep=";", index=True, header=True)
+        ll_dfs.append(df_per_crop)
+    
+    df_per_crop = pd.concat(ll_dfs, axis=0)
+    df_per_crop = df_per_crop.fillna(-9999)
+    file = base_path_output / "data_nitrate_leaching" / "nitrate_leaching_values_per_crop_and_subregion.csv"
+    df_per_crop.to_csv(file, sep=";", index=True, header=True)
 
 
     subregions = ["freiburg", "lahr", "muellheim",
@@ -314,7 +321,7 @@ def main(tmp_dir):
 
     df_per_crop_rotation = pd.concat(ll_dfs, axis=0)
     df_per_crop_rotation = df_per_crop_rotation.fillna(-9999)
-    file = base_path_output / "data_nitrate_leaching" / "min_nitrate_leaching_values_per_crop_rotation_and_subregio_alldata.csv"
+    file = base_path_output / "data_nitrate_leaching" / "min_nitrate_leaching_values_per_crop_rotation_and_subregion_alldata.csv"
     df_per_crop_rotation.to_csv(file, sep=";", index=True, header=True)
 
     ll_dfs = []

@@ -463,6 +463,10 @@ def main(location, irrigation_scenario, crop_rotation_scenario, stress_test_mete
                         vs.irrig = update(
                             vs.irrig, at[2:-2, 2:-2], npx.where((mask_irrig[2:-2, 2:-2] & mask_crops[2:-2, 2:-2]), 30, vs.irrig[2:-2, 2:-2])
                         )
+                    # irrigate for 4 hours from 06:00 to 10:00
+                    vs.prec_day = update_add(
+                        vs.prec_day, at[2:-2, 2:-2, 6*6:10*6], vs.irrig[2:-2, 2:-2, npx.newaxis] / (6 * 4)
+                    )
 
             if (vs.year[1] != vs.year[0]) & (vs.itt > 1):
                 vs.itt_cr = vs.itt_cr + 2
