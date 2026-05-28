@@ -1,5 +1,5 @@
 #!/bin/sh
-conda env create --file=conda-environment.yml
+conda env create --file=conda-environment-gpu.yml
 conda activate roger-gpu
 module load lib/hdf5/1.12-gnu-14.2-openmpi-4.1
 module load devel/cuda/12.6

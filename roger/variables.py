@@ -924,6 +924,7 @@ VARIABLES = {
         CATCH_GRID + TIMESTEPS,
         "degC",
         "air temperature",
+        initial=15,
         time_dependent=True,
     ),
     "ta_year": Variable(
