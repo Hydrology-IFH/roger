@@ -1,0 +1,32 @@
+# --- Settings --------------------------------------------------------------
+# name of the model run; is used to name the output files
+identifier: ONEDEVENT
+# spatial discretization in x-direction (in meters)
+dx: 5
+# spatial discretization in y-direction (in meters)
+dy: 5
+# x-origin of spatial grid
+x_origin: 408561.5
+# y-origin of spatial grid
+y_origin: 5277703.5
+# number of grid cells in x-direction i.e. number of columns
+nx: 824
+# number of grid cells in y-direction i.e. number of rows
+ny: 544
+
+# --- Diagnostics --------------------------------------------------------------
+OUTPUT_FREQUENCY: 600  # output frequency in seconds
+OUTPUT_RATE:
+- "inf_mat"  # soil matrix infiltration (mm/10 mins)
+- "inf_mp"  # macropore infiltration (mm/10 mins)
+- "inf_sc"  # shrinkage crack infiltration (mm/10 mins)
+- "q_ss"  # percolation from subsoil (mm/10 mins)
+- "q_sub"  # lateral subsurface runoff (mm/10 mins)
+- "q_sub_mp"  # lateral macropore subsurface runoff (mm/10 mins)
+- "q_sub_mat"  # lateral matrix subsurface runoff (mm/10 mins)
+- "q_hof"  # hortonian surface runoff (mm/10 mins)
+- "q_sof"  # saturation surface runoff (mm/10 mins)
+
+# simulated hydrologic storages
+OUTPUT_COLLECT:
+- "theta"  # soil water content (-)

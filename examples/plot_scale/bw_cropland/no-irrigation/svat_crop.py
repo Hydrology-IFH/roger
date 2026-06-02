@@ -7,6 +7,8 @@ import pandas as pd
 import click
 from roger.cli.roger_run_base import roger_base_cli
 
+_CROP_ROTATION_SCENARIOS = pd.read_csv(Path(__file__).parent.parent / "subregions_crop_rotations.csv", sep=";").loc[:, "crop_rotation_type"].tolist()
+
 @click.option("--location", type=click.Choice(["freiburg", "lahr", "bruchsal-heidelsheim",
                                                "pfullendorf", "nagold", "sachsenheim",
                                                "heidelberg", "mergentheim", "rot-buch", "elztal-rittersbach",
@@ -15,52 +17,7 @@ from roger.cli.roger_run_base import roger_base_cli
                                                "weingarten", "wutoeschingen-ofteringen", "singen", "grosserlach-mannenweiler",
                                                "altheim", "ulm", "stoetten", "notzingen"]), 
                                                default="heidelberg")
-@click.option("--crop-rotation-scenario", type=click.Choice(["grain-corn",
-                                                             "grain-corn_yellow-mustard",
-                                                             "silage-corn",
-                                                             "silage-corn_yellow-mustard",
-                                                             "summer-barley",
-                                                             "summer-barley_yellow-mustard",
-                                                             "clover",
-                                                             "winter-wheat",
-                                                             "winter-barley",
-                                                             "winter-rape",
-                                                             "faba-bean",
-                                                             "potato-early",
-                                                             "potato",
-                                                             "sugar-beet",
-                                                             "sugar-beet_yellow-mustard",
-                                                             "vegetables",
-                                                             "strawberry",
-                                                             "asparagus",
-                                                             "winter-wheat_clover",
-                                                             "winter-wheat_silage-corn",
-                                                             "summer-wheat_winter-wheat",
-                                                             "summer-wheat_clover_winter-wheat",
-                                                             "winter-wheat_clover_silage-corn",
-                                                             "winter-wheat_sugar-beet_silage-corn",
-                                                             "summer-wheat_winter-wheat_silage-corn",
-                                                             "summer-wheat_winter-wheat_winter-rape",
-                                                             "winter-wheat_winter-rape",
-                                                             "winter-wheat_soybean_winter-rape",
-                                                             "sugar-beet_winter-wheat_winter-barley", 
-                                                             "grain-corn_winter-wheat_winter-rape", 
-                                                             "grain-corn_winter-wheat_winter-barley",
-                                                             "grain-corn_winter-wheat_clover",
-                                                             "winter-wheat_silage-corn_yellow-mustard",
-                                                             "summer-wheat_winter-wheat_yellow-mustard",
-                                                             "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
-                                                             "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
-                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                                                             "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
-                                                             "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                                                             "grain-corn_winter-wheat_winter-barley_yellow-mustard",
-                                                             "grain-corn",
-                                                             "grain-corn_yellow-mustard",
-                                                             "winter-wheat",
-                                                             "yellow-mustard",
-                                                             "miscanthus",
-                                                             "bare-grass"]), default="summer-barley")
+@click.option("--crop-rotation-scenario", type=click.Choice(_CROP_ROTATION_SCENARIOS), default="winter-wheat_grain-corn")
 @click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "spring-drought", "summer-drought", "long-term", "spring-summer-wet"]), default="long-term", help="Type of meteorological stress test")
 @click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=2, help="Magnitude of meteorological stress test")
 @click.option("-stmd", "--stress-test-meteo-duration", type=click.Choice([0, 2, 3]), default=0, help="Duration of meteorological stress test in consecutive years")

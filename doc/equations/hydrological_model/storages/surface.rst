@@ -53,7 +53,7 @@ Short description of land use (lu_id)
 - `509`: pea
 - `510`: strawberry
 - `511`: esparcet
-- `512`: sunflower
+- `512`: to be determined
 - `513`: vegetables
 - `514`: flax
 - `515`: early potatoes

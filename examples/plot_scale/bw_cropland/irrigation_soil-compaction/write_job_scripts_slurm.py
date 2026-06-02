@@ -1,4 +1,5 @@
 from pathlib import Path
+import pandas as pd
 import yaml
 import subprocess
 import os
@@ -16,9 +17,12 @@ def main():
     with open(base_path.parent / "config.yml", "r") as file:
         config = yaml.safe_load(file)
 
+    # load the subregions and crop rotations
+    df_subregions_crop_rotations = pd.read_csv(base_path.parent / "subregions_crop_rotations.csv", sep=";")
+
     # identifiers of the simulations
-    locations = config["locations"]
-    crop_rotation_scenarios = config["crop_rotation_scenarios"]
+    locations = df_subregions_crop_rotations.loc[:, "subregion"].values.astype(str).tolist()
+    crop_rotation_scenarios = df_subregions_crop_rotations.loc[:, "crop_rotation_type"].values.astype(str).tolist()
     stress_tests_meteo = config["climate_scenarios"]
 
     jobs = []
@@ -32,43 +36,41 @@ def main():
         for duration_magnitude in durations_magnitudes:
             duration = duration_magnitude[0]
             magnitude = duration_magnitude[1]
-            for location in locations:
-                # --- jobs to calculate fluxes and states for each irrigation scenario -------------------------
-                for crop_rotation_scenario in crop_rotation_scenarios:
-                    script_name = f"svat_crop_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}_no-irrigation_soil-compaction"
-                    output_path_ws = base_path_ws / "output" / dir_name
-                    lines = []
-                    lines.append("#!/bin/bash\n")
-                    lines.append("#SBATCH --time=4:00:00\n")
-                    lines.append("#SBATCH --nodes=1\n")
-                    lines.append("#SBATCH --ntasks=1\n")
-                    lines.append("#SBATCH --cpus-per-task=1\n")
-                    lines.append("#SBATCH --mem=1000\n")
-                    lines.append("#SBATCH --mail-type=FAIL\n")
-                    lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
-                    lines.append(f"#SBATCH --job-name={script_name}\n")
-                    lines.append(f"#SBATCH --output={script_name}.out\n")
-                    lines.append(f"#SBATCH --error={script_name}_err.out\n")
-                    lines.append("#SBATCH --export=ALL\n")
-                    lines.append(" \n")
-                    lines.append('module load devel/miniforge\n')
-                    lines.append('eval "$(conda shell.bash hook)"\n')
-                    lines.append("conda activate roger\n")
-                    lines.append(f"cd {base_path_bwhpc}/{dir_name}\n")
-                    lines.append(" \n")
-                    lines.append(
-                        'python svat_crop.py -b numpy -d cpu --location %s --crop-rotation-scenario %s --stress-test-meteo %s --stress-test-meteo-duration %d --stress-test-meteo-magnitude %d -td "${TMPDIR}"\n' % (location, crop_rotation_scenario, stress_test_meteo, duration, magnitude)
-                    )
-                    lines.append("# Move output from local SSD to global workspace\n")
-                    lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
-                    lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
-                    lines.append('mv "${TMPDIR}"/SVATCROP_*.nc %s\n' % (output_path_ws.as_posix()))
-                    file_path = base_path / f"{script_name}.sh"
-                    file = open(file_path, "w")
-                    file.writelines(lines)
-                    file.close()
-                    subprocess.Popen(f"chmod +x {file_path}", shell=True)
-                    jobs.append(f"{script_name}.sh")
+            for location, crop_rotation_scenario in zip(locations, crop_rotation_scenarios):
+                script_name = f"svat_crop_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}_no-irrigation_soil-compaction"
+                output_path_ws = base_path_ws / "output" / dir_name
+                lines = []
+                lines.append("#!/bin/bash\n")
+                lines.append("#SBATCH --time=4:00:00\n")
+                lines.append("#SBATCH --nodes=1\n")
+                lines.append("#SBATCH --ntasks=1\n")
+                lines.append("#SBATCH --cpus-per-task=1\n")
+                lines.append("#SBATCH --mem=1000\n")
+                lines.append("#SBATCH --mail-type=FAIL\n")
+                lines.append("#SBATCH --mail-user=robin.schwemmle@hydrology.uni-freiburg.de\n")
+                lines.append(f"#SBATCH --job-name={script_name}\n")
+                lines.append(f"#SBATCH --output={script_name}.out\n")
+                lines.append(f"#SBATCH --error={script_name}_err.out\n")
+                lines.append("#SBATCH --export=ALL\n")
+                lines.append(" \n")
+                lines.append('module load devel/miniforge\n')
+                lines.append('eval "$(conda shell.bash hook)"\n')
+                lines.append("conda activate roger\n")
+                lines.append(f"cd {base_path_bwhpc}/{dir_name}\n")
+                lines.append(" \n")
+                lines.append(
+                    'python svat_crop.py -b numpy -d cpu --location %s --crop-rotation-scenario %s --stress-test-meteo %s --stress-test-meteo-duration %d --stress-test-meteo-magnitude %d -td "${TMPDIR}"\n' % (location, crop_rotation_scenario, stress_test_meteo, duration, magnitude)
+                )
+                lines.append("# Move output from local SSD to global workspace\n")
+                lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
+                lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
+                lines.append('mv "${TMPDIR}"/SVATCROP_*.nc %s\n' % (output_path_ws.as_posix()))
+                file_path = base_path / f"{script_name}.sh"
+                file = open(file_path, "w")
+                file.writelines(lines)
+                file.close()
+                subprocess.Popen(f"chmod +x {file_path}", shell=True)
+                jobs.append(f"{script_name}.sh")
 
     file_path = base_path / "submit_jobs.sh"
     with open(file_path, "w") as job_file:

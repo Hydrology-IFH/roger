@@ -22,6 +22,10 @@ conda-environment-doc.yml
 *.prj
 *.cpg
 *.qmd
+*.flt
+*.flt.aux.xml
+*.hdr
+*.stx
 
 # documentation and profiler output
 #*.html
