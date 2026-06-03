@@ -35,7 +35,6 @@ def main(location, crop_rotation_scenario, stress_test_meteo, stress_test_meteo_
         """A SVAT model including crop phenology/crop rotation."""
 
         _base_path = Path(__file__).parent
-        tmp_dir = Path(tmp_dir)
         if stress_test_meteo == "base":
             _input_dir = tmp_dir / "input" / location
         elif stress_test_meteo in ["spring-drought", "summer-drought", "long-term", "spring-summer-wet"]:
