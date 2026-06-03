@@ -56,6 +56,9 @@ def main():
                 lines.append('module load devel/miniforge\n')
                 lines.append('eval "$(conda shell.bash hook)"\n')
                 lines.append("conda activate roger\n")
+                lines.append('echo "Start copying data ..."\n')
+                lines.append("cp -r %s/input ${TMPDIR}\n" % (base_path_bwhpc))
+                lines.append("cp -r %s/parameters.nc ${TMPDIR}\n" % (base_path_bwhpc))
                 lines.append(f"cd {base_path_bwhpc}/{dir_name}\n")
                 lines.append(" \n")
                 lines.append(

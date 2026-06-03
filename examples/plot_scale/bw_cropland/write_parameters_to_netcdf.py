@@ -2,7 +2,10 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import h5netcdf
+import h5py
 import datetime
+
+str_dtype = h5py.string_dtype(encoding="utf-8", length=20)
 
 _UNITS = {
    "z_soil": "mm",
@@ -54,7 +57,8 @@ base_path = Path(__file__).parent
 
 # load the parameters
 file = base_path / "parameters.csv"
-df_parameters = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
+df_parameters = pd.read_csv(file, sep=";", skiprows=1)
+df_parameters.index = df_parameters.loc[:, "CLUST_ID"]
 
 # write parameters to netcdf
 param_names = ["z_soil", "dmpv", "lmpv", "theta_ac", "theta_ufc", "theta_pwp", "ks", "kf", "soil_fertility", "clay", "z_gw"]
@@ -97,6 +101,13 @@ with h5netcdf.File(params_file, "w", decode_vlen_strings=False) as f:
         vals = df_parameters.loc[:, key].values.flatten().reshape(ncols, 1)
         v[:, :] = vals
         v.attrs.update(long_name=key, units=_UNITS[key])
+
+    v = f.create_variable(
+        "soil_type", ("x", "y"), str_dtype, compression="gzip", compression_opts=1
+    )
+    vals = df_parameters.loc[:, "CLUST_ID"].values.flatten().reshape(ncols, 1)
+    v[:, :] = vals
+    v.attrs.update(long_name="soil type", units="")
 
 
     c_clay = df_parameters.loc[:, "clay"].values.astype(float) / (0.4 - 0.02)

@@ -15,7 +15,7 @@ def main():
 
     # load the parameters
     file = base_path / "parameters.csv"
-    df_parameters = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
+    df_parameters = pd.read_csv(file, sep=";", skiprows=1)
     df_parameters.index = df_parameters.loc[:, "CLUST_ID"]
     df_parameters = df_parameters.drop(columns=["CLUST_ID"]).iloc[:20, :]
     file = base_path / "output" / "areas.csv"
@@ -121,8 +121,8 @@ def main():
                                 if var in ["lu_id", "crop_type"]:
                                     df_simulation.loc[:, var] = ll_area_weighted[0][var].values
                                 else:
-                                    df_var = pd.DataFrame(index=date, columns=df_parameters.index[3:])
-                                    for x, soil_type in enumerate(df_parameters.index[3:]):
+                                    df_var = pd.DataFrame(index=date, columns=df_parameters.index)
+                                    for x, soil_type in enumerate(df_parameters.index):
                                         df_var.loc[:, soil_type] = ll_area_weighted[x][var].values * df_parameters.loc[soil_type, "area_share"]
                                     df_simulation.loc[:, var] = df_var.sum(axis=1)
                             df_simulation.columns =[["[kg N/ha/day]", "[kg N/ha/day]", "[kg N/ha/day]", "[mg/l]", "[mg/l]", "", ""],
