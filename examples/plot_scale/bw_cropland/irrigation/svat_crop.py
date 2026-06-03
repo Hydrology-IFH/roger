@@ -41,9 +41,9 @@ def main(location, irrigation_scenario, crop_rotation_scenario, stress_test_mete
 
         _base_path = Path(__file__).parent
         if stress_test_meteo == "base":
-            _input_dir = _base_path.parent / "input" / location
+            _input_dir = Path(tmp_dir) / "input" / location
         elif stress_test_meteo in ["spring-drought", "summer-drought", "long-term", "spring-summer-wet"]:
-            _input_dir = _base_path.parent / "input" / "stress_tests_meteo" / stress_test_meteo / f"duration{stress_test_meteo_duration}_magnitude{stress_test_meteo_magnitude}" / location
+            _input_dir = Path(tmp_dir) / "input" / "stress_tests_meteo" / stress_test_meteo / f"duration{stress_test_meteo_duration}_magnitude{stress_test_meteo_magnitude}" / location
 
 
         def _read_var_from_nc(self, var, path_dir, file):
@@ -87,7 +87,7 @@ def main(location, irrigation_scenario, crop_rotation_scenario, stress_test_mete
             settings = state.settings
             settings.identifier = f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}"
 
-            settings.nx = self._get_nx(self._base_path.parent, "parameters.nc")
+            settings.nx = self._get_nx(Path(tmp_dir), "parameters.nc")
             settings.ny = 1
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
@@ -216,27 +216,27 @@ def main(location, irrigation_scenario, crop_rotation_scenario, stress_test_mete
 
             vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], vs.crop_type[2:-2, 2:-2, 0])
             vs.z_soil = update(
-                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_nc("z_soil", self._base_path.parent, "parameters.nc")
+                vs.z_soil, at[2:-2, 2:-2], self._read_var_from_nc("z_soil", Path(tmp_dir), "parameters.nc")
             )
             vs.dmpv = update(
-                vs.dmpv, at[2:-2, 2:-2], self._read_var_from_nc("dmpv", self._base_path.parent, "parameters.nc")
+                vs.dmpv, at[2:-2, 2:-2], self._read_var_from_nc("dmpv", Path(tmp_dir), "parameters.nc")
             )
             vs.lmpv = update(
-                vs.lmpv, at[2:-2, 2:-2], self._read_var_from_nc("lmpv", self._base_path.parent, "parameters.nc")
+                vs.lmpv, at[2:-2, 2:-2], self._read_var_from_nc("lmpv", Path(tmp_dir), "parameters.nc")
             )
             vs.theta_ac = update(
-                vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_nc("theta_ac", self._base_path.parent, "parameters.nc")
+                vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_nc("theta_ac", Path(tmp_dir), "parameters.nc")
             )
             vs.theta_ufc = update(
-                vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_nc("theta_ufc", self._base_path.parent, "parameters.nc")
+                vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_nc("theta_ufc", Path(tmp_dir), "parameters.nc")
             )
             vs.theta_pwp = update(
-                vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_nc("theta_pwp", self._base_path.parent, "parameters.nc")
+                vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_nc("theta_pwp", Path(tmp_dir), "parameters.nc")
             )
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", self._base_path.parent, "parameters.nc"))
-            vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_nc("kf", self._base_path.parent, "parameters.nc"))
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_nc("ks", Path(tmp_dir), "parameters.nc"))
+            vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_nc("kf", Path(tmp_dir), "parameters.nc"))
             vs.z_gw = update(
-                vs.z_gw, at[2:-2, 2:-2, :], self._read_var_from_nc("z_gw", self._base_path.parent, "parameters.nc")[:, :, npx.newaxis]
+                vs.z_gw, at[2:-2, 2:-2, :], self._read_var_from_nc("z_gw", Path(tmp_dir), "parameters.nc")[:, :, npx.newaxis]
             )
 
             vs.root_growth_scale = update(
