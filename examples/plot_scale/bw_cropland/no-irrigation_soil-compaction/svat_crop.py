@@ -36,9 +36,9 @@ def main(location, crop_rotation_scenario, stress_test_meteo, stress_test_meteo_
 
         _base_path = Path(__file__).parent
         if stress_test_meteo == "base":
-            _input_dir = tmp_dir / "input" / location
+            _input_dir = Path(tmp_dir) / "input" / location
         elif stress_test_meteo in ["spring-drought", "summer-drought", "long-term", "spring-summer-wet"]:
-            _input_dir = tmp_dir / "input" / "stress_tests_meteo" / stress_test_meteo / f"duration{stress_test_meteo_duration}_magnitude{stress_test_meteo_magnitude}" / location
+            _input_dir = Path(tmp_dir) / "input" / "stress_tests_meteo" / stress_test_meteo / f"duration{stress_test_meteo_duration}_magnitude{stress_test_meteo_magnitude}" / location
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
