@@ -98,7 +98,63 @@ df_crop_rotations_["Crop3"] = df_crop_rotations_["Crop3"].astype(str)
 df_crop_rotations_["Crop4"] = df_crop_rotations_["Crop4"].astype(str)
 df_crop_rotations_["Crop5"] = df_crop_rotations_["Crop5"].astype(object).astype(str)
 df_crop_rotations_.loc[:, "Crop5"] = "nan"
-df_crop_rotations = df_crop_rotations_.loc[:, "Crop1":"Crop5"].drop_duplicates().loc[:, "Crop1":"Crop5"].reset_index(drop=True)
+
+df_crop_rotations_all_combinations = pd.DataFrame(index=[0], columns=df_crop_rotations_.columns)
+df_crop_rotations_all_combinations["group_flag"] = False
+for i, row in df_crop_rotations_.iterrows():
+    if len(df_crop_rotations_all_combinations.index) == 1:
+        ii = 0
+    else:
+        ii = len(df_crop_rotations_all_combinations.index) + 1
+    df_crop_rotations_all_combinations.loc[ii, :"Sum_station"] = row.values
+    df_crop_rotations_all_combinations.loc[ii, "group_flag"] = True
+    crops = row[["Crop1", "Crop2", "Crop3", "Crop4"]].values
+    cond_crops = (crops != "nan")
+    n_crops = np.sum(cond_crops)
+    if n_crops == 2:
+        crop1 = crops[0]
+        crop2 = crops[1]
+        df_crop_rotations_all_combinations.loc[ii+1, :"Sum_station"] = row.values
+        df_crop_rotations_all_combinations.loc[ii+1, "group_flag"] = False
+        df_crop_rotations_all_combinations.loc[ii+1, "Crop1"] = crop2
+        df_crop_rotations_all_combinations.loc[ii+1, "Crop2"] = crop1
+    elif n_crops == 3:
+        crop1 = crops[0]
+        crop2 = crops[1]
+        crop3 = crops[2]
+        df_crop_rotations_all_combinations.loc[ii+1, :"Sum_station"] = row.values
+        df_crop_rotations_all_combinations.loc[ii+1, "group_flag"] = False
+        df_crop_rotations_all_combinations.loc[ii+1, "Crop1"] = crop2
+        df_crop_rotations_all_combinations.loc[ii+1, "Crop2"] = crop3
+        df_crop_rotations_all_combinations.loc[ii+1, "Crop3"] = crop1
+        df_crop_rotations_all_combinations.loc[ii+2, :"Sum_station"] = row.values
+        df_crop_rotations_all_combinations.loc[ii+2, "group_flag"] = False
+        df_crop_rotations_all_combinations.loc[ii+2, "Crop1"] = crop3
+        df_crop_rotations_all_combinations.loc[ii+2, "Crop2"] = crop1
+        df_crop_rotations_all_combinations.loc[ii+2, "Crop3"] = crop2
+    elif n_crops == 4:
+        crop1 = crops[0]
+        crop2 = crops[1]
+        crop3 = crops[2]
+        crop4 = crops[3]
+        df_crop_rotations_all_combinations.loc[ii+1, :"Sum_station"] = row.values
+        df_crop_rotations_all_combinations.loc[ii+1, "group_flag"] = False
+        df_crop_rotations_all_combinations.loc[ii+1, "Crop1"] = crop2
+        df_crop_rotations_all_combinations.loc[ii+1, "Crop2"] = crop3
+        df_crop_rotations_all_combinations.loc[ii+1, "Crop3"] = crop4
+        df_crop_rotations_all_combinations.loc[ii+1, "Crop4"] = crop1
+        df_crop_rotations_all_combinations.loc[ii+2, :"Sum_station"] = row.values
+        df_crop_rotations_all_combinations.loc[ii+2, "group_flag"] = False
+        df_crop_rotations_all_combinations.loc[ii+2, "Crop1"] = crop3
+        df_crop_rotations_all_combinations.loc[ii+2, "Crop2"] = crop4
+        df_crop_rotations_all_combinations.loc[ii+2, "Crop3"] = crop1
+        df_crop_rotations_all_combinations.loc[ii+2, "Crop4"] = crop2
+        df_crop_rotations_all_combinations.loc[ii+3, :"Sum_station"] = row.values
+        df_crop_rotations_all_combinations.loc[ii+3, "group_flag"] = False
+        df_crop_rotations_all_combinations.loc[ii+3, "Crop1"] = crop4
+        df_crop_rotations_all_combinations.loc[ii+3, "Crop2"] = crop1
+        df_crop_rotations_all_combinations.loc[ii+3, "Crop3"] = crop2
+        df_crop_rotations_all_combinations.loc[ii+3, "Crop4"] = crop3
 
 cr_columns = []
 cr_columns_summer = []
@@ -111,8 +167,10 @@ for i, year in enumerate(years):
     cr_columns_summer.append(f"{i+1}_summer")
     cr_columns_winter.append(f"{i+1}_winter")
 
+df_crop_rotations_unique = df_crop_rotations_all_combinations.loc[:, "Crop1":"Crop5"].drop_duplicates().loc[:, "Crop1":"Crop5"].reset_index(drop=True)
+
 # loop over unique crop rotations
-for i, row in df_crop_rotations.iterrows():
+for i, row in df_crop_rotations_unique.iterrows():
     crops = row.values.tolist()
     df_crop_rotation = pd.DataFrame(index=[0], columns=cr_columns)
     df_crop_rotation.loc[0, "No"] = 1
@@ -364,9 +422,10 @@ for i, row in df_crop_rotations.iterrows():
     file = file_dir / "crop_rotation.csv"
     df_crop_rotation.to_csv(file, sep=";", index=False)
 
-df_crop_rotations_["crop_rotation_type"] = ""
-df_crop_rotations_["subregion"] = ""
-for i, row in df_crop_rotations_.iterrows():
+df_crop_rotations_all_combinations["crop_rotation_group"] = ""
+df_crop_rotations_all_combinations["crop_rotation_type"] = ""
+df_crop_rotations_all_combinations["subregion"] = ""
+for i, row in df_crop_rotations_all_combinations.iterrows():
     crops = row[["Crop1", "Crop2", "Crop3", "Crop4", "Crop5"]].values.tolist()
     n_summer_crops = np.sum([1 for crop in crops if _dict_crop_to_luid[crop] in summer_crops])
     n_winter_crops = np.sum([1 for crop in crops if _dict_crop_to_luid[crop] in winter_crops])
@@ -509,11 +568,15 @@ for i, row in df_crop_rotations_.iterrows():
         elif n_summer_crops == 0 and n_winter_crops == 4:
             crop_rotation_type = f"{_dict_crop_to_crop[crops[0]]}_{_dict_crop_to_crop[crops[1]]}_{_dict_crop_to_crop[crops[2]]}_{_dict_crop_to_crop[crops[3]]}"
 
-    df_crop_rotations_.loc[i, "crop_rotation_type"] = crop_rotation_type
-    station_id = df_crop_rotations_.loc[i, "station_id"]
-    df_crop_rotations_.loc[i, "subregion"] = dict_id_to_station[station_id]
+    df_crop_rotations_all_combinations.loc[i, "crop_rotation_type"] = crop_rotation_type
+    station_id = df_crop_rotations_all_combinations.loc[i, "station_id"]
+    df_crop_rotations_all_combinations.loc[i, "subregion"] = dict_id_to_station[station_id]
 
-df_crop_rotations_.to_csv(base_path / "input" / "crop_rotations_.csv", sep=";", index=False)
+cond_group = (df_crop_rotations_all_combinations["group_flag"] == True)
+df_crop_rotations_all_combinations.loc[cond_group, "crop_rotation_group"] = df_crop_rotations_all_combinations.loc[cond_group, "crop_rotation_type"]
+# forward fill the crop_rotation_group column
+df_crop_rotations_all_combinations["crop_rotation_group"] = df_crop_rotations_all_combinations["crop_rotation_group"].ffill()
+df_crop_rotations_all_combinations.to_csv(base_path / "input" / "crop_rotations_all_combinations.csv", sep=";", index=False)
 
 file = base_path / "input" / "crop_rotations_catchcrop.csv"
 df_crop_rotations_catchcrop_ = pd.read_csv(file, sep=";", na_values="nan")
@@ -531,10 +594,98 @@ df_crop_rotations_catchcrop_["Zwischen_2_3"] = df_crop_rotations_catchcrop_["Zwi
 df_crop_rotations_catchcrop_["Zwischen_3_4"] = df_crop_rotations_catchcrop_["Zwischen_3_4"].astype(str)
 df_crop_rotations_catchcrop_["Zwischen_4_5"] = df_crop_rotations_catchcrop_["Zwischen_4_5"].astype(object)
 df_crop_rotations_catchcrop_["Zwischen_4_5"] = "nan"
-df_crop_rotations_catchcrop = df_crop_rotations_catchcrop_.loc[:, "Crop1":"Crop5"].drop_duplicates().reset_index(drop=True)
 
+df_crop_rotations_catchcrop_all_combinations = pd.DataFrame(index=[0], columns=df_crop_rotations_catchcrop_.columns)
+df_crop_rotations_catchcrop_all_combinations["group_flag"] = False
+
+for i, row in df_crop_rotations_catchcrop_.iterrows():
+    if len(df_crop_rotations_catchcrop_all_combinations.index) == 1:
+        ii = 0
+    else:
+        ii = len(df_crop_rotations_catchcrop_all_combinations.index) + 1
+    df_crop_rotations_catchcrop_all_combinations.loc[ii, :"Sum_station"] = row.values
+    df_crop_rotations_catchcrop_all_combinations.loc[ii, "group_flag"] = True
+    crops = row[["Crop1", "Crop2", "Crop3", "Crop4"]].values
+    catchcrops = row[["Zwischen_1_2", "Zwischen_2_3", "Zwischen_3_4"]].values
+    cond_crops = (crops != "nan")
+    n_crops = np.sum(cond_crops)
+    if n_crops == 2:
+        crop1 = crops[0]
+        crop2 = crops[1]
+        catchcrop1 = catchcrops[0]
+        catchcrop2 = catchcrops[1]
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, :"Sum_station"] = row.values
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "group_flag"] = False
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Crop1"] = crop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Crop2"] = crop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Zwischen_1_2"] = catchcrop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Zwischen_2_3"] = catchcrop1
+    elif n_crops == 3:
+        crop1 = crops[0]
+        crop2 = crops[1]
+        crop3 = crops[2]
+        catchcrop1 = catchcrops[0]
+        catchcrop2 = catchcrops[1]
+        catchcrop3 = catchcrops[2]
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, :"Sum_station"] = row.values
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "group_flag"] = False
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Crop1"] = crop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Crop2"] = crop3
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Crop3"] = crop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Zwischen_1_2"] = catchcrop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Zwischen_2_3"] = catchcrop3
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Zwischen_3_4"] = catchcrop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, :"Sum_station"] = row.values
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "group_flag"] = False
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Crop1"] = crop3
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Crop2"] = crop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Crop3"] = crop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Zwischen_1_2"] = catchcrop3
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Zwischen_2_3"] = catchcrop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Zwischen_3_4"] = catchcrop2
+    elif n_crops == 4:
+        crop1 = crops[0]
+        crop2 = crops[1]
+        crop3 = crops[2]
+        crop4 = crops[3]
+        catchcrop1 = catchcrops[0]
+        catchcrop2 = catchcrops[1]
+        catchcrop3 = catchcrops[2]
+        catchcrop4 = "nan"
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, :"Sum_station"] = row.values
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "group_flag"] = False
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Crop1"] = crop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Crop2"] = crop3
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Crop3"] = crop4
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Crop4"] = crop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Zwischen_1_2"] = catchcrop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Zwischen_2_3"] = catchcrop3
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Zwischen_3_4"] = catchcrop4
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+1, "Zwischen_4_5"] = catchcrop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, :"Sum_station"] = row.values
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "group_flag"] = False
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Crop1"] = crop3
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Crop2"] = crop4
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Crop3"] = crop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Crop4"] = crop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Zwischen_1_2"] = catchcrop3
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Zwischen_2_3"] = catchcrop4
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Zwischen_3_4"] = catchcrop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+2, "Zwischen_4_5"] = catchcrop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+3, :"Sum_station"] = row.values
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+3, "group_flag"] = False
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+3, "Crop1"] = crop4
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+3, "Crop2"] = crop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+3, "Crop3"] = crop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+3, "Crop4"] = crop3
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+3, "Zwischen_1_2"] = catchcrop4
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+3, "Zwischen_2_3"] = catchcrop1
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+3, "Zwischen_3_4"] = catchcrop2
+        df_crop_rotations_catchcrop_all_combinations.loc[ii+3, "Zwischen_4_5"] = catchcrop3
+
+df_crop_rotations_catchcrop_unique = df_crop_rotations_catchcrop_all_combinations.loc[:, "Crop1":"Crop5"].drop_duplicates().reset_index(drop=True)
 # loop over unique crop rotations
-for i, row in df_crop_rotations_catchcrop.iterrows():
+for i, row in df_crop_rotations_catchcrop_unique.iterrows():
     crops = row[["Crop1", "Crop2", "Crop3", "Crop4", "Crop5"]].values.tolist()
     df_crop_rotation = pd.DataFrame(index=[0], columns=cr_columns)
     df_crop_rotation.loc[0, "No"] = 1
@@ -819,9 +970,10 @@ for i, row in df_crop_rotations_catchcrop.iterrows():
     file = file_dir / "crop_rotation.csv"
     df_crop_rotation.to_csv(file, sep=";", index=False)
 
-df_crop_rotations_catchcrop_["crop_rotation_type"] = ""
-df_crop_rotations_catchcrop_["subregion"] = ""
-for i, row in df_crop_rotations_catchcrop_.iterrows():
+df_crop_rotations_catchcrop_all_combinations["crop_rotation_group"] = ""
+df_crop_rotations_catchcrop_all_combinations["crop_rotation_type"] = ""
+df_crop_rotations_catchcrop_all_combinations["subregion"] = ""
+for i, row in df_crop_rotations_catchcrop_all_combinations.iterrows():
     crops = row[["Crop1", "Crop2", "Crop3", "Crop4", "Crop5"]].values.tolist()
     n_summer_crops = np.sum([1 for crop in crops if _dict_crop_to_luid[crop] in summer_crops])
     n_winter_crops = np.sum([1 for crop in crops if _dict_crop_to_luid[crop] in winter_crops])
@@ -964,14 +1116,17 @@ for i, row in df_crop_rotations_catchcrop_.iterrows():
         elif n_summer_crops == 0 and n_winter_crops == 4:
             crop_rotation_type = f"{_dict_crop_to_crop[crops[0]]}_{_dict_crop_to_crop[crops[1]]}_{_dict_crop_to_crop[crops[2]]}_{_dict_crop_to_crop[crops[3]]}"
 
-    df_crop_rotations_catchcrop_.loc[i, "crop_rotation_type"] = crop_rotation_type
-    station_id = df_crop_rotations_catchcrop_.loc[i, "station_id"]
-    df_crop_rotations_catchcrop_.loc[i, "subregion"] = dict_id_to_station[station_id]
+    df_crop_rotations_catchcrop_all_combinations.loc[i, "crop_rotation_type"] = crop_rotation_type
+    station_id = df_crop_rotations_catchcrop_all_combinations.loc[i, "station_id"]
+    df_crop_rotations_catchcrop_all_combinations.loc[i, "subregion"] = dict_id_to_station[station_id]
 
-df_crop_rotations_catchcrop_.to_csv(base_path / "input" / "crop_rotations_catchcrop_.csv", sep=";", index=False)
+cond_group = (df_crop_rotations_catchcrop_all_combinations["group_flag"] == True)
+df_crop_rotations_catchcrop_all_combinations.loc[cond_group, "crop_rotation_group"] = df_crop_rotations_catchcrop_all_combinations.loc[cond_group, "crop_rotation_type"]
+df_crop_rotations_catchcrop_all_combinations["crop_rotation_group"] = df_crop_rotations_catchcrop_all_combinations["crop_rotation_group"].ffill()
+df_crop_rotations_catchcrop_all_combinations.to_csv(base_path / "input" / "crop_rotations_catchcrop_all_combinations.csv", sep=";", index=False)
 
-df1 = df_crop_rotations_.loc[:, ["station_id", "crop_rotation_type", "subregion"]]
-df2 = df_crop_rotations_catchcrop_.loc[:, ["station_id", "crop_rotation_type", "subregion"]]
+df1 = df_crop_rotations_all_combinations.loc[:, ["station_id", "crop_rotation_type", "subregion"]]
+df2 = df_crop_rotations_catchcrop_all_combinations.loc[:, ["station_id", "crop_rotation_type", "subregion"]]
 df_subregions_crop_rotations = pd.concat([df1, df2], axis=0)
 df_subregions_crop_rotations = df_subregions_crop_rotations[["station_id", "subregion", "crop_rotation_type"]]
 # remove duplicate rows

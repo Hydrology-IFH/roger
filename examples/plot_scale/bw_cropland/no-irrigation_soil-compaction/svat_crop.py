@@ -92,6 +92,7 @@ def main(location, crop_rotation_scenario, stress_test_meteo, stress_test_meteo_
             settings.nx = self._get_nx(self._base_path.parent, "parameters.nc")
             settings.ny = 1
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
+            settings.runlen = 365 * 24 * 60 * 60
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
 
             settings.dx = 1

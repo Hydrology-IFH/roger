@@ -37,7 +37,7 @@ def main():
             duration = duration_magnitude[0]
             magnitude = duration_magnitude[1]
             for location, crop_rotation_scenario in zip(locations, crop_rotation_scenarios):
-                script_name = f"svat_crop_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}_no-irrigation_soil-compaction"
+                script_name = f"svat_crop_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}_irrigation_soil-compaction"
                 output_path_ws = base_path_ws / "output" / dir_name
                 lines = []
                 lines.append("#!/bin/bash\n")
