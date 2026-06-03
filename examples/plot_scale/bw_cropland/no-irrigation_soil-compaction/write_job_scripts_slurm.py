@@ -64,9 +64,9 @@ def main():
                 lines.append("# Move output from local SSD to global workspace\n")
                 lines.append(f'echo "Move output to {output_path_ws.as_posix()}"\n')
                 lines.append("mkdir -p %s\n" % (output_path_ws.as_posix()))
-                lines.append('cd "${TMPDIR}\n')
+                lines.append('cd "${TMPDIR}"\n')
                 lines.append('ls -la\n')
-                lines.append('mv "${TMPDIR}"/SVATCROP_*.nc %s\n' % (output_path_ws.as_posix()))
+                lines.append('mv -v "${TMPDIR}"/SVATCROP_*.nc %s\n' % (output_path_ws.as_posix()))
                 file_path = base_path / f"{script_name}.sh"
                 file = open(file_path, "w")
                 file.writelines(lines)
