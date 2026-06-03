@@ -36,14 +36,6 @@ def main(location, irrigation_scenario, crop_rotation_scenario, stress_test_mete
     from roger.tools.setup import write_forcing, write_crop_rotation
     import roger.lookuptables as lut
 
-    if stress_test_meteo == "base":
-        tmp_dir = Path(tmp_dir) / stress_test_meteo
-    elif stress_test_meteo in ["spring-drought", "summer-drought", "long-term", "spring-summer-wet"]:
-        tmp_dir = Path(tmp_dir) / stress_test_meteo / f"duration{stress_test_meteo_duration}_magnitude{stress_test_meteo_magnitude}"
-
-    if not os.path.exists(tmp_dir):
-        os.makedirs(tmp_dir)
-
     class SVATCROPSetup(RogerSetup):
         """A SVAT model including crop phenology/crop rotation."""
 
