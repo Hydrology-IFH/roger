@@ -357,9 +357,7 @@ def main(location, irrigation_scenario, crop_rotation_scenario, stress_test_mete
                             vs.irrig, at[2:-2, 2:-2], 0
                         )
                     precip_5days = allocate(state.dimensions, ("x", "y", "timesteps_5days"))
-                    for i, ii in enumerate(vs.station_ids):
-                        mask = (vs.station_id == ii)
-                        precip_5days = update(precip_5days, at[:, :, :], npx.where(mask[:, :, npx.newaxis], vs.PREC_DIST[i, vs.itt_forc:vs.itt_forc + 5 * 6 * 24][npx.newaxis, npx.newaxis, :], precip_5days))
+                    precip_5days = update(precip_5days, at[:, :, :], vs.PREC[vs.itt_forc:vs.itt_forc + 5 * 6 * 24][npx.newaxis, npx.newaxis, :], precip_5days)
                     # irrigate if sum of rainfall for the next 5 days is less than 20 mm
                     sum_rainfall_next5days = npx.sum(precip_5days, axis=-1)
                     if (sum_rainfall_next5days <= 20).any() and vs.month[1] in [4, 5] and (vs.irr_demand[2:-2, 2:-2] > 0).any():
@@ -423,6 +421,7 @@ def main(location, irrigation_scenario, crop_rotation_scenario, stress_test_mete
                 "pt",
                 "aet",
                 "transp",
+                "pt",
                 "evap_soil",
                 "inf_mat_rz",
                 "inf_mp_rz",
@@ -459,7 +458,8 @@ def main(location, irrigation_scenario, crop_rotation_scenario, stress_test_mete
                 "ta_max",
                 "irr_demand",
                 "theta_rz",
-                "theta_irr"
+                "theta_irr",
+                "irrig",
             ]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1

@@ -84,7 +84,6 @@ def main(location, crop_rotation_scenario, stress_test_meteo, stress_test_meteo_
             settings.nx = self._get_nx(self._base_path.parent, "parameters.nc")
             settings.ny = 1
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
-            settings.runlen = 365 * 24 * 60 * 60
             settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
 
             settings.dx = 1
@@ -101,6 +100,7 @@ def main(location, crop_rotation_scenario, stress_test_meteo, stress_test_meteo_
             settings.enable_crop_water_stress = True
             settings.enable_crop_phenology = True
             settings.enable_crop_rotation = True
+            settings.enable_crop_specific_irrigation_demand = True
             settings.enable_macropore_lower_boundary_condition = False
             settings.enable_adaptive_time_stepping = True
 
@@ -400,8 +400,8 @@ def main(location, crop_rotation_scenario, stress_test_meteo, stress_test_meteo_
                 "ta",
                 "ta_max",
                 "theta_rz",
-                "ks",
-                "ks_ss"
+                "theta_irr",
+                "irr_demand",
             ]
             diagnostics["collect"].output_frequency = 24 * 60 * 60
             diagnostics["collect"].sampling_frequency = 1
