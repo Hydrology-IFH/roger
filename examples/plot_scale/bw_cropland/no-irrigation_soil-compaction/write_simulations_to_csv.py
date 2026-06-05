@@ -38,9 +38,12 @@ def main():
     with open(base_path / "config.yml", "r") as file:
         config = yaml.safe_load(file)
 
+    # load the subregions and crop rotations
+    df_subregions_crop_rotations = pd.read_csv(base_path.parent / "subregions_crop_rotations.csv", sep=";")
+
     # identifiers of the simulations
-    locations = config[locations]
-    crop_rotation_scenarios = config["crop_rotation_scenarios"]
+    locations = df_subregions_crop_rotations.loc[:, "subregion"].values.astype(str).tolist()
+    crop_rotation_scenarios = df_subregions_crop_rotations.loc[:, "crop_rotation_type"].values.astype(str).tolist()
     stress_tests_meteo = config["climate_scenarios"]
     soil_types = df_parameters.index.to_list()
     for location in locations:

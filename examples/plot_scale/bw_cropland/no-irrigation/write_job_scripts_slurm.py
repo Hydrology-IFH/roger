@@ -10,8 +10,8 @@ import click
 def main():
     base_path = Path(__file__).parent
     dir_name = os.path.basename(str(Path(__file__).parent))
-    base_path_bwhpc = "/pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland"
-    base_path_ws = Path("/pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland")
+    base_path_bwhpc = str(base_path.parent)
+    base_path_ws = base_path.parent
 
     # load the configuration file
     with open(base_path.parent / "config.yml", "r") as file:
@@ -41,7 +41,7 @@ def main():
                 output_path_ws = base_path_ws / "output" / dir_name
                 lines = []
                 lines.append("#!/bin/bash\n")
-                lines.append("#SBATCH --time=4:00:00\n")
+                lines.append("#SBATCH --time=2:00:00\n")
                 lines.append("#SBATCH --nodes=1\n")
                 lines.append("#SBATCH --ntasks=1\n")
                 lines.append("#SBATCH --cpus-per-task=1\n")

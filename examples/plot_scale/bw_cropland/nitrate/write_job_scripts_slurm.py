@@ -2,6 +2,7 @@ from pathlib import Path
 import yaml
 import subprocess
 import os
+import pandas as pd
 import click
 
 
@@ -9,25 +10,40 @@ import click
 def main():
     base_path = Path(__file__).parent
     dir_name = os.path.basename(str(Path(__file__).parent))
-    base_path_bwhpc = "/pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland/"
-    base_path_ws = Path("/pfs/10/work/fr_rs1092-workspace/roger/examples/plot_scale/bw_cropland")
+    base_path_bwhpc = str(base_path.parent)
+    base_path_ws = base_path.parent
 
     # load the configuration file
     with open(base_path.parent / "config.yml", "r") as file:
         config = yaml.safe_load(file)
 
+    # load the configuration file
+    with open(base_path.parent / "config.yml", "r") as file:
+        config = yaml.safe_load(file)
+
+    # load the subregions and crop rotations
+    df_subregions_crop_rotations = pd.read_csv(base_path.parent / "subregions_crop_rotations.csv", sep=";")
+
     # identifiers of the simulations
-    locations = config["locations"]
-    irrigation_scenarios = config["irrigation_scenarios"]
-    crop_rotation_scenarios = config["crop_rotation_scenarios"]
+    locations = df_subregions_crop_rotations.loc[:, "subregion"].values.astype(str).tolist()
+    crop_rotation_scenarios = df_subregions_crop_rotations.loc[:, "crop_rotation_type"].values.astype(str).tolist()
+    stress_tests_meteo = config["climate_scenarios"]
 
     jobs = []
-    for location in locations:# --- jobs to calculate fluxes and states for each irrigation scenario -------------------------
-        for crop_rotation_scenario in crop_rotation_scenarios:
-            for irrigation_scenario in irrigation_scenarios:
-                script_name = f"svat_crop_nitrate_{location}_{crop_rotation_scenario}_{irrigation_scenario}-irrigation"
-                input_path_ws = base_path_ws / "output" / "irrigation" / f"{irrigation_scenario}"
-                output_path_ws = base_path_ws / "output" / dir_name
+    for stress_test_meteo in stress_tests_meteo:
+        if stress_test_meteo == "base":
+            durations_magnitudes = [(0, 0)]
+        elif stress_test_meteo in ["spring-drought", "summer-drought"]:
+            durations_magnitudes = [(3, 0), (3, 2)]
+        elif stress_test_meteo == "long-term":
+            durations_magnitudes = [(0, 2)]
+        for duration_magnitude in durations_magnitudes:
+            duration = duration_magnitude[0]
+            magnitude = duration_magnitude[1]
+            for location, crop_rotation_scenario in zip(locations, crop_rotation_scenarios):
+                script_name = f"svat_crop_nitrate_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}_irrigation"
+                input_path_ws = base_path_ws / "output" / "irrigation"
+                output_path_ws = base_path_ws / "output" / dir_name / "irrigation"
                 lines = []
                 lines.append("#!/bin/bash\n")
                 lines.append("#SBATCH --time=4:00:00\n")
@@ -49,7 +65,7 @@ def main():
                 lines.append("# Copy fluxes and states from global workspace to local SSD\n")
                 lines.append('echo "Copy fluxes and states from global workspace to local SSD"\n')
                 lines.append("# Compares hashes\n")
-                file_nc = f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                file_nc = f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.nc"
                 lines.append(
                     f'checksum_gws=$(shasum -a 256 {input_path_ws.as_posix()}/{file_nc} | cut -f 1 -d " ")\n'
                 )
@@ -76,9 +92,9 @@ def main():
                 subprocess.Popen(f"chmod +x {file_path}", shell=True)
                 jobs.append(f"{script_name}.sh")
 
-                script_name = f"svat_crop_nitrate_{location}_{crop_rotation_scenario}_{irrigation_scenario}-irrigation_soil-compaction"
-                input_path_ws = base_path_ws / "output" / "irrigation_soil-compaction" / f"{irrigation_scenario}"
-                output_path_ws = base_path_ws / "output" / dir_name
+                script_name = f"svat_crop_nitrate_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}_irrigation_soil-compaction"
+                input_path_ws = base_path_ws / "output" / "irrigation_soil-compaction"
+                output_path_ws = base_path_ws / "output" / dir_name / "irrigation_soil-compaction"
                 lines = []
                 lines.append("#!/bin/bash\n")
                 lines.append("#SBATCH --time=4:00:00\n")
@@ -100,7 +116,7 @@ def main():
                 lines.append("# Copy fluxes and states from global workspace to local SSD\n")
                 lines.append('echo "Copy fluxes and states from global workspace to local SSD"\n')
                 lines.append("# Compares hashes\n")
-                file_nc = f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                file_nc = f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.nc"
                 lines.append(
                     f'checksum_gws=$(shasum -a 256 {input_path_ws.as_posix()}/{file_nc} | cut -f 1 -d " ")\n'
                 )
@@ -127,9 +143,9 @@ def main():
                 subprocess.Popen(f"chmod +x {file_path}", shell=True)
                 jobs.append(f"{script_name}.sh")
 
-            script_name = f"svat_crop_nitrate_{location}_{crop_rotation_scenario}"
+            script_name = f"svat_crop_nitrate_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}"
             input_path_ws = base_path_ws / "output" / "no-irrigation"
-            output_path_ws = base_path_ws / "output" / dir_name
+            output_path_ws = base_path_ws / "output" / dir_name / "no-irrigation"
             lines = []
             lines.append("#!/bin/bash\n")
             lines.append("#SBATCH --time=4:00:00\n")
@@ -151,7 +167,7 @@ def main():
             lines.append("# Copy fluxes and states from global workspace to local SSD\n")
             lines.append('echo "Copy fluxes and states from global workspace to local SSD"\n')
             lines.append("# Compares hashes\n")
-            file_nc = f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+            file_nc = f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.nc"
             lines.append(
                 f'checksum_gws=$(shasum -a 256 {input_path_ws.as_posix()}/{file_nc} | cut -f 1 -d " ")\n'
             )
@@ -178,9 +194,9 @@ def main():
             subprocess.Popen(f"chmod +x {file_path}", shell=True)
             jobs.append(f"{script_name}.sh")
 
-            script_name = f"svat_crop_nitrate_{location}_{crop_rotation_scenario}_soil-compaction"
+            script_name = f"svat_crop_nitrate_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}_soil-compaction"
             input_path_ws = base_path_ws / "output" / "no-irrigation_soil-compaction"
-            output_path_ws = base_path_ws / "output" / dir_name
+            output_path_ws = base_path_ws / "output" / dir_name / "no-irrigation_soil-compaction"
             lines = []
             lines.append("#!/bin/bash\n")
             lines.append("#SBATCH --time=4:00:00\n")
@@ -203,7 +219,7 @@ def main():
             lines.append("# Copy fluxes and states from global workspace to local SSD\n")
             lines.append('echo "Copy fluxes and states from global workspace to local SSD"\n')
             lines.append("# Compares hashes\n")
-            file_nc = f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+            file_nc = f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.nc"
             lines.append(
                 f'checksum_gws=$(shasum -a 256 {input_path_ws.as_posix()}/{file_nc} | cut -f 1 -d " ")\n'
             )

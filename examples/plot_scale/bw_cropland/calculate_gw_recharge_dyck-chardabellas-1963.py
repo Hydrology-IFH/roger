@@ -2,7 +2,6 @@ from pathlib import Path
 import os
 import numpy as np
 import pandas as pd
-import yaml
 import click
 
 
@@ -104,13 +103,12 @@ def calculate_recharge_6lines(precip):
 
 @click.command("main")
 def main():
-    # load the configuration file
-    with open(base_path.parent / "config.yml", "r") as file:
-        config = yaml.safe_load(file)
-
     base_path = Path(__file__).parent
 
-    locations = config["locations"]
+    # load the subregions and crop rotations
+    df_subregions_crop_rotations = pd.read_csv(base_path.parent / "subregions_crop_rotations.csv", sep=";")
+
+    locations = df_subregions_crop_rotations.loc[:, "subregion"].unique().values.astype(str).tolist()
 
     for location in locations:
         precip_path = base_path / "input" / f"{location}" / "PREC.txt"

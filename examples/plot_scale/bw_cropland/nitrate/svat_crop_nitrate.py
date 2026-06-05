@@ -2,8 +2,11 @@ from pathlib import Path
 import os
 import h5netcdf
 import numpy as onp
+import pandas as pd
 import click
 from roger.cli.roger_run_base import roger_base_cli
+
+_CROP_ROTATION_SCENARIOS = pd.read_csv(Path(__file__).parent.parent / "subregions_crop_rotations.csv", sep=";").loc[:, "crop_rotation_type"].tolist()
 
 @click.option("--location", type=click.Choice(["freiburg", "lahr", "bruchsal-heidelsheim",
                                                "pfullendorf", "nagold", "sachsenheim",
@@ -15,55 +18,13 @@ from roger.cli.roger_run_base import roger_base_cli
                                                default="lahr")
 @click.option("--soil-compaction-scenario", type=click.Choice(["no_compaction", "compaction"]), default="no_compaction")
 @click.option("--irrigation-scenario", type=click.Choice(["no-irrigation", "15-ufc", "35-ufc", "50-ufc", "crop-specific"]), default="no-irrigation")
-@click.option("--crop-rotation-scenario", type=click.Choice(["grain-corn",
-                                                             "grain-corn_yellow-mustard",
-                                                             "silage-corn",
-                                                             "silage-corn_yellow-mustard",
-                                                             "summer-barley",
-                                                             "summer-barley_yellow-mustard",
-                                                             "clover",
-                                                             "winter-wheat",
-                                                             "winter-barley",
-                                                             "winter-rape",
-                                                             "faba-bean",
-                                                             "potato-early",
-                                                             "potato",
-                                                             "sugar-beet",
-                                                             "sugar-beet_yellow-mustard",
-                                                             "vegetables",
-                                                             "strawberry",
-                                                             "asparagus",
-                                                             "winter-wheat_clover",
-                                                             "winter-wheat_silage-corn",
-                                                             "summer-wheat_winter-wheat",
-                                                             "summer-wheat_clover_winter-wheat",
-                                                             "winter-wheat_clover_silage-corn",
-                                                             "winter-wheat_sugar-beet_silage-corn",
-                                                             "summer-wheat_winter-wheat_silage-corn",
-                                                             "summer-wheat_winter-wheat_winter-rape",
-                                                             "winter-wheat_winter-rape",
-                                                             "winter-wheat_soybean_winter-rape",
-                                                             "sugar-beet_winter-wheat_winter-barley", 
-                                                             "grain-corn_winter-wheat_winter-rape", 
-                                                             "grain-corn_winter-wheat_winter-barley",
-                                                             "grain-corn_winter-wheat_clover",
-                                                             "winter-wheat_silage-corn_yellow-mustard",
-                                                             "summer-wheat_winter-wheat_yellow-mustard",
-                                                             "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
-                                                             "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
-                                                             "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                                                             "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
-                                                             "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                                                             "grain-corn_winter-wheat_winter-barley_yellow-mustard",
-                                                             "grain-corn",
-                                                             "grain-corn_yellow-mustard",
-                                                             "winter-wheat",
-                                                             "yellow-mustard",
-                                                             "miscanthus",
-                                                             "bare-grass"]), default="grain-corn")
+@click.option("--crop-rotation-scenario", type=click.Choice(_CROP_ROTATION_SCENARIOS), default="winter-wheat_grain-corn")
+@click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "spring-drought", "summer-drought", "long-term", "spring-summer-wet"]), default="long-term", help="Type of meteorological stress test")
+@click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=2, help="Magnitude of meteorological stress test")
+@click.option("-stmd", "--stress-test-meteo-duration", type=click.Choice([0, 2, 3]), default=0, help="Duration of meteorological stress test in consecutive years")
 @click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "nitrate")
 @roger_base_cli
-def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_scenario, tmp_dir):
+def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_scenario, stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_duration, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput
     from roger.variables import allocate
     from roger.core.operators import numpy as npx, update, update_add, at
@@ -71,34 +32,8 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
     from roger.core.utilities import _get_row_no
     from roger import runtime_settings as rs
 
-    tmp_dir = Path(tmp_dir)
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
-
-    # if soil_compaction_scenario == "no_compaction":
-    #     if irrigation_scenario == "no-irrigation":
-    #         tmp_dir = Path(tmp_dir) / "no-irrigation" / location
-    #     elif irrigation_scenario == "20-ufc":
-    #         tmp_dir = Path(tmp_dir) / "irrigation" / "20-ufc" / location
-    #     elif irrigation_scenario == "35-ufc":
-    #         tmp_dir = Path(tmp_dir) / "irrigation" / "35-ufc" / location
-    #     elif irrigation_scenario == "50-ufc":
-    #         tmp_dir = Path(tmp_dir) / "irrigation" / "50-ufc" / location
-    #     elif irrigation_scenario == "crop-specific":
-    #         tmp_dir = Path(tmp_dir) / "irrigation" / "crop-specific" / location
-    # else:
-    #     if irrigation_scenario == "no-irrigation":
-    #         tmp_dir = Path(tmp_dir) / "no-irrigation_soil-compaction" / location
-    #     elif irrigation_scenario == "20-ufc":
-    #         tmp_dir = Path(tmp_dir) / "irrigation_soil-compaction" / "20-ufc" / location
-    #     elif irrigation_scenario == "35-ufc":
-    #         tmp_dir = Path(tmp_dir) / "irrigation_soil-compaction" / "35-ufc" / location
-    #     elif irrigation_scenario == "50-ufc":
-    #         tmp_dir = Path(tmp_dir) / "irrigation_soil-compaction" / "50-ufc" / location
-    #     elif irrigation_scenario == "crop-specific":
-    #         tmp_dir = Path(tmp_dir) / "irrigation_soil-compaction" / "crop-specific" / location
-    # if not os.path.exists(tmp_dir):
-    #     os.makedirs(tmp_dir)
 
     class SVATCROPNITRATESetup(RogerSetup):
         """A SVAT-CROP transport model for nitrate."""
@@ -107,29 +42,29 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
 
         if irrigation_scenario == "no-irrigation":
             if soil_compaction_scenario == "no_compaction":
-                _input_dir = _base_path.parent / "output" / "no-irrigation" / location
+                _input_dir = Path(tmp_dir) / "output" / "no-irrigation" / location
             else:
-                _input_dir = _base_path.parent / "output" / "no-irrigation_soil-compaction" / location
+                _input_dir = Path(tmp_dir) / "output" / "no-irrigation_soil-compaction" / location
         elif irrigation_scenario == "20-ufc":
             if soil_compaction_scenario == "no_compaction":
-                _input_dir = _base_path.parent / "output" / "irrigation" / "20-ufc" / location
+                _input_dir = Path(tmp_dir) / "output" / "irrigation" / "20-ufc" / location
             else:
-                _input_dir = _base_path.parent / "output" / "irrigation_soil-compaction" / "20-ufc" / location
+                _input_dir = Path(tmp_dir) / "output" / "irrigation_soil-compaction" / "20-ufc" / location
         elif irrigation_scenario == "35-ufc":
             if soil_compaction_scenario == "no_compaction":
-                _input_dir = _base_path.parent / "output" / "irrigation" / "35-ufc" / location
+                _input_dir = Path(tmp_dir) / "output" / "irrigation" / "35-ufc" / location
             else:
-                _input_dir = _base_path.parent / "output" / "irrigation_soil-compaction" / "35-ufc" / location
+                _input_dir = Path(tmp_dir) / "output" / "irrigation_soil-compaction" / "35-ufc" / location
         elif irrigation_scenario == "50-ufc":
             if soil_compaction_scenario == "no_compaction":
-                _input_dir = _base_path.parent / "output" / "irrigation" / "50-ufc" / location
+                _input_dir = Path(tmp_dir) / "output" / "irrigation" / "50-ufc" / location
             else:
-                _input_dir = _base_path.parent / "output" / "irrigation_soil-compaction" / "50-ufc" / location
+                _input_dir = Path(tmp_dir) / "output" / "irrigation_soil-compaction" / "50-ufc" / location
         elif irrigation_scenario == "crop-specific":
             if soil_compaction_scenario == "no_compaction":
-                _input_dir = _base_path.parent / "output" / "irrigation" / "crop-specific" / location
+                _input_dir = Path(tmp_dir) / "output" / "irrigation" / "crop-specific" / location
             else:
-                _input_dir = _base_path.parent / "output" / "irrigation_soil-compaction" / "crop-specific" / location
+                _input_dir = Path(tmp_dir) / "output" / "irrigation_soil-compaction" / "crop-specific" / location
 
         def _read_var_from_nc(self, var, path_dir, file):
             nc_file = path_dir / file
@@ -158,24 +93,21 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
         @roger_routine
         def set_settings(self, state):
             settings = state.settings
-            if soil_compaction_scenario == "no_compaction":
-                settings.identifier = f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{irrigation_scenario}-irrigation"
-            else:
-                settings.identifier = f"SVATCROPNITRATE_{location}_{crop_rotation_scenario}_{irrigation_scenario}-irrigation_-soil-compaction"
+            settings.identifier = f"SVATCROPNITRATE_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}"
             settings.sas_solver = "deterministic"
             settings.sas_solver_substeps = 8
 
             settings.nx = self._get_nx(self._base_path, "parameters_sas-nitrate.nc")
             settings.ny = 1
             settings.nitt = self._get_nitt(
-                self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
             )
             settings.nitt_forc = settings.nitt
             settings.ages = 1000
             settings.nages = settings.ages + 1
             settings.runlen_warmup = 2 * 365 * 24 * 60 * 60
             settings.runlen = self._get_runlen(
-                self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
             )
 
             settings.dx = 1
@@ -295,28 +227,28 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
                 vs.S_PWP_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_pwp_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_pwp_rz", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_SAT_RZ = update(
                 vs.S_SAT_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_sat_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_sat_rz", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_PWP_SS = update(
                 vs.S_PWP_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_pwp_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_pwp_ss", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_SAT_SS = update(
                 vs.S_SAT_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_sat_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_sat_ss", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
 
@@ -324,28 +256,28 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
                 vs.S_pwp_rz,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_pwp_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_pwp_rz", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, 0],
             )
             vs.S_pwp_ss = update(
                 vs.S_pwp_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_pwp_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_pwp_ss", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, 0],
             )
             vs.S_sat_rz = update(
                 vs.S_sat_rz,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_sat_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_sat_rz", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, 0],
             )
             vs.S_sat_ss = update(
                 vs.S_sat_ss,
                 at[2:-2, 2:-2],
                 self._read_var_from_nc(
-                    "S_sat_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_sat_ss", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, 0],
             )
 
@@ -414,28 +346,28 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
                 vs.YEAR,
                 at[:],
                 self._read_var_from_nc(
-                    "year", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "year", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ).astype('int32'),
             )
             vs.DOY = update(
                 vs.DOY,
                 at[:],
                 self._read_var_from_nc(
-                    "doy", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "doy", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ).astype('int32'),
             )
             vs.LU_ID = update(
                 vs.LU_ID,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "lu_id", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "lu_id", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ).astype('int32'),
             )
             vs.Z_ROOT = update(
                 vs.Z_ROOT,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "z_root", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "z_root", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
 
@@ -486,14 +418,14 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
                 vs.S_rz,
                 at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
-                    "S_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_rz", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, vs.itt, npx.newaxis],
             )
             vs.S_ss = update(
                 vs.S_ss,
                 at[2:-2, 2:-2, :vs.taup1],
                 self._read_var_from_nc(
-                    "S_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_ss", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 )[:, :, vs.itt, npx.newaxis],
             )
             vs.S_s = update(
@@ -615,7 +547,7 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
                 vs.PREC_DIST_DAILY,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "prec", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "prec", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.INF_MAT_RZ = update(
@@ -624,7 +556,7 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
                 self._read_var_from_nc(
                     "inf_mat_rz",
                     self._input_dir,
-                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
+                    f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc",
                 ),
             )
             vs.INF_PF_RZ = update(
@@ -633,26 +565,26 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
                 self._read_var_from_nc(
                     "inf_mp_rz",
                     self._input_dir,
-                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
+                    f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc",
                 )
                 + self._read_var_from_nc(
                     "inf_sc_rz",
                     self._input_dir,
-                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
+                    f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc",
                 ),
             )
             vs.INF_PF_SS = update(
                 vs.INF_PF_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "inf_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "inf_ss", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.TRANSP = update(
                 vs.TRANSP,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "transp", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "transp", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.EVAP_SOIL = update(
@@ -661,56 +593,56 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
                 self._read_var_from_nc(
                     "evap_soil",
                     self._input_dir,
-                    f"SVATCROP_{location}_{crop_rotation_scenario}.nc",
+                    f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc",
                 ),
             )
             vs.CPR_RZ = update(
                 vs.CPR_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "cpr_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "cpr_rz", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.Q_RZ = update(
                 vs.Q_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "q_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "q_rz", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.Q_SS = update(
                 vs.Q_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "q_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "q_ss", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.RE_RG = update(
                 vs.RE_RG,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "re_rg", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "re_rg", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.RE_RL = update(
                 vs.RE_RL,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "re_rl", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "re_rl", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_RZ = update(
                 vs.S_RZ,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_rz", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_rz", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_SS = update(
                 vs.S_SS,
                 at[2:-2, 2:-2, :],
                 self._read_var_from_nc(
-                    "S_ss", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "S_ss", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 ),
             )
             vs.S_S = update(vs.S_S, at[2:-2, 2:-2, :], vs.S_RZ[2:-2, 2:-2, :] + vs.S_SS[2:-2, 2:-2, :])
@@ -718,7 +650,7 @@ def main(location, soil_compaction_scenario, irrigation_scenario, crop_rotation_
                 vs.TA,
                 at[:],
                 self._read_var_from_nc(
-                    "ta", self._input_dir, f"SVATCROP_{location}_{crop_rotation_scenario}.nc"
+                    "ta", Path(tmp_dir), f"SVATCROP_{stress_test_meteo}-duration{stress_test_meteo_duration}-magnitude{stress_test_meteo_magnitude}_{location}_{crop_rotation_scenario}.nc"
                 )[0, 0, :],
             )
             vs.ta_year = update(
