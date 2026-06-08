@@ -97,6 +97,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache
 test/mpi/
+conda-environment-gpu-test.yml
 
 # Translations
 *.mo
