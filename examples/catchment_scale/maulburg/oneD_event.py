@@ -61,7 +61,7 @@ def main(tmp_dir):
             settings.output_frequency = self._config["OUTPUT_FREQUENCY"]
 
             # total grid numbers in x- and y-direction
-            settings.nx, settings.ny = self._config["nx"], self._config["ny"]
+            settings.nx, settings.ny = self._config["ncols"], self._config["nrows"]
             # derive total number of time steps from forcing
             settings.nitt = self._get_nitt(self._input_dir, "forcing.nc")
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
@@ -152,33 +152,32 @@ def main(tmp_dir):
             vs = state.variables
 
             # land use ID (see README for description)
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "lanu_of.flt"))
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "lanu_of.flt").T)
             # degree of sealing (-)
-            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "vers_of.flt") / 100)
+            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "vers_of.flt").T / 100)
             # surface slope (-)
-            vs.slope = update(vs.slope, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "slope.flt") / 100)
+            vs.slope = update(vs.slope, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "slope.flt").T / 100)
             # convert slope to percentage
-            vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "slope.flt"))
-            # total surface depression storage (mm)
-            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "mulden.flt"))
+            vs.slope_per = update(vs.slope_per, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "slope.flt").T)
+            vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "mulden.flt").T)
             # soil depth (mm)
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "gru_bo_of.flt"))
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "gru_bo_of.flt").T)
             # density of vertical macropores (1/m2)
-            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "mpdv_n.flt"))
+            vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "mpdv_n.flt").T)
             # density of horizontal macropores (1/m2)
-            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "mpd_h_of.flt"))
+            vs.dmph = update(vs.dmph, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "mpd_h_of.flt").T)
             # total length of vertical macropores (mm)
-            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "mpl_v_ogw.flt"))
+            vs.lmpv = update(vs.lmpv, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "mpl_v_ogw.flt").T)
             # air capacity (-)
-            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "lk_ob.flt") / 100)
+            vs.theta_ac = update(vs.theta_ac, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "lk_ob.flt").T / 100)
             # usable field capacity (-)
-            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "nfk.flt") / 100)
+            vs.theta_ufc = update(vs.theta_ufc, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "nfk.flt").T / 100)
             # permanent wilting point (-)
-            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "pwp.flt") / 100)
+            vs.theta_pwp = update(vs.theta_pwp, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "pwp.flt").T / 100)
             # saturated hydraulic conductivity (mm/h)
-            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "ks_ob.flt"))
+            vs.ks = update(vs.ks, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "ks_ob.flt").T)
             # hydraulic conductivity of bedrock/saturated zone (mm/h)
-            vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "ks_geo.flt"))
+            vs.kf = update(vs.kf, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "ks_geo.flt").T)
 
         @roger_routine
         def set_parameters(self, state):

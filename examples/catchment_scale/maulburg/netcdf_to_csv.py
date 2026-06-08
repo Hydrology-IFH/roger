@@ -15,10 +15,6 @@ def main():
     base_path_output = base_path / "output"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
-    # directory of figures
-    base_path_figs = base_path / "figures"
-    if not os.path.exists(base_path_figs):
-        os.mkdir(base_path_figs)
 
     # load configuration file
     file_config = base_path / "config.yml"
@@ -38,11 +34,24 @@ def main():
     )
     ds_sim = ds_sim.assign_coords(date=("Time", date_sim))
 
+    idx_xy = onp.arange(config["nrows"] * config["ncols"]).reshape(config["nrows"], config["ncols"])
+
     # write output to csv
     vars_sim = config["OUTPUT_RATE"]
     for var_sim in vars_sim:
-        df_var_sim = pd.DataFrame(index=date_sim, columns=[f"sim_{x}" for x in range(config["nx"])])
-        df_var_sim.iloc[:, :] = ds_sim[var_sim].isel(y=0).values.T
+        df_var_sim = pd.DataFrame(index=date_sim, columns=[f"sim_{xy}" for xy in range(config["nrows"] * config["ncols"])])
+        for x,y in zip(range(config["nrows"]), range(config["ncols"])):
+            i = idx_xy[x, y]
+            df_var_sim.iloc[:, i] = ds_sim[var_sim].isel(x=x, y=y).values
+        df_var_sim.to_csv(base_path_output / f"{var_sim}.csv", sep=";", index=True, index_label="date")
+
+    # write output to csv
+    vars_sim = config["OUTPUT_COLLECT"]
+    for var_sim in vars_sim:
+        df_var_sim = pd.DataFrame(index=date_sim, columns=[f"sim_{xy}" for xy in range(config["nrows"] * config["ncols"])])
+        for x,y in zip(range(config["nrows"]), range(config["ncols"])):
+            i = idx_xy[x, y]
+            df_var_sim.iloc[:, i] = ds_sim[var_sim].isel(x=x, y=y).values
         df_var_sim.to_csv(base_path_output / f"{var_sim}.csv", sep=";", index=True, index_label="date")
 
     return

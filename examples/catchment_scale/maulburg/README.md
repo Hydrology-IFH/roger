@@ -56,7 +56,31 @@ The variables written to the output files are defined in `config.yml`. Available
 are listed [here](https://roger.readthedocs.io/en/latest/reference/variables.html#available-variables). Generally, storage variables
 should be defined in `OUTPUT_COLLECT` and flux variables in `OUTPUT_RATE`.
 
-# Workflow
+# Workflow for computation on **GPU**
+The following workflow briefly describes the model application:
+
+1. Install roger on GPU device using `install_roger_gpu_on_fuhys012.sh` ()
+
+2. Prepare the meteorological input data (see Meteorological input data).
+
+3. If required data is ready, the following script runs the simulations:
+
+```
+conda activate roger-gpu
+python oneD_event.py -b jax -d gpu
+```
+
+3. After calculation is done, the simulation results can be merged in a single NetCDF-file:
+```
+python merge_output.py
+```
+
+4. (Optional) The following script converts the model output from NetCDF to csv.
+```
+python netcdf_to_csv.py
+```
+
+# Workflow for computation on **CPU**
 
 The following workflow briefly describes the model application:
 

@@ -10,9 +10,9 @@ x_origin: 408561.5
 # y-origin of spatial grid
 y_origin: 5277703.5
 # number of grid cells in x-direction i.e. number of columns
-ny: 824
+ncols: 824
 # number of grid cells in y-direction i.e. number of rows
-nx: 544
+nrows: 544
 
 # --- Diagnostics --------------------------------------------------------------
 OUTPUT_FREQUENCY: 600  # output frequency in seconds

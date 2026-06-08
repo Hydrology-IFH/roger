@@ -16,10 +16,6 @@ def main():
     base_path_output = base_path / "output"
     if not os.path.exists(base_path_output):
         os.mkdir(base_path_output)
-    # directory of figures
-    base_path_figs = base_path / "figures"
-    if not os.path.exists(base_path_figs):
-        os.mkdir(base_path_figs)
 
     # load configuration file
     file_config = base_path / "config.yml"
@@ -59,24 +55,42 @@ def main():
                         v = f.create_variable("x", ("x",), float, compression="gzip", compression_opts=1)
                         v.attrs["long_name"] = "x"
                         v.attrs["units"] = "m"
-                        v[:] = onp.arange(dict_dim["x"]) * 5
+                        v.attrs["axis"] = "X"
+                        v[:] = config["x_origin"] + (onp.arange(dict_dim["x"]) * config["dx"])
                         v = f.create_variable("y", ("y",), float, compression="gzip", compression_opts=1)
                         v.attrs["long_name"] = "y"
                         v.attrs["units"] = "m"
-                        v[:] = onp.arange(dict_dim["y"]) * 5
+                        v.attrs["axis"] = "Y"
+                        v[:] = config["y_origin"] + (onp.arange(dict_dim["y"]) * config["dy"] * (-1))
                         v = f.create_variable("Time", ("Time",), float, compression="gzip", compression_opts=1)
                         var_obj = df.variables.get("Time")
                         v.attrs.update(time_origin=var_obj.attrs["time_origin"], units=var_obj.attrs["units"])
                         v[:] = time
+                        # create CF grid mapping variable
+                        crs = f.create_variable("spatial_ref", (), int)
+                        crs.attrs.update(
+                            grid_mapping_name="transverse_mercator",
+                            spatial_ref="EPSG:25832",
+                            epsg_code="EPSG:25832",
+                            semi_major_axis=6378137.0,
+                            inverse_flattening=298.257222101,
+                            latitude_of_projection_origin=0.0,
+                            longitude_of_central_meridian=9.0,
+                            scale_factor_at_central_meridian=0.9996,
+                            false_easting=500000.0,
+                            false_northing=0.0,
+                        )
+
                     for key in list(df.variables.keys()):
                         var_obj = df.variables.get(key)
                         if key not in list(f.dimensions.keys()) and var_obj.ndim == 3:
                             v = f.create_variable(
-                                key, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
+                                key, ("Time", "y", "x"), float, compression="gzip", compression_opts=1
                             )
                             vals = onp.array(var_obj)
-                            v[:, :, :] = vals.swapaxes(0, 2)
-                            v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"])
+                            v[:, :, :] = vals
+                            v.attrs.update(long_name=var_obj.attrs["long_name"], units=var_obj.attrs["units"], grid_mapping="spatial_ref")
+
     return
 
 
