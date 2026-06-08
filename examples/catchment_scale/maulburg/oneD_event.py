@@ -65,6 +65,7 @@ def main(tmp_dir):
             # derive total number of time steps from forcing
             settings.nitt = self._get_nitt(self._input_dir, "forcing.nc")
             settings.runlen = self._get_runlen(self._input_dir, "forcing.nc")
+            settings.nitt_forc = len(self._read_var_from_nc("Time", self._input_dir, "forcing.nc"))
 
             # spatial discretization (in meters)
             settings.dx = self._config["dx"]
@@ -151,9 +152,9 @@ def main(tmp_dir):
             vs = state.variables
 
             # land use ID (see README for description)
-            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "lanu.flt"))
+            vs.lu_id = update(vs.lu_id, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "lanu_of.flt"))
             # degree of sealing (-)
-            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "vers_of.flt"))
+            vs.sealing = update(vs.sealing, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "vers_of.flt") / 100)
             # surface slope (-)
             vs.slope = update(vs.slope, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "slope.flt") / 100)
             # convert slope to percentage
@@ -161,7 +162,7 @@ def main(tmp_dir):
             # total surface depression storage (mm)
             vs.S_dep_tot = update(vs.S_dep_tot, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "mulden.flt"))
             # soil depth (mm)
-            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "gru_ob_of.flt"))
+            vs.z_soil = update(vs.z_soil, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "gru_bo_of.flt"))
             # density of vertical macropores (1/m2)
             vs.dmpv = update(vs.dmpv, at[2:-2, 2:-2], self._read_var_from_flt(self._base_path / "parameters", "mpdv_n.flt"))
             # density of horizontal macropores (1/m2)
@@ -192,23 +193,23 @@ def main(tmp_dir):
             vs = state.variables
 
             # interception storage of upper surface layer (mm)
-            vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.S_int_top = update(vs.S_int_top, at[2:-2, 2:-2, :vs.taup1], 0)
             # snow water equivalent stored in upper surface layer (mm)
-            vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.swe_top = update(vs.swe_top, at[2:-2, 2:-2, :vs.taup1], 0)
             # interception storage of lower surface layer (mm)
-            vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.S_int_ground = update(vs.S_int_ground, at[2:-2, 2:-2, :vs.taup1], 0)
             # snow water equivalent stored in lower surface layer (mm)
-            vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.swe_ground = update(vs.swe_ground, at[2:-2, 2:-2, :vs.taup1], 0)
             # surface depression storage (mm)
-            vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.S_dep = update(vs.S_dep, at[2:-2, 2:-2, :vs.taup1], 0)
             # snow cover storage (mm)
-            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.S_snow = update(vs.S_snow, at[2:-2, 2:-2, :vs.taup1], 0)
             # snow water equivalent of snow cover (mm)
-            vs.swe = update(vs.swe, at[2:-2, 2:-2, : vs.taup1], 0)
+            vs.swe = update(vs.swe, at[2:-2, 2:-2, :vs.taup1], 0)
             # soil water content of root zone/upper soil layer (-)
-            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, : vs.taup1], vs.theta_pwp[2:-2, 2:-2] + vs.theta_ufc[2:-2, 2:-2])
+            vs.theta_rz = update(vs.theta_rz, at[2:-2, 2:-2, :vs.taup1], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis])
             # soil water content of subsoil/lower soil layer (-)
-            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, : vs.taup1], vs.theta_pwp[2:-2, 2:-2] + vs.theta_ufc[2:-2, 2:-2])
+            vs.theta_ss = update(vs.theta_ss, at[2:-2, 2:-2, :vs.taup1], vs.theta_pwp[2:-2, 2:-2, npx.newaxis] + vs.theta_ufc[2:-2, 2:-2, npx.newaxis])
 
         @roger_routine
         def set_boundary_conditions_setup(self, state):
@@ -235,6 +236,7 @@ def main(tmp_dir):
             local_variables=[
                 "itt",
                 "prec",
+                "PREC",
                 "event_id",
                 "tau",
             ],
@@ -255,16 +257,26 @@ def main(tmp_dir):
             diagnostics = state.diagnostics
 
             # variables written to output files
-            diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
-            # required to be equal or greater than time increments of forcing
-            diagnostics["rate"].output_frequency = self._config["OUTPUT_FREQUENCY"]  # in seconds
-            diagnostics["rate"].sampling_frequency = 1
-            if base_path:
-                diagnostics["rate"].base_output_path = base_path
+            if self._config["OUTPUT_RATE"]:
+                diagnostics["rate"].output_variables = self._config["OUTPUT_RATE"]
+                # required to be equal or greater than time increments of forcing
+                diagnostics["rate"].output_frequency = self._config["OUTPUT_FREQUENCY"]  # in seconds
+                diagnostics["rate"].sampling_frequency = 1
+                if base_path:
+                    diagnostics["rate"].base_output_path = base_path
+
+            # variables written to output files
+            if self._config["OUTPUT_COLLECT"]:
+                diagnostics["collect"].output_variables = self._config["OUTPUT_COLLECT"]
+                # required to be equal or greater than time increments of forcing
+                diagnostics["collect"].output_frequency = self._config["OUTPUT_FREQUENCY"]  # in seconds
+                diagnostics["collect"].sampling_frequency = 1
+                if base_path:
+                    diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
             diagnostics["maximum"].output_variables = ["dS_num_error"]
-            diagnostics["maximum"].output_frequency = 24 * 60 * 60
+            diagnostics["maximum"].output_frequency = self._config["OUTPUT_FREQUENCY"]
             diagnostics["maximum"].sampling_frequency = 1
             if base_path:
                 diagnostics["maximum"].base_output_path = base_path

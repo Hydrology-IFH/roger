@@ -134,6 +134,9 @@ groundwater-related processes
 - implement gravity-driven infiltration and percolation and include it into the transport routine
 - implement time-variant sowing and harvesting of crops
 
+## Contact
+I have left academia to find a permanent position outside of academia. I will still fix minor bugs, if time is available. For major requests or questions please contact Markus Weiler (<markus.weiler@hydrology.uni-freiburg.de>).
+
 ## License
 This software can be distributed freely under the MIT license. Please read the LICENSE for further information.
 © 2024, Robin Schwemmle (<robin.schwemmle@hydrology.uni-freiburg.de>)

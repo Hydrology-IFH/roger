@@ -37,52 +37,10 @@ _dict_crop_id = {557: "winter wheat",
                  599: "bare"
                 }
 
-crop_rotation_scenarios = ["grain-corn",
-                           "grain-corn_yellow-mustard",
-                           "silage-corn",
-                           "silage-corn_yellow-mustard",
-                           "summer-barley",
-                           "summer-barley_yellow-mustard",
-                           "clover",
-                           "winter-wheat",
-                           "winter-barley",
-                           "winter-rape",
-                           "faba-bean",
-                           "potato-early",
-                           "potato",
-                           "sugar-beet",
-                           "sugar-beet_yellow-mustard",
-                           "vegetables",
-                           "strawberry",
-                           "asparagus",
-                           "winter-wheat_clover",
-                           "winter-wheat_silage-corn",
-                           "summer-wheat_winter-wheat",
-                           "summer-wheat_clover_winter-wheat",
-                           "winter-wheat_clover_silage-corn",
-                           "winter-wheat_sugar-beet_silage-corn",
-                           "summer-wheat_winter-wheat_silage-corn",
-                           "summer-wheat_winter-wheat_winter-rape",
-                           "winter-wheat_winter-rape",
-                           "winter-wheat_soybean_winter-rape",
-                           "sugar-beet_winter-wheat_winter-barley", 
-                           "grain-corn_winter-wheat_winter-rape", 
-                           "grain-corn_winter-wheat_winter-barley",
-                           "grain-corn_winter-wheat_clover",
-                           "winter-wheat_silage-corn_yellow-mustard",
-                           "summer-wheat_winter-wheat_yellow-mustard",
-                           "winter-wheat_sugar-beet_silage-corn_yellow-mustard",
-                           "summer-wheat_winter-wheat_silage-corn_yellow-mustard",
-                           "summer-wheat_winter-wheat_winter-rape_yellow-mustard",
-                           "sugar-beet_winter-wheat_winter-barley_yellow-mustard", 
-                           "grain-corn_winter-wheat_winter-rape_yellow-mustard", 
-                           "grain-corn_winter-wheat_winter-barley_yellow-mustard",
-                           "grain-corn",
-                           "grain-corn_yellow-mustard",
-                           "winter-wheat",
-                           "yellow-mustard",
-                           "miscanthus",
-                           "bare-grass"]
+# load the subregions and crop rotations
+df_subregions_crop_rotations = pd.read_csv(Path(__file__).parent / "subregions_crop_rotations.csv", sep=";")
+crop_rotation_scenarios = df_subregions_crop_rotations.loc[:, "crop_rotation_type"].values.astype(str).tolist()
+
 @click.command("main")
 def main():
     base_path = Path(__file__).parent

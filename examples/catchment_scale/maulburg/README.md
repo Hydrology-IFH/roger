@@ -77,9 +77,3 @@ python merge_output.py
 ```
 python netcdf_to_csv.py
 ```
-
-5. Figures and tables can be produced with the following script:
-```
-python make_figures_and_tables.py
-```
-
