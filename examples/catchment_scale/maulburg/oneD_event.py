@@ -229,7 +229,7 @@ def main(tmp_dir):
             vs = state.variables
 
             # load precipitation forcing data from netcdf file and set to variable
-            vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc'))
+            vs.PREC = update(vs.PREC, at[:], self._read_var_from_nc("PREC", self._input_dir, 'forcing.nc')[0, 0, :])
 
         @roger_routine(
             dist_safe=False,
