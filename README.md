@@ -125,17 +125,26 @@ Or have a look at [our documentation](https://roger.readthedocs.io/en/latest/mor
 for more publications involving Roger.
 
 ## TODO
-- implement runoff and channel routing (e.g. kinematic wave or hydraulic approach)
+- implement runoff and channel routing (e.g. kinematic wave or hydraulic approach; `roger/core/surface_runoff.py` and `roger/core/subsurface_runoff.py`)
 - implement distributed model with run-on infiltration
-- use coarser spatial and temporal resolution for computation of
-groundwater-related processes
-- implement baseflow in the groundwater routine. requires surface water depth.
-- implement surface runoff generation for gravity-driven infiltration
-- implement gravity-driven infiltration and percolation and include it into the transport routine
-- implement time-variant sowing and harvesting of crops
+- complete the surface runoff generation for gravity-driven infiltration (`roger/core/film_flow.py`)
+- implement gravity-driven infiltration and percolation and include it into the transport routine (`roger/core/film_flow.py`)
+- implement a routing for solute transport
+- implement a GPU memory profiling to optimise GPU computing
+- write more and better unit tests
+
+## Where to start future developments
+Add your new routine to `roger/core/xxx.py` and include it in `roger/roger.py`. If you introduce new variables, you have to add them to `roger/variables.py`. If you build a new model structure, you have to add it to `roger/models/xxx`
+
+## What would I do differently the next time?
+- better variable names (e.g. use perc_ss for percolation of subsurface runoff)
+- move percolation from subsurface runoff into a separate module e.g. `roger/core/percolation.py`
+- use more vertical layers of state variables (e.g. soil water content). Currently, only two hard coded soil layers exist *_rz and *_ss.
+- enable flexible usage of numerical solvers rather than calculate the processes in a given sequence
+- release versions with a higher frequency and better release notes
 
 ## Contact
-I have left academia to find a permanent position outside of academia. I will still fix minor bugs, if time is available. For major requests or questions please contact Markus Weiler (<markus.weiler@hydrology.uni-freiburg.de>).
+I have left academia to find a permanent position outside of academia. I will still fix minor bugs, if time is available. I have tried my best to document everything as good as possible and for sure you will encounter some bugs or incomplete documentation. My advice is that for advanced models a single person is not sufficient and I suggest the four eye principle. Many conceptual and technical issues can be avoided by building a development team. For major requests or questions please contact [Markus Weiler](markus.weiler@hydrology.uni-freiburg.de) or you can choose another implementation of [RoGeR](https://www.hydrology.uni-freiburg.de/roger/). 
 
 ## License
 This software can be distributed freely under the MIT license. Please read the LICENSE for further information.

@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import numpy as np
 import pandas as pd
+import yaml
 import click
 
 
@@ -105,41 +106,63 @@ def calculate_recharge_6lines(precip):
 def main():
     base_path = Path(__file__).parent
 
+    # load the configuration file
+    with open(base_path / "config.yml", "r") as file:
+        config = yaml.safe_load(file)
+
     # load the subregions and crop rotations
-    df_subregions_crop_rotations = pd.read_csv(base_path.parent / "subregions_crop_rotations.csv", sep=";")
+    df_subregions_crop_rotations = pd.read_csv(base_path / "subregions_crop_rotations.csv", sep=";")
+    locations = df_subregions_crop_rotations.loc[:, "subregion"].unique().astype(str).tolist()
+    stress_tests_meteo = config["climate_scenarios"]
 
-    locations = df_subregions_crop_rotations.loc[:, "subregion"].unique().values.astype(str).tolist()
+    for stress_test_meteo in stress_tests_meteo:
+        if stress_test_meteo == "base":
+            durations_magnitudes = [(0, 0)]
+        elif stress_test_meteo in ["spring-drought", "summer-drought"]:
+            durations_magnitudes = [(3, 0), (3, 2)]
+        elif stress_test_meteo == "long-term":
+            durations_magnitudes = [(0, 2)]
+        for duration_magnitude in durations_magnitudes:
+            duration = duration_magnitude[0]
+            magnitude = duration_magnitude[1]
+            for location in locations:
+                if stress_test_meteo == "base":
+                    precip_path = base_path / "input" / f"{location}" / "PREC.txt"
+                elif stress_test_meteo in ["spring-drought", "summer-drought", "long-term", "spring-summer-wet"]:
+                    precip_path = base_path / "input" / "stress_tests_meteo" / f"{stress_test_meteo}" / f"duration{duration}_magnitude{magnitude}" / f"{location}" / "PREC.txt"
+                df_precip_10mins = load_precpitation_data(precip_path)
+                # Resample the data to annual frequency
+                df_precip_annual = df_precip_10mins.resample("YE").sum()
+                precip = df_precip_annual["PRECIP"].values
 
-    for location in locations:
-        precip_path = base_path / "input" / f"{location}" / "PREC.txt"
-        df_precip_10mins = load_precpitation_data(precip_path)
-        # Resample the data to annual frequency
-        df_precip_annual = df_precip_10mins.resample("YE").sum()
-        precip = df_precip_annual["PRECIP"].values
+                # calculate recharge according to DYCK & CHARDABELLAS (1963)
+                recharge = calculate_recharge_6lines(precip)
+                recharge_avg = np.mean(recharge, axis=0)
 
-        # calculate recharge according to DYCK & CHARDABELLAS (1963)
-        recharge = calculate_recharge_6lines(precip)
-        recharge_avg = np.mean(recharge, axis=0)
+                df_recharge = pd.DataFrame(recharge, columns=["PERC1", "PERC2", "PERC3", "PERC4", "PERC5", "PERC6"], index=df_precip_annual.index)
+                df_recharge.columns = [["[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]"],
+                                    ["PERC1", "PERC2", "PERC3", "PERC4", "PERC5", "PERC6"]]
+                df_recharge.index = df_recharge.index.rename("")
 
-        df_recharge = pd.DataFrame(recharge, columns=["PERC1", "PERC2", "PERC3", "PERC4", "PERC5", "PERC6"], index=df_precip_annual.index)
-        df_recharge.columns = [["[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]"],
-                            ["PERC1", "PERC2", "PERC3", "PERC4", "PERC5", "PERC6"]]
-        df_recharge.index = df_recharge.index.rename("")
+                df_recharge_avg = pd.DataFrame(columns=["PERC1", "PERC2", "PERC3", "PERC4", "PERC5", "PERC6"], index=["avg"])
+                df_recharge_avg.loc["avg", :] = recharge_avg
+                df_recharge_avg.columns = [["[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]"],
+                                        ["PERC1", "PERC2", "PERC3", "PERC4", "PERC5", "PERC6"]]
+                df_recharge_avg.index = df_recharge_avg.index.rename("")
 
-        df_recharge_avg = pd.DataFrame(columns=["PERC1", "PERC2", "PERC3", "PERC4", "PERC5", "PERC6"], index=["avg"])
-        df_recharge_avg.loc["avg", :] = recharge_avg
-        df_recharge_avg.columns = [["[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]", "[mm/year]"],
-                                ["PERC1", "PERC2", "PERC3", "PERC4", "PERC5", "PERC6"]]
-        df_recharge_avg.index = df_recharge_avg.index.rename("")
-
-        # write to csv
-        if not os.path.exists(base_path / "output" / "no-irrigation" / f"{location}"):
-            os.makedirs(base_path / "output" / "no-irrigation" / f"{location}")
-
-        output_path = base_path / "output" / "no-irrigation" / f"{location}" / f"gw_recharge_dyck-chardabellas.csv"
-        df_recharge.to_csv(output_path, sep=";", index=True)
-        output_path_avg = base_path / "output" / "no-irrigation" / f"gw_recharge_avg_dyck-chardabellas.csv"
-        df_recharge_avg.to_csv(output_path_avg, sep=";", index=True)
+                # write to csv
+                if stress_test_meteo == "base":
+                    output_dir = base_path / "output" / "no-irrigation" / f"{stress_test_meteo}" / f"{location}"
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)
+                elif stress_test_meteo in ["spring-drought", "summer-drought", "long-term", "spring-summer-wet"]:
+                    output_dir = base_path / "output" / "no-irrigation" / f"{stress_test_meteo}" / f"duration{duration}_magnitude{magnitude}" / f"{location}"
+                    if not os.path.exists(output_dir):
+                        os.makedirs(output_dir)
+                output_path = output_dir / f"gw_recharge_dyck-chardabellas.csv"
+                df_recharge.to_csv(output_path, sep=";", index=True)
+                output_path_avg = output_dir / f"gw_recharge_avg_dyck-chardabellas.csv"
+                df_recharge_avg.to_csv(output_path_avg, sep=";", index=True)
     return
 
 

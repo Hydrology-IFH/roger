@@ -8,6 +8,7 @@ import click
 from roger.cli.roger_run_base import roger_base_cli
 
 _CROP_ROTATION_SCENARIOS = pd.read_csv(Path(__file__).parent.parent / "subregions_crop_rotations.csv", sep=";").loc[:, "crop_rotation_type"].tolist()
+_CROP_ROTATION_SCENARIOS.append("winter-barley")
 
 @click.option("--location", type=click.Choice(["freiburg", "lahr", "bruchsal-heidelsheim",
                                                "pfullendorf", "nagold", "sachsenheim",
@@ -16,12 +17,12 @@ _CROP_ROTATION_SCENARIOS = pd.read_csv(Path(__file__).parent.parent / "subregion
                                                "rheinau-memprechtshofen", "muellheim", "rheinstetten", 
                                                "weingarten", "wutoeschingen-ofteringen", "singen", "grosserlach-mannenweiler",
                                                "altheim", "ulm", "stoetten", "notzingen"]), 
-                                               default="pfullendorf")
-@click.option("--crop-rotation-scenario", type=click.Choice(_CROP_ROTATION_SCENARIOS), default="winter-wheat_grain-corn")
-@click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "spring-drought", "summer-drought", "long-term", "spring-summer-wet"]), default="long-term", help="Type of meteorological stress test")
-@click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=2, help="Magnitude of meteorological stress test")
+                                               default="freiburg")
+@click.option("--crop-rotation-scenario", type=click.Choice(_CROP_ROTATION_SCENARIOS), default="winter-barley")
+@click.option("-stm", "--stress-test-meteo", type=click.Choice(["base", "spring-drought", "summer-drought", "long-term", "spring-summer-wet"]), default="base", help="Type of meteorological stress test")
+@click.option("-stmm", "--stress-test-meteo-magnitude", type=click.Choice([0, 1, 2]), default=0, help="Magnitude of meteorological stress test")
 @click.option("-stmd", "--stress-test-meteo-duration", type=click.Choice([0, 2, 3]), default=0, help="Duration of meteorological stress test in consecutive years")
-@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent / "output" / "no-irrigation_soil-compaction")
+@click.option("-td", "--tmp-dir", type=str, default=Path(__file__).parent.parent)
 @roger_base_cli
 def main(location, crop_rotation_scenario, stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_duration, tmp_dir):
     from roger import RogerSetup, roger_routine, roger_kernel, KernelOutput

@@ -63,19 +63,21 @@ The following workflow briefly describes the model application:
 
 2. Prepare the meteorological input data (see Meteorological input data).
 
-3. If required data is ready, the following script runs the simulations:
+3. Move the *.flt-files with model parameters in `parameters/` to your workspace since GitHub does not support storage of files larger than 50 MB.
+
+4. If required data is ready, the following script runs the simulations:
 
 ```
 conda activate roger-gpu
 python oneD_event.py -b jax -d gpu
 ```
 
-3. After calculation is done, the simulation results can be merged in a single NetCDF-file:
+5. After calculation is done, the simulation results can be merged in a single NetCDF-file:
 ```
 python merge_output.py
 ```
 
-4. (Optional) The following script converts the model output from NetCDF to csv.
+6. (Optional) The following script converts the model output from NetCDF to csv.
 ```
 python netcdf_to_csv.py
 ```
@@ -86,18 +88,20 @@ The following workflow briefly describes the model application:
 
 1. Prepare the meteorological input data (see Meteorological input data).
 
-2. If required data is ready, the following script runs the simulations:
+2. Move the *.flt-files with model parameters in `parameters/` to your workspace since GitHub does not support storage of files larger than 50 MB.
+
+3. If required data is ready, the following script runs the simulations:
 
 ```
 python oneD_event.py
 ```
 
-3. After calculation is done, the simulation results can be merged in a single NetCDF-file:
+4. After calculation is done, the simulation results can be merged in a single NetCDF-file:
 ```
 python merge_output.py
 ```
 
-4. (Optional) The following script converts the model output from NetCDF to csv.
+5. (Optional) The following script converts the model output from NetCDF to csv.
 ```
 python netcdf_to_csv.py
 ```

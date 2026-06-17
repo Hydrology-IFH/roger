@@ -9,12 +9,19 @@
 - `write_job_scripts_slurm.py`: Write SLURM job scripts to run the RoGeR simulations on BinAC2 computing cluster
 - `crops_2018-2022.nc`: Crops of the period 2018-2022 encoded as RoGeR lu_id. Data was derived from "Gemeinsamer Antrag" dataset
 - `*_stress_magnitude.csv`: Magnitudes to increase meteorological stress of the considered period. Magnitudes of spring precipitation correspond with magnitudes of the summer precipitation. The reason for this is that magnitudes of spring precipitation are too little or cause an increase of precipitation.
-- `RheiKlim_Ann_Trends_DWD_*.pdf`: Figures to derive magnitudes of the meteorological stress tests.
+- `input/stress_tests_meteo/RheiKlim_Ann_Trends_DWD_*.pdf`: Figures to derive magnitudes of the meteorological stress tests.
 
-## Workflow
-1. `python update_lu_id_of_roger_parameters.py`
-2. `python modify_parameters.py`
-3. `python write_crop_rotations.py`
-4. `python write_crop_rotations_yellow_mustard.py`
+## Workflow on BinAC2
+1. Use [install_roger_gpu_on_binac2.sh](https://github.com/Hydrology-IFH/roger/blob/main/install_roger_gpu_on_binac2.sh) to install GPU-ready anaconda environment
+2. `python update_lu_id_of_roger_parameters.py`
+3. `python modify_parameters.py`
+4. `python write_crop_rotations.py`
+5. `python write_crop_rotations_yellow_mustard.py`
 6. Use `RheiKlim_Ann_Trends_DWD_*.pdf` to define values in `*_stress_magnitude.csv` then run `python write_stress_tests_meteo.py`
-7. `python write_job_scripts_slurm.py`
+7. `python write_job_scripts_slurm_gpu.py`
+8. `./submit_gpu_jobs.sh`
+9. `python write_data_job_scripts_slurm.py`
+10. `./submit_data_jobs.sh`
+
+
+Data of `input/` or `output/` is stored on FUHYS018 in `StressRes_RoGeR-ModFlow/` since GitHub is not meant to be a large data storage facility. Please contact [Jürgen Strub](juergen.strub@hydrology.uni-freiburg.de) or [Markus Weiler](markus.weiler@hydrology.uni-freiburg.de) to access the data.

@@ -1,6 +1,7 @@
 from pathlib import Path
 import numpy as np
 import pandas as pd
+import os
 import click
 import roger.lookuptables as lut
 
@@ -39,7 +40,7 @@ _dict_crop_id = {557: "winter wheat",
 
 # load the subregions and crop rotations
 df_subregions_crop_rotations = pd.read_csv(Path(__file__).parent / "subregions_crop_rotations.csv", sep=";")
-crop_rotation_scenarios = df_subregions_crop_rotations.loc[:, "crop_rotation_type"].values.astype(str).tolist()
+crop_rotation_scenarios = df_subregions_crop_rotations.loc[:, "crop_rotation_type"].unique().astype(str).tolist()
 
 @click.command("main")
 def main():
@@ -65,17 +66,17 @@ def main():
             summer_crop = df_crops["summer_crop"].iloc[i]
             winter_crop = df_crops["winter_crop"].iloc[i]
             if summer_crop != 599:
-                df_crops["lu_id"].iloc[i] = summer_crop
+                df_crops.loc[index[i], "lu_id"] = summer_crop
             if winter_crop != 599:
-                df_crops["lu_id"].iloc[i+1] = winter_crop
+                df_crops.loc[index[i+1], "lu_id"] = winter_crop
         summer_crop = df_crops["summer_crop"].iloc[-1]
         if summer_crop != 599:
-            df_crops["lu_id"].iloc[-1] = summer_crop
+            df_crops.loc[index[-1], "lu_id"] = summer_crop
 
         df_nitrate_leaching = pd.DataFrame(index=index)
-        df_nitrate_leaching["low_NFert"] = 0
-        df_nitrate_leaching["medium_NFert"] = 0
-        df_nitrate_leaching["high_NFert"] = 0
+        df_nitrate_leaching["low_NFert"] = 0.
+        df_nitrate_leaching["medium_NFert"] = 0.
+        df_nitrate_leaching["high_NFert"] = 0.
         df_nitrate_leaching["lu_id"] = df_crops["lu_id"].values
         df_nitrate_leaching["crop_type"] = df_crops["lu_id"].map(_dict_crop_id)
         for i, lu_id in enumerate(df_nitrate_leaching["lu_id"]):
@@ -91,9 +92,9 @@ def main():
                         Nin2 = Nin2 - 40
                     if Nin3 > 40:
                         Nin3 = Nin3 - 40
-            df_nitrate_leaching["low_NFert"].iloc[i] = Nin1 * 0.3
-            df_nitrate_leaching["medium_NFert"].iloc[i] = Nin2 * 0.3
-            df_nitrate_leaching["high_NFert"].iloc[i] = Nin3 * 0.3
+            df_nitrate_leaching.loc[index[i], "low_NFert"] = Nin1 * 0.3
+            df_nitrate_leaching.loc[index[i], "medium_NFert"] = Nin2 * 0.3
+            df_nitrate_leaching.loc[index[i], "high_NFert"] = Nin3 * 0.3
 
         df_nitrate_leaching_avg = df_nitrate_leaching.iloc[:, 0:3].mean().to_frame().T
 
@@ -106,10 +107,14 @@ def main():
                                     ["low_NFert", "medium_NFert", "high_NFert"]]
         df_nitrate_leaching_avg.index = df_nitrate_leaching_avg.index.rename("")
 
-        file = base_path / "output" / "nitrate" / "thuenen" / f"nitrate_leaching_thuenen_{crop_rotation_scenario}.csv"   
+        output_dir = base_path / "output" / "nitrate" / "thuenen"
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+
+        file = output_dir / f"nitrate_leaching_thuenen_{crop_rotation_scenario}.csv"   
         df_nitrate_leaching.to_csv(file, sep=";", index=True)
 
-        file = base_path / "output" / "nitrate" / "thuenen" / f"nitrate_leaching_avg_thuenen_{crop_rotation_scenario}.csv"   
+        file = output_dir / f"nitrate_leaching_avg_thuenen_{crop_rotation_scenario}.csv"   
         df_nitrate_leaching_avg.to_csv(file, sep=";", index=False)
     return
 
