@@ -27,12 +27,9 @@ Available soil types:
 
 Available irrigation demand rules:
 - no_irrigation: No irrigation is applied
-- 20-ufc: Irrigation demand is calculated if soil water content is less than 20% of usable field capacity
-- 35-ufc: Irrigation demand is calculated if soil water content is less than 35% of usable field capacity
-- 50-ufc: Irrigation demand is calculated if soil water content is less than 50% of usable field capacity
 - crop-specific: Irrigation demand is specifically calculated for each crop (default)
 
-Available meteorological stress tests:
+## Meteorological stress tests:
 Magnitudes of the meteorological variables and the season are defined in `*_stress_magnitude.csv`. We used information from [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/map) (see also `A4_Ann_Trends_*.pdf`). The following meteorological stress tests are available:
 - spring drought of 2020 three times in a row (starting in year 2018) in current climate --> `/input/stress_test_meteo/spring-drought/duration3_magnitude0/`
 - spring drought of 2020 three times in a row (starting in year 2018) in far future climate (2070 - 2100) --> `/input/stress_test_meteo/spring-drought/duration3_magnitude2/`
@@ -40,46 +37,62 @@ Magnitudes of the meteorological variables and the season are defined in `*_stre
 - summer drought of 2018 three times in a row (starting in year 2016) in far future climate (2070 - 2100) --> `/input/stress_test_meteo/summer-drought/duration3_magnitude2/`
 - far future climate (2070 - 2100) --> `/input/stress_test_meteo/long-term/duration0_magnitude2/`
 
+durationx: event is x years repeated.
+magnitude1: using seasonal delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the near future (2040 - 2069)
+magnitude2: using seasonale delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the far future (2070 - 2099)
+
 Crop rotations are repeated after three to four years. The available crop rotations for each subregion (i.e. 30 km radius around DWD station) are listed in `subregions_crop_rotations.csv`.
 
+Below the implementaion of 4 agricultural management scenarios is described. The simulations are run for available crop rotations using current meteorological conditions (base) and different meteorological stress tests.
 ### no-irrigation
-No irrigation is applied i.e. irrigation demand is calculated without irrigation.
+No irrigation is applied i.e. irrigation demand is calculated without irrigation and subsoil compaction is not considered.
 
 - `svat_crop.py`: Setup of the RoGeR model
-- `merge_output.py`: Merges the model output into a single *.nc-file
-- `write_simulations_to_csv.py`: Writes simulations to *.csv-file
+- `merge_output.py`: Merges the RoGeR model output into a single *.nc-file
+- `merge_output.sh`: Runs `merge_output.py` as computing job on BinAC2
+- `write_simulations_to_csv.py`: Writes simulations *.nc-file to *.csv-file
 - `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
 - `write_job_script_slurm.py`: Writes shell scripts to run the simulations on BinAC2 computing cluster
+- `submit_jobs.sh`: Submit the simulations as job scripts on BinAC2
 - `run_roger.sh`: Runs the RoGeR model to generate the simulations
 
 ### no-irrigation_soil-compaction
 No irrigation is applied i.e. irrigation demand is calculated without irrigation. Additionally, soil compaction by agricultural wheel trafficking is considered. Soil compaction is implemented by reducing the saturated hydraulic conductivity and soil air capacity of the subsoil.
 
 - `svat_crop.py`: Setup of the RoGeR model
-- `merge_output.py`: Merges the model output into a single *.nc-file
-- `write_simulations_to_csv.py`: Writes simulations to *.csv-file
+- `merge_output.py`: Merges the RoGeR model output into a single *.nc-file
+- `merge_output.sh`: Runs `merge_output.py` as computing job on BinAC2
+- `write_simulations_to_csv.py`: Writes simulations *.nc-file to *.csv-file
+- `write_simulations_to_csv.sh`: Runs `write_simulations_to_csv.py` as computing job on BinAC2
 - `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
 - `write_job_script_slurm.py`: Writes shell scripts to run the simulations on BinAC2 computing cluster
+- `submit_jobs.sh`: Submit the simulations as job scripts on BinAC2
 - `run_roger.sh`: Runs the RoGeR model to generate the simulations
 
 ### irrigation
-30 mm per day are irrigated according to five irrigation demand rules.
+30 mm per day are irrigated if crop specific irrgation demand occurs and subsoil compaction is not considered.
 
 - `svat_crop.py`: Setup of the RoGeR model
-- `merge_output.py`: Merges the model output into a single *.nc-file
-- `write_simulations_to_csv.py`: Writes simulations to *.csv-file
+- `merge_output.py`: Merges the RoGeR model output into a single *.nc-file
+- `merge_output.sh`: Runs `merge_output.py` as computing job on BinAC2
+- `write_simulations_to_csv.py`: Writes simulations *.nc-file to *.csv-file
+- `write_simulations_to_csv.sh`: Runs `write_simulations_to_csv.py` as computing job on BinAC2
 - `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
 - `write_job_script_slurm.py`: Writes shell scripts to run the simulations on BinAC2 computing cluster
+- `submit_jobs.sh`: Submit the simulations as job scripts on BinAC2
 - `run_roger.sh`: Runs the RoGeR model to generate the simulations
 
 ### irrigation_soil-compaction
 30 mm per day are irrigated according to four irrigation demand rules. Additionally, soil compaction by agricultural wheel trafficking is considered. Soil compaction is implemented by reducing the saturated hydraulic conductivity and soil air capacity of the subsoil.
 
 - `svat_crop.py`: Setup of the RoGeR model
-- `merge_output.py`: Merges the model output into a single *.nc-file
-- `write_simulations_to_csv.py`: Writes simulations to *.csv-file
+- `merge_output.py`: Merges the RoGeR  model output into a single *.nc-file
+- `merge_output.sh`: Runs `merge_output.py` as computing job on BinAC2
+- `write_simulations_to_csv.py`: Writes simulations *.nc-file to *.csv-file
+- `write_simulations_to_csv.sh`: Runs `write_simulations_to_csv.py` as computing job on BinAC2
 - `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
 - `write_job_script_slurm.py`: Writes shell scripts to run the simulations on BinAC2 computing cluster
+- `submit_jobs.sh`: Submit the simulations as job scripts on BinAC2
 - `run_roger.sh`: Runs the RoGeR model to generate the simulations
 
 ### nitrate
@@ -89,8 +102,10 @@ Nitrate leaching is simulated considering all combinations: no irrigation and no
 - `svat_crop_nitrate.py`: Setup of the RoGeR-SAS model to simulate the nitrate transport 
 - `merge_output.py`: Merges the model output into a single *.nc-file
 - `write_simulations_to_csv.py`: Writes simulations to *.csv-file
+- `write_simulations_to_csv.sh`: Runs `write_simulations_to_csv.py` as computing job on BinAC2
 - `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
 - `run_roger.sh`: Runs the RoGeR model to generate the simulations
+- `submit_jobs.sh`: Submit the simulations as job scripts on BinAC2
 
 ## Workflow
 ! Windows user may change from `/` to `\` in the provided *.sh-files. Please check beforehand. !
@@ -107,11 +122,14 @@ Nitrate leaching is simulated considering all combinations: no irrigation and no
 
 ### Computation on BinAC2
 
+Move in `cd no-irrigation_soil-compaction`, `cd no-irrigation/`, `cd irrigation_soil-compaction` or `cd irrigation`:
 1. Run `python write_job_scripts_slurm.py` to write the computing jobs
 2. Run `./submit_jobs.sh` to submit the jobs to the queue
 3. After all jobs are finalised, run `merge_output.sh` to merge the RoGeR output files
 4. Run `write_simulations_to_csv.sh` to convert NetCDF format to csv format (optionally)
 5. Analyse the data (e.g. `python impact_analysis.py`)
+
+Move in `cd nitrate`
 
 ### Computation on local computer
 

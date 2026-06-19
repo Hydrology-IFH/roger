@@ -11,7 +11,7 @@
 - `*_stress_magnitude.csv`: Magnitudes to increase meteorological stress of the considered period. Magnitudes of spring precipitation correspond with magnitudes of the summer precipitation. The reason for this is that magnitudes of spring precipitation are too little or cause an increase of precipitation.
 - `input/stress_tests_meteo/RheiKlim_Ann_Trends_DWD_*.pdf`: Figures to derive magnitudes of the meteorological stress tests.
 
-## Workflow on BinAC2
+## Workflow on BinAC2 using NVIDIA A100 GPU
 1. Use [install_roger_gpu_on_binac2.sh](https://github.com/Hydrology-IFH/roger/blob/main/install_roger_gpu_on_binac2.sh) to install GPU-ready anaconda environment
 2. `python update_lu_id_of_roger_parameters.py`
 3. `python modify_parameters.py`
@@ -23,5 +23,32 @@
 9. `python write_data_job_scripts_slurm.py`
 10. `./submit_data_jobs.sh`
 
+## Stress-Test scenarios
 
-Data of `input/` or `output/` is stored on FUHYS018 in `StressRes_RoGeR-ModFlow/` since GitHub is not meant to be a large data storage facility. Please contact [Jürgen Strub](juergen.strub@hydrology.uni-freiburg.de) or [Markus Weiler](markus.weiler@hydrology.uni-freiburg.de) to access the data.
+### Climate stress
+summer-drought:
+- duration3-magnitude0: Summer drought of 2018 is repeated and occurs in 2016, 2017 and 2018 in current climate
+- duration3-magnitude2: Summer drought of 2018 is repeated and occurs in 2016, 2017 and 2018 in future climate
+
+long-term:
+- duration0-magnitude2: Far future climate (2070 - 2099)
+
+durationx: event is x years repeated.
+magnitude1: using seasonal delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the near future (2040 - 2069)
+magnitude2: using seasonale delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the far future (2070 - 2099)
+
+### Agricultural management
+- no-irrigation: no irrigation is applied on agricultural areas
+- irrigation: irrigation is applied on agricultural areas
+- no-yellow-mustard: No catch crop is considered before summer crops.
+- yellow-mustard: Yellow mustard is cultivated before summer crops.
+- soil-compaction: Soil compaction on agricultural areas is considered by decreasing air capacity and hydraulic conductivity.
+
+## Files in output/
+File names contain a combination of the stress test scenarios. For example:
+- roger_long-term-magnitude2-duration0_irrigation_no-yellow-mustard_soil-compaction.nc: RoGeR-1D simulation result of the period 2013-2023 with a future climate, agricultural irrigation, soil compaction of agricultural areas.
+
+If soil-compaction does not occur in the file name, the stress test scenario is not applied.
+
+
+Data of `input/`, `output/`, and parameter files are stored on FUHYS018 in `StressRes_RoGeR-ModFlow/` since GitHub is not meant to be a large data storage facility. Please contact [Jürgen Strub](juergen.strub@hydrology.uni-freiburg.de) or [Markus Weiler](markus.weiler@hydrology.uni-freiburg.de) to access the data.

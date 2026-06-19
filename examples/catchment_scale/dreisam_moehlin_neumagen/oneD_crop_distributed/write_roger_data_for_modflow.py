@@ -675,7 +675,7 @@ def main(stress_test_meteo, stress_test_meteo_magnitude, stress_test_meteo_durat
                             v.attrs[key] = spatial_ref.attrs[key]
                         with h5netcdf.File(diag_file, "r", decode_vlen_strings=False) as df:
                             time_indices = onp.where(date_time.year == year)[0]
-                            v = f.create_variable("precipitaion", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
+                            v = f.create_variable("precipitation", ("Time", "y", "x"), float, compression="gzip", compression_opts=1)
                             var_object = df.variables.get("prec")
                             v[:, :, :] = var_object[time_indices, :, :]
                             v.attrs.update(long_name=var_object.attrs["long_name"], units=var_object.attrs["units"], grid_mapping="spatial_ref")
