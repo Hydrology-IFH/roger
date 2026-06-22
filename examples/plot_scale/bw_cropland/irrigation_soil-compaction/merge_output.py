@@ -38,9 +38,9 @@ def main():
         elif stress_test_meteo == "long-term":
             durations_magnitudes = [(0, 2)]
         for duration_magnitude in durations_magnitudes:
-            click.echo(f"Processing duration {duration} cosequent years, magnitude {magnitude}...")
             duration = duration_magnitude[0]
             magnitude = duration_magnitude[1]
+            click.echo(f"Processing duration {duration} cosequent years, magnitude {magnitude}...")
             for location, crop_rotation_scenario in zip(locations, crop_rotation_scenarios):
                 click.echo(f"Processing location {location} and crop rotation {crop_rotation_scenario}...")
                 crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
