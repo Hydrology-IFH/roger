@@ -90,6 +90,7 @@ def main():
                                         v[:] = time
                                     for var_sim in list(df.variables.keys()):
                                         var_obj = df.variables.get(var_sim)
+                                        click.echo(f"Processing variable {var_sim}...")
                                         if var_sim not in list(f.dimensions.keys()) and var_obj.ndim == 3 and var_obj.shape[0] > 2:
                                             v = f.create_variable(
                                                 var_sim, ("x", "y", "Time"), float, compression="gzip", compression_opts=1
