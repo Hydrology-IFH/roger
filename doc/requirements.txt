@@ -2,7 +2,7 @@ click==8.1.7
 entrypoints==0.4
 ipython==8.25.0
 matplotlib==3.9.0
-netCDF4==1.7.0
+netCDF4==1.7.2
 pickleshare==0.7.5
 seaborn==0.13.2
 Sphinx==7.3.7
