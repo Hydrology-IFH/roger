@@ -30,6 +30,7 @@ def main():
 
     # merge model output into single file
     for stress_test_meteo in stress_tests_meteo:
+        click.echo(f"Processing {stress_test_meteo}...")
         if stress_test_meteo == "base":
             durations_magnitudes = [(0, 0)]
         elif stress_test_meteo in ["spring-drought", "summer-drought"]:
@@ -37,9 +38,11 @@ def main():
         elif stress_test_meteo == "long-term":
             durations_magnitudes = [(0, 2)]
         for duration_magnitude in durations_magnitudes:
+            click.echo(f"Processing duration {duration} cosequent years, magnitude {magnitude}...")
             duration = duration_magnitude[0]
             magnitude = duration_magnitude[1]
             for location, crop_rotation_scenario in zip(locations, crop_rotation_scenarios):
+                click.echo(f"Processing location {location} and crop rotation {crop_rotation_scenario}...")
                 crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
                 path = str(base_path / "output" / dir_name / f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.*.nc")
                 output_hm_file = base_path / "output" / dir_name / f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.nc"
