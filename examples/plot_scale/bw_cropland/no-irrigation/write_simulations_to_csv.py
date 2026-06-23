@@ -39,7 +39,7 @@ def main():
         config = yaml.safe_load(file)
 
     # load the subregions and crop rotations
-    df_subregions_crop_rotations = pd.read_csv(base_path.parent / "subregions_crop_rotations.csv", sep=";")
+    df_subregions_crop_rotations = pd.read_csv(base_path / "subregions_crop_rotations.csv", sep=";")
 
     # identifiers of the simulations
     locations = df_subregions_crop_rotations.loc[:, "subregion"].values.astype(str).tolist()
