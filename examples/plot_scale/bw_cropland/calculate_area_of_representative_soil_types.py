@@ -167,10 +167,10 @@ df_soil_types["area"] = df.groupby(["CLUST_ID"]).sum()["area"]
 df_soil_types["area_share"] = (df_soil_types["area"]/df_soil_types["area"].sum()) * 100
 
 
-columns = ['location', 'clust_id', 'z_soil', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks',
+columns = ['location', 'CLUST_ID', 'z_soil', 'dmpv', 'lmpv', 'theta_ac', 'theta_ufc', 'theta_pwp', 'ks',
        'soil_fertility', 'clay', 'area_share']
 df_region = df.loc[:, columns].groupby(["location", "CLUST_ID"]).mean()
-columns = ['location', 'clust_id', 'area_share']
+columns = ['location', 'CLUST_ID', 'area_share']
 df_region.loc[:, "area_share"] = df.loc[:, columns].groupby(["location", "CLUST_ID"]).sum()
 df_region.loc[:, "area_share"] = (df_region.loc[:, "area_share"].values / 3) * 100
 df_region["location1"] = df_region.index.get_level_values(0)
