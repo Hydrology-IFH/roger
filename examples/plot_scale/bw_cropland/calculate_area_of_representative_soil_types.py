@@ -87,9 +87,11 @@ base_path = Path(__file__).parent
 with open(base_path / "config.yml", "r") as file:
     config = yaml.safe_load(file)
 
-# identifiers of the simulations
-locations = config["locations"]
+# load the subregions and crop rotations
+df_subregions_crop_rotations = pd.read_csv(base_path / "subregions_crop_rotations.csv", sep=";")
 
+# identifiers of the simulations
+locations = df_subregions_crop_rotations.loc[:, "subregion"].unique().astype(str).tolist()
 
 # load linkage between BK50 and cropland clusters
 file = base_path / "input" / "link_cluster_geometries_cropland.h5"
@@ -154,7 +156,6 @@ if not file.exists():
         df.loc[cond, "area_share"] = df_location["area"] / area
     file = base_path / "output" / "areas.csv"
     df.to_csv(file, sep=";", index=False)
-
 df = pd.read_csv(base_path / "output" / "areas.csv", sep=";")
 df["CLUST_ID"] = [int(x.split("-")[-1]) for x in df["CLUST_ID"].values]
 
