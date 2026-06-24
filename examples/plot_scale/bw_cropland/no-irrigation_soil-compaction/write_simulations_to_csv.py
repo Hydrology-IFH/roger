@@ -19,7 +19,7 @@ def main():
     file = base_path / "parameters.csv"
     df_parameters = pd.read_csv(file, sep=";", skiprows=1)
     df_parameters.index = df_parameters.loc[:, "CLUST_ID"]
-    df_parameters = df_parameters.drop(columns=["CLUST_ID"]).iloc[:20, :]
+    _df_parameters = df_parameters.drop(columns=["CLUST_ID"]).iloc[:20, :]
     file = base_path / "output" / "areas.csv"
     df_areas = pd.read_csv(file, sep=";", skiprows=0)
 
@@ -47,13 +47,13 @@ def main():
     locations = df_subregions_crop_rotations.loc[:, "subregion"].values.astype(str).tolist()
     crop_rotation_scenarios = df_subregions_crop_rotations.loc[:, "crop_rotation_type"].values.astype(str).tolist()
     stress_tests_meteo = config["climate_scenarios"]
-    soil_types = df_parameters.index.to_list()
+    soil_types = _df_parameters.index.to_list()
     for location in locations:
         cond_location = (df_areas["location"] == location)
         df_areas_location = df_areas[cond_location]
         df_areas_location.index = df_areas_location.loc[:, "CLUST_ID"]
         df_areas_location["area_share"] = df_areas_location["area"] / df_areas_location["area"].sum()
-        df_parameters = df_parameters.join(df_areas_location[["area_share"]], how="left")
+        df_parameters = _df_parameters.join(df_areas_location[["area_share"]], how="left")
         for stress_test_meteo in stress_tests_meteo:
             if stress_test_meteo == "base":
                 durations_magnitudes = [(0, 0)]
