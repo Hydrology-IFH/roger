@@ -20,7 +20,6 @@ def main():
     df_parameters = df_parameters.drop(columns=["CLUST_ID"]).iloc[:20, :]
     file = base_path / "output" / "areas.csv"
     df_areas = pd.read_csv(file, sep=";", skiprows=0)
-    df_areas["location"] = df_areas.index.values.astype(str).tolist()
     
     file = base_path / "crop_water_stress.csv"
     df_crop_water_stress = pd.read_csv(file, sep=";", skiprows=1, index_col=0)
