@@ -53,6 +53,8 @@ def main():
         df_areas_location = df_areas[cond_location]
         df_areas_location.index = df_areas_location.loc[:, "CLUST_ID"]
         df_areas_location["area_share"] = df_areas_location["area"] / df_areas_location["area"].sum()
+        click.echo(f"{df_parameters.head()}")
+        click.echo(f"{df_areas_location.head()}")
         df_parameters = df_parameters.join(df_areas_location[["area_share"]], how="left")
         for stress_test_meteo in stress_tests_meteo:
             if stress_test_meteo == "base":
