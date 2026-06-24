@@ -6,6 +6,8 @@ from cftime import num2date
 import pandas as pd
 import yaml
 import click
+import warnings
+warnings.filterwarnings('ignore')  # Suppress all warnings
 
 
 @click.command("main")
@@ -140,6 +142,7 @@ def main():
                             df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm]", "[%]", "[degC]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
                                                     ["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrigation_demand", "root_ventilation", "ta", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]]
                             df_simulation = df_simulation.iloc[1:, :] # remove initial values
+                            click.echo(f"Writing simulation to {dir_csv_files / 'simulation.csv'}")
                             df_simulation.to_csv(
                                 dir_csv_files / "simulation.csv", sep=";"
                             )

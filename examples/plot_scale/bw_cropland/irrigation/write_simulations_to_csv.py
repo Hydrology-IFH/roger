@@ -6,7 +6,8 @@ from cftime import num2date
 import pandas as pd
 import yaml
 import click
-
+import warnings
+warnings.filterwarnings('ignore')  # Suppress all warnings
 
 @click.command("main")
 def main():
@@ -136,6 +137,7 @@ def main():
                                 df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", "", "[mm/day]"],
                                                         ["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type", "inf"]]
                                 df_simulation = df_simulation.iloc[1:, :] # remove initial values
+                                click.echo(f"Writing simulation to {dir_csv_files / 'simulation.csv'}")
                                 df_simulation.to_csv(
                                     dir_csv_files / "simulation.csv", sep=";"
                                 )
@@ -159,6 +161,7 @@ def main():
                         dir_csv_files = base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location/ location / crop_rotation_scenario / "area_weighted"
                         if not os.path.exists(dir_csv_files):
                             os.makedirs(dir_csv_files)
+                        click.echo(f"Writing area weighted simulation to {dir_csv_files / 'simulation.csv'}")
                         df_simulation.to_csv(
                                 dir_csv_files / "simulation.csv", sep=";"
                             )
