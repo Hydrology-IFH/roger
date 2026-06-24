@@ -44,10 +44,12 @@ def main():
             for location, crop_rotation_scenario in zip(locations, crop_rotation_scenarios):
                 click.echo(f"Processing location {location} and crop rotation {crop_rotation_scenario}...")
                 crop_rotation_scenario1 = crop_rotation_scenario.replace("-", " ").replace("_", ", ")
-                path = str(base_path / "output" / dir_name / f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.*.nc")
+                path1 = str(base_path / "output" / dir_name / f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.collect.nc")
+                path2 = str(base_path / "output" / dir_name / f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.rate.nc")
+                path3 = str(base_path / "output" / dir_name / f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.maximum.nc")
                 output_hm_file = base_path / "output" / dir_name / f"SVATCROP_{stress_test_meteo}-duration{duration}-magnitude{magnitude}_{location}_{crop_rotation_scenario}.nc"
                 if not os.path.exists(output_hm_file):
-                    diag_files = glob.glob(path)
+                    diag_files = [path1, path2, path3]
                     if diag_files:
                         with h5netcdf.File(output_hm_file, "w", decode_vlen_strings=False) as f:
                             f.attrs.update(
