@@ -205,6 +205,8 @@ examples/plot_scale/bw_cropland/input/*.qmd
 examples/plot_scale/bw_cropland/input/*.flt
 examples/plot_scale/bw_cropland/input/*.flt.aux.xml
 examples/plot_scale/bw_cropland/input/*.h5
+!examples/plot_scale/bw_cropland/input/stress_tests_meteo/*.pdf
+!examples/plot_scale/bw_cropland/input/stress_tests_meteo/A4_Ann_Trends_DWD_259.pdf
 gpu_memory_profiling/
 *_2016-*.sh
 debug_setup/
