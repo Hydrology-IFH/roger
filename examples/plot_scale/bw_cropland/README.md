@@ -39,7 +39,7 @@ Magnitudes of the meteorological variables and the season are defined in `*_stre
 
 durationx: event is x years repeated.
 magnitude1: using seasonal delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the near future (2040 - 2069)
-magnitude2: using seasonale delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the far future (2070 - 2099)
+magnitude2: using seasonal delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the far future (2070 - 2099)
 
 Crop rotations are repeated after three to four years. The available crop rotations for each subregion (i.e. 30 km radius around DWD station) are listed in `subregions_crop_rotations.csv`.
 
@@ -132,6 +132,7 @@ Move in `cd no-irrigation_soil-compaction`, `cd no-irrigation/`, `cd irrigation_
 5. Analyse the data (e.g. `python impact_analysis.py`)
 
 Move in `cd nitrate`
+
 6. Run `python write_job_scripts_slurm.py` to write the computing jobs
 7. Run `./submit_jobs.sh` to submit the jobs to the queue
 8. After all jobs are finalised, run `merge_output.sh` to merge the RoGeR output files
