@@ -37,13 +37,13 @@ Magnitudes of the meteorological variables and the season are defined in `*_stre
 - summer drought of 2018 three times in a row (starting in year 2016) in far future climate (2070 - 2100) --> `/input/stress_test_meteo/summer-drought/duration3_magnitude2/`
 - far future climate (2070 - 2100) --> `/input/stress_test_meteo/long-term/duration0_magnitude2/`
 
-durationx: event is x years repeated.
-magnitude1: using seasonal delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the near future (2040 - 2069)
-magnitude2: using seasonal delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the far future (2070 - 2099)
+duration**x**: event is x years repeated.
+magnitude**1**: using seasonal delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the near future (2040 - 2069)
+magnitude**2**: using seasonal delta values of [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/) for the far future (2070 - 2099)
 
 Crop rotations are repeated after three to four years. The available crop rotations for each subregion (i.e. 30 km radius around DWD station) are listed in `subregions_crop_rotations.csv`.
 
-Below the implementaion of 4 agricultural management scenarios is described. The simulations are run for available crop rotations using current meteorological conditions (base) and different meteorological stress tests.
+Below the implementaion of 4 agricultural management scenarios is described. The simulations are run for available crop rotations using current meteorological conditions (base) and different meteorological stress tests. All simulations assume free drainage (i.e. capillary rise is not considered)
 ### no-irrigation
 No irrigation is applied i.e. irrigation demand is calculated without irrigation and subsoil compaction is not considered.
 
@@ -83,7 +83,7 @@ No irrigation is applied i.e. irrigation demand is calculated without irrigation
 - `run_roger.sh`: Runs the RoGeR model to generate the simulations
 
 ### irrigation_soil-compaction
-30 mm per day are irrigated according to four irrigation demand rules. Additionally, soil compaction by agricultural wheel trafficking is considered. Soil compaction is implemented by reducing the saturated hydraulic conductivity and soil air capacity of the subsoil.
+30 mm per day are irrigated if crop specific irrgation demand occurs. Additionally, soil compaction by agricultural wheel trafficking is considered. Soil compaction is implemented by reducing the saturated hydraulic conductivity and soil air capacity of the subsoil.
 
 - `svat_crop.py`: Setup of the RoGeR model
 - `merge_output.py`: Merges the RoGeR  model output into a single *.nc-file
