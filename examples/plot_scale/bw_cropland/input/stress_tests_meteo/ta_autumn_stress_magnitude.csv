@@ -1,0 +1,26 @@
+;;[degC];[degC];[m a.s.l.]
+station;ID;magnitude1;magnitude2;elevation
+Altheim;4189;1.8;4.1;534
+Bruchsal-Heidelsheim;731;1.7;3.9;130
+Ellwangen-Rindelbach;1197;1.8;4.1;463
+Elztal-Rittersbach;1216;1.7;4;312
+Freiburg;1443;1.8;4.2;237
+Grosserlach-Mannenweiler;6259;1.7;4;524
+Hechingen;2074;1.9;4.3;518
+Heidelberg;2080;1.7;3.9;110
+Klippeneck;2638;2;4.4;974
+Lahr;2812;1.8;4.1;156
+Mergentheim;3257;1.7;4;251
+Muellheim;259;1.9;4.3;275
+Nagold;3432;1.8;4;380
+Notzingen;6275;1.8;4.1;327
+Pfullendorf;3927;1.9;4.2;630
+Rheinau-Memprechtshofen;4169;1.7;4;131
+Rheinstetten;4177;1.7;4;116
+Rot-Buch;5724;1.9;4.2;690
+Sachsenheim;4349;1.7;4;251
+Singen;6263;1.9;4.2;445
+Stoetten;4887;1.9;4.2;734
+Ulm;5155;1.8;4.1;567
+Weingarten;4094;1.9;4.2;441
+Wutoeschingen-Ofteringen;5731;1.9;4.2;395

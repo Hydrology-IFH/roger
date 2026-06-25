@@ -29,7 +29,7 @@ Available irrigation demand rules:
 - no_irrigation: No irrigation is applied
 - crop-specific: Irrigation demand is specifically calculated for each crop (default)
 
-## Meteorological stress tests:
+## Meteorological stress tests
 Magnitudes of the meteorological variables and the season are defined in `*_stress_magnitude.csv`. We used information from [RheiKlim](https://apps.hydro.uni-freiburg.de/de/RheiKlim/map) (see also `A4_Ann_Trends_*.pdf`). The following meteorological stress tests are available:
 - spring drought of 2020 three times in a row (starting in year 2018) in current climate --> `/input/stress_test_meteo/spring-drought/duration3_magnitude0/`
 - spring drought of 2020 three times in a row (starting in year 2018) in far future climate (2070 - 2100) --> `/input/stress_test_meteo/spring-drought/duration3_magnitude2/`
@@ -104,6 +104,8 @@ Nitrate leaching is simulated considering all combinations: no irrigation and no
 - `write_simulations_to_csv.py`: Writes simulations to *.csv-file
 - `write_simulations_to_csv.sh`: Runs `write_simulations_to_csv.py` as computing job on BinAC2
 - `write_job_script.py`: Writes shell script to generate the simulations for the available soil types, irrigation scenarios and crop roations
+- `write_job_script_slurm.py`: Writes shell scripts to run the simulations on BinAC2 computing cluster
+- `submit_jobs.sh`: Submit the simulations as job scripts on BinAC2
 - `run_roger.sh`: Runs the RoGeR model to generate the simulations
 - `submit_jobs.sh`: Submit the simulations as job scripts on BinAC2
 
@@ -130,6 +132,11 @@ Move in `cd no-irrigation_soil-compaction`, `cd no-irrigation/`, `cd irrigation_
 5. Analyse the data (e.g. `python impact_analysis.py`)
 
 Move in `cd nitrate`
+6. Run `python write_job_scripts_slurm.py` to write the computing jobs
+7. Run `./submit_jobs.sh` to submit the jobs to the queue
+8. After all jobs are finalised, run `merge_output.sh` to merge the RoGeR output files
+9. Run `write_simulations_to_csv.sh` to convert NetCDF format to csv format (optionally)
+10. Analyse the data
 
 ### Computation on local computer
 
