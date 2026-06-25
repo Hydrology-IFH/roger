@@ -467,7 +467,7 @@ def main(location, irrigation_scenario, crop_rotation_scenario, stress_test_mete
                 diagnostics["collect"].base_output_path = base_path
 
             # maximum bias of deterministic/numerical solution at time step t
-            diagnostics["maximum"].output_variables = ["dS_num_error", "dS_rz_num_error", "dS_ss_num_error", "irrig"]
+            diagnostics["maximum"].output_variables = ["dS_num_error", "dS_rz_num_error", "dS_ss_num_error"]
             diagnostics["maximum"].output_frequency = 24 * 60 * 60
             diagnostics["maximum"].sampling_frequency = 1
             if base_path:

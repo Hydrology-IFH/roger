@@ -19,7 +19,7 @@ def main():
     file = base_path / "parameters.csv"
     df_parameters = pd.read_csv(file, sep=";", skiprows=1)
     df_parameters.index = df_parameters.loc[:, "CLUST_ID"]
-    _df_parameters = df_parameters.drop(columns=["CLUST_ID"]).iloc[:20, :]
+    CLUST_IDs = df_parameters.loc[:"5-15", "CLUST_ID"].tolist()
     file = base_path / "output" / "areas.csv"
     df_areas = pd.read_csv(file, sep=";", skiprows=0)
     
@@ -47,13 +47,13 @@ def main():
     locations = df_subregions_crop_rotations.loc[:, "subregion"].values.astype(str).tolist()
     crop_rotation_scenarios = df_subregions_crop_rotations.loc[:, "crop_rotation_type"].values.astype(str).tolist()
     stress_tests_meteo = config["climate_scenarios"]
-    soil_types = _df_parameters.index.to_list()
+    soil_types = df_parameters.index.to_list()
     for location in locations:
         cond_location = (df_areas["location"] == location)
         df_areas_location = df_areas[cond_location]
         df_areas_location.index = df_areas_location.loc[:, "CLUST_ID"]
         df_areas_location["area_share"] = df_areas_location["area"] / df_areas_location["area"].sum()
-        df_parameters = _df_parameters.join(df_areas_location[["area_share"]], how="left")
+        df_parameters = df_parameters.join(df_areas_location[["area_share"]], how="left")
         for stress_test_meteo in stress_tests_meteo:
             if stress_test_meteo == "base":
                 durations_magnitudes = [(0, 0)]
@@ -135,7 +135,8 @@ def main():
                             df_simulation.loc[:, "theta_irrig"] = theta_irr
                             df_simulation.loc[cond_bare, "theta_irrig"] = onp.nan
                             df_simulation.loc[:, "inf"] = ds["inf_mat_rz"].isel(x=x, y=0).values + ds["inf_mp_rz"].isel(x=x, y=0).values + ds["inf_sc_rz"].isel(x=x, y=0).values + ds["inf_ss"].isel(x=x, y=0).values
-                            ll_area_weighted.append(df_simulation.copy())
+                            if soil_type in CLUST_IDs:
+                                ll_area_weighted.append(df_simulation.copy())
                             df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", "", "[mm/day]"],
                                                     ["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrig", "irrigation_demand", "root_ventilation", "ta", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type", "inf"]]
                             df_simulation = df_simulation.iloc[1:, :] # remove initial values
@@ -153,8 +154,8 @@ def main():
                         if var in ["lu_id", "crop_type"]:
                             df_simulation.loc[:, var] = ll_area_weighted[0][var].values
                         else:
-                            df_var = pd.DataFrame(index=date, columns=df_parameters.index)
-                            for x, soil_type in enumerate(df_parameters.index):
+                            df_var = pd.DataFrame(index=date, columns=CLUST_IDs)
+                            for x, soil_type in enumerate(CLUST_IDs):
                                 df_var.loc[:, soil_type] = ll_area_weighted[x][var].values * df_parameters.loc[soil_type, "area_share"]
                             df_simulation.loc[:, var] = df_var.sum(axis=1)
                     df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm/day]", "[mm]", "[%]", "[degC]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
