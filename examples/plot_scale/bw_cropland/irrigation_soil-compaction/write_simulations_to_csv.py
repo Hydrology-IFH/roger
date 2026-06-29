@@ -65,8 +65,8 @@ def main():
             for duration_magnitude in durations_magnitudes:
                 duration = duration_magnitude[0]
                 magnitude = duration_magnitude[1]
-                if not os.path.exists(str(base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location / location)):
-                    os.makedirs(base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location / location)
+                if not os.path.exists(str(base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location)):
+                    os.makedirs(base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location)
                 for crop_rotation_scenario in crop_rotation_scenarios:
                     roger_file = (
                         base_path

@@ -65,8 +65,8 @@ def main():
             for duration_magnitude in durations_magnitudes:
                 duration = duration_magnitude[0]
                 magnitude = duration_magnitude[1]
-                if not os.path.exists(str(base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location / location)):
-                    os.makedirs(base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location / location)
+                if not os.path.exists(str(base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location)):
+                    os.makedirs(base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location)
                 for crop_rotation_scenario in crop_rotation_scenarios:
                     roger_file = (
                         base_path
@@ -164,7 +164,7 @@ def main():
                         df_simulation.columns =[["[mm/day]", "[mm/day]", "[mm/day]", "[-]", "[-]", "[mm]", "[-]", "[-]", "[-]", "[mm]", "[%]", "[degC]", "[degC]", "[day]", "[mm/day]", "[mm/day]", "[mm/day]", "", ""],
                                                 ["precip", "pet", "pt", "photosynthesis_index", "canopy_cover", "z_root", "theta_fc", "theta_irrig", "theta_rz", "irrigation_demand", "root_ventilation", "ta", "ta_max", "heat_stress", "transp", "evap_soil", "perc", "lu_id", "crop_type"]]
 
-                        dir_csv_files = base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location / location / crop_rotation_scenario / "area_weighted"
+                        dir_csv_files = base_path / "output" / dir_name / stress_test_meteo / f"duration{duration}_magnitude{magnitude}" / location / crop_rotation_scenario / "area_weighted"
                         if not os.path.exists(dir_csv_files):
                             os.makedirs(dir_csv_files)
                         df_simulation.to_csv(
