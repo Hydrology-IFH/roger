@@ -18,6 +18,7 @@ def main():
     file = base_path / "parameters.csv"
     df_parameters = pd.read_csv(file, sep=";", skiprows=1)
     df_parameters.index = df_parameters.loc[:, "CLUST_ID"]
+    _df_parameters = df_parameters.copy()
     CLUST_IDs = df_parameters.loc[:"5-15", "CLUST_ID"].tolist()
     file = base_path / "output" / "areas.csv"
     df_areas = pd.read_csv(file, sep=";", skiprows=0)
@@ -52,7 +53,7 @@ def main():
         df_areas_location = df_areas[cond_location]
         df_areas_location.index = df_areas_location.loc[:, "CLUST_ID"]
         df_areas_location["area_share"] = df_areas_location["area"] / df_areas_location["area"].sum()
-        df_parameters = df_parameters.join(df_areas_location[["area_share"]], how="left")
+        df_parameters = _df_parameters.join(df_areas_location[["area_share"]], how="left")
         for stress_test_meteo in stress_tests_meteo:
             if stress_test_meteo == "base":
                 durations_magnitudes = [(0, 0)]
